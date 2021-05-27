@@ -8,24 +8,23 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "",
-"class": "GitAPI",
-"language": "NativeScript",
-"path": "res://git_api.gdns"
-} ]
-_global_script_class_icons={
-"GitAPI": ""
-}
-
 [application]
 
 config/name="Starwars Autochess"
+run/main_scene="res://scenes/Main.tscn"
 config/icon="res://icon.png"
 
 [gdnative]
 
-singletons=[ "res://git_api.gdnlib" ]
+singletons=[  ]
+
+[input]
+
+left_mouse_button={
+"deadzone": 0.5,
+"events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
+ ]
+}
 
 [physics]
 
