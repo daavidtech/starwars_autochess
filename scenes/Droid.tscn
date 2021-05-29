@@ -17,7 +17,7 @@ extents = Vector3( 0.466191, 1, 0.36953 )
 [node name="Droid" type="RigidBody" groups=[
 "Characters",
 ]]
-collision_layer = 2
+collision_layer = 258
 collision_mask = 3
 script = ExtResource( 1 )
 

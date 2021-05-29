@@ -30,4 +30,6 @@ horizontal_rows = 5
 vertical_rows = 5
 
 [node name="CaracterBarrack" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1.79386, 0, 0, 0, 1, 0, 0, 0, 7.09231, -8.63333, 0.845639, 0.0225756 )
+transform = Transform( 1.79386, 0, 0, 0, 1, 0, 0, 0, 7.09231, -8.63333, 0.97038, 0.0225756 )
+
+[node name="GameStartTimer" type="Timer" parent="."]

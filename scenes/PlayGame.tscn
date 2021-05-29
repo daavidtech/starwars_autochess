@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/PlayGame.gd" type="Script" id=1]
+[ext_resource path="res://scenes/GameMap.tscn" type="PackedScene" id=2]
+
+[node name="Spatial" type="Spatial"]
+script = ExtResource( 1 )
+
+[node name="GameMap" parent="." instance=ExtResource( 2 )]
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( -0.115561, -0.778195, 0.617299, 0, 0.621462, 0.783444, -0.9933, 0.0905359, -0.0718171, 13.2136, 11.6514, -0.963403 )
+fov = 69.4096
+
+[node name="GameStartTimer" type="Timer" parent="."]
+
+[node name="Control" type="Control" parent="."]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartTimeLeft" type="Label" parent="Control"]
+margin_left = 474.801
+margin_top = 253.676
+margin_right = 623.801
+margin_bottom = 335.676
+text = "Niggaaa"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="timeout" from="GameStartTimer" to="." method="_on_GameStartTimer_timeout"]

@@ -9,6 +9,10 @@ var mouse_is_over = false
 var drag_button_already_down = false
 var dragging = false
 
+const SPEED = 1.0
+
+var direction = null
+
 onready var parent_coordinates = get_parent().translation
 
 # Called when the node enters the scene tree for the first time.
@@ -16,6 +20,11 @@ func _ready():
 	pass # Replace with function body.
 
 func _physics_process(delta):
+	if direction != null:
+		var step_size = delta * SPEED
+		
+		apply_central_impulse(direction * step_size)
+	
 	if drag_button_already_down == false and mouse_is_over and Input.is_action_pressed("left_mouse_button"):
 		if dragging == false:
 			dragging = true
@@ -120,6 +129,37 @@ func _integrate_forces(state):
 #func _process(delta):
 #	pass
 
+func attack():
+	var direct_state = get_world().direct_space_state
+	
+	var query = PhysicsShapeQueryParameters.new()
+	
+	var s = SphereShape.new()
+	s.radius = 100
+	
+	query.set_shape(s)
+	query.collision_mask = 256
+	
+	var collisions = direct_state.intersect_shape(query)
+	
+	print("collisions ", collisions)
+	
+	var first_collision = collisions[2]
+
+	if first_collision:
+		print("first attack collision", first_collision)
+		
+		var collider = first_collision.collider
+		
+		print("collider ", collider.transform.origin)
+		
+		move_to_point(collider.transform.origin.x, collider.transform.origin.z)
+		
+
+func move_to_point(x, z):
+	var destination = Vector3(x, transform.origin.y, z)
+	
+	direction = destination - translation
 
 func _on_Droid_mouse_entered():
 	mouse_is_over = true
