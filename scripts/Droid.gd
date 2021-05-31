@@ -1,15 +1,8 @@
-extends RigidBody
-
-
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
+extends "res://scripts/Unit.gd"
 
 var mouse_is_over = false
 var drag_button_already_down = false
 var dragging = false
-
-const SPEED = 1.0
 
 var direction = null
 
@@ -19,27 +12,27 @@ onready var parent_coordinates = get_parent().translation
 func _ready():
 	pass # Replace with function body.
 
-func _physics_process(delta):
-	if direction != null:
-		var step_size = delta * SPEED
+# func _physics_process(delta):
+# 	if direction != null:
+# 		var step_size = delta * speed
 		
-		apply_central_impulse(direction * step_size)
+# 		apply_central_impulse(direction * step_size)
 	
-	if drag_button_already_down == false and mouse_is_over and Input.is_action_pressed("left_mouse_button"):
-		if dragging == false:
-			dragging = true
-			#custom_integrator = true
-			#mode = MODE_STATIC
-			apply_central_impulse(Vector3(0, 1, 0))
-			print("start dragging")
+# 	if drag_button_already_down == false and mouse_is_over and Input.is_action_pressed("left_mouse_button"):
+# 		if dragging == false:
+# 			dragging = true
+# 			#custom_integrator = true
+# 			#mode = MODE_STATIC
+# 			apply_central_impulse(Vector3(0, 1, 0))
+# 			print("start dragging")
 		
-	if Input.is_action_pressed("left_mouse_button") == false and dragging == true:
-		dragging = false
-		drag_button_already_down = false
-		apply_central_impulse(Vector3(0,0,0))
-		#mode = MODE_RIGID
-		#custom_integrator = false
-		print("dragging stopped")
+# 	if Input.is_action_pressed("left_mouse_button") == false and dragging == true:
+# 		dragging = false
+# 		drag_button_already_down = false
+# 		apply_central_impulse(Vector3(0,0,0))
+# 		#mode = MODE_RIGID
+# 		#custom_integrator = false
+# 		print("dragging stopped")
 		
 #		var viewport = get_viewport()
 #
@@ -130,6 +123,8 @@ func _integrate_forces(state):
 #	pass
 
 func attack():
+	var collision = find_closest_enemy()
+
 	var direct_state = get_world().direct_space_state
 	
 	var query = PhysicsShapeQueryParameters.new()
@@ -153,13 +148,13 @@ func attack():
 		
 		print("collider ", collider.transform.origin)
 		
-		move_to_point(collider.transform.origin.x, collider.transform.origin.z)
+#		move_to_point(collider.transform.origin.x, collider.transform.origin.z)
 		
 
-func move_to_point(x, z):
-	var destination = Vector3(x, transform.origin.y, z)
+# func move_to_point(x, z):
+# 	var destination = Vector3(x, transform.origin.y, z)
 	
-	direction = destination - translation
+# 	direction = destination - translation
 
 func _on_Droid_mouse_entered():
 	mouse_is_over = true

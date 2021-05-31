@@ -22,7 +22,7 @@ func _ready():
 
 # Draws character grid rectangles
 func draw(horizontal_rows, vertical_rows):
-#	print("scale x ", shape.scale.x, " scale z ", shape.scale.z)
+	print("scale x ", shape.scale.x, " scale z ", shape.scale.z)
 	
 	var vertical_diameter = shape.scale.x / 2
 	var horizontal_diameter = shape.scale.z / 2
