@@ -32,6 +32,3 @@ shape = SubResource( 3 )
 
 [node name="CollisionShape2" type="CollisionShape" parent="."]
 shape = SubResource( 4 )
-
-[connection signal="mouse_entered" from="." to="." method="_on_Droid_mouse_entered"]
-[connection signal="mouse_exited" from="." to="." method="_on_Droid_mouse_exited"]

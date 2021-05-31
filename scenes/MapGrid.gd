@@ -17,8 +17,7 @@ func _ready():
 func draw():
 	var vertical_diameter = shape.scale.x / 2
 	var horizontal_diameter = shape.scale.z / 2
-	
-	var vertical_start_position = shape.transform.origin.x + vertical_diameter
+		var vertical_start_position = shape.transform.origin.x + vertical_diameter
 	var horizontal_start_position = shape.transform.origin.z - horizontal_diameter
 	
 	var item_height = shape.scale.x / rows

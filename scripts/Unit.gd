@@ -11,10 +11,6 @@ var game_grid = null
 func set_game_grid(g):
 	game_grid = g
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
 func _physics_process(delta):
 	if move_direction != null:
 		handle_move(delta)
@@ -23,9 +19,7 @@ func handle_move(delta):
 	var step_size = delta * speed
 
 	var stop_now = false
-	
-	#print("move_direction length ", move_direction.length())
-	
+
 	if step_size > move_direction.length():
 		print("unit reached destination")
 		
@@ -51,52 +45,6 @@ func handle_move(delta):
 	if move_direction.x == 0 and move_direction.z == 0:
 		move_direction = null
 		move_destination = null
-
-	# print(
-	# 	"x: ", 
-	# 	move_destination.x, 
-	# 	" x2: ",
-	# 	transform.origin.x, 
-	# 	" z: ", 
-	# 	move_destination.z, 
-	# 	" z2: ", 
-	# 	transform.origin.z)
-
-	# if move_destination.x <= transform.origin.x:
-	# 	var inverse = Vector3(-move_destination.x, 0, 0)
-
-	# 	apply_central_impulse(inverse)
-
-	# 	move_destination.x = 0
-
-	# if move_destination.z >= transform.origin.z:
-	# 	var inverse = Vector3(0, 0, -move_destination.z)
-		
-	# 	apply_central_impulse(inverse)
-
-	# 	move_destination.z = 0
-
-	# print("move_destination", move_destination, transform.origin)
-
-	# if move_destination.x == 0 and move_destination.z == 0:
-	# 	print("Both are zero")
-
-	# 	move_direction = null
-	# 	move_destination = null
-
-	# 	return
-
-	# if move_destination.x == transform.origin.x and move_destination.z == transform.origin.z:
-	# 	print("stop moving")
-
-	# 	apply_central_impulse(move_direction.inverse() * step_size)
-
-
-		
-	# 	return
-
-
-	# apply_central_impulse(move_direction * step_size)
 
 func stop():
 	print("stopping now")

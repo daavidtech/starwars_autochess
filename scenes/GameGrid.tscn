@@ -1,7 +1,88 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://scripts/GameGrid.gd" type="Script" id=1]
+[sub_resource type="GDScript" id=1]
+script/source = "extends StaticBody
+
+onready var shape = $Shape
+onready var meh = $meh
+
+var Droid = preload(\"res://scenes/Droid.tscn\")
+
+var GridColumn = preload(\"res://scenes/GridColumn.tscn\")
+
+export var rows = 10
+export var columns = 10
+
+var grid_elements = []
+
+func set_team(x: int, y: int, team: int):
+	var element = grid_elements[y][x]
+	element.set_team(team)
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	draw()
+
+func get_column_origin(x: int, y: int):
+	var element = grid_elements[y][x]
+	
+	return element.get_origin()
+
+func add_unit(u):
+	add_child(u)
+
+func find_closest(x: int, y: int, team: int):
+	pass
+
+func draw():
+	#print(\"draw \", shape.scale)
+	
+	var new_droid = Droid.instance()
+	
+	add_child(new_droid)
+	
+#	var vertical_diameter = shape.scale.x / 2
+#	var horizontal_diameter = shape.scale.z / 2
+#
+#	var vertical_start_position = shape.transform.origin.x + vertical_diameter
+#	var horizontal_start_position = shape.transform.origin.z - horizontal_diameter
+#
+#	var item_height = shape.scale.x / rows
+#	var item_width = shape.scale.z / columns
+#
+#	var item_height_diameter = item_height / 2
+#	var item_width_diameter = item_width / 2
+#
+#	for i in range(rows):
+#		var row_arr = []
+#
+#		for j in range(columns):
+#			var z = horizontal_start_position + item_width * j + item_width_diameter
+#			var x = vertical_start_position - item_height * i - item_height_diameter
+#
+#
+#			var new_target = GridColumn.instance()
+#			new_target.transform.origin.x = x
+#			new_target.transform.origin.z = z
+#			new_target.transform.origin.y = shape.transform.origin.y
+#			new_target.scale.x = item_height_diameter - shape.scale.x / 100
+#			new_target.scale.y = 0.01
+#			new_target.scale.z = item_width_diameter - shape.scale.y / 100
+#
+#			#print(\"new_target_transform_origin \", new_target.transform.origin)
+#
+#			add_child(new_target)
+#
+#			row_arr.push_back(new_target)
+#
+#		grid_elements.push_back(row_arr)
+#
+#	for row in grid_elements:
+#		for column in row:
+#			pass
+#			print(\"origin\", column.get_origin())
+"
 
 [node name="GameGrid" type="StaticBody"]
 transform = Transform( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
-script = ExtResource( 1 )
+script = SubResource( 1 )
