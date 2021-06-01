@@ -1,11 +1,13 @@
 extends KinematicBody
 
-export var health = 100
-export var speed = 2
-export var attack_range = 1
-export var attack_rate = 1
+export var max_health = 100.0
+export var health = 100.0
+export var speed = 3
+export var attack_range = 4
+export var attack_rate = 0.3
 
 signal death(unit)
+signal health_changed(new_value)
 
 var move_destination = null
 var move_direction = null
@@ -13,6 +15,8 @@ var move_direction = null
 var path_coordinator = null
 
 var current_target = null
+
+var auto_attack = false
 
 var team = null
 
@@ -24,12 +28,20 @@ func set_path_coordinator(c):
 func _physics_process(delta):
 	since_last_hit += delta
 	
+	if auto_attack == true and current_target == null and path_coordinator.count_units() > 0:
+		var units = path_coordinator.get_units()
+	
+		for unit in units:
+			if unit != self and unit.team != team:
+				set_current_target(unit)
+				return
+	
 	if current_target:
 		var my_position = get_position()
 		var target_position = current_target.get_position()
 		
-		if (my_position.x > target_position.x - 1 and my_position.x < target_position.x + 1
-			and my_position.y > target_position.y - 1 and my_position.y < target_position.y + 1):
+		if (my_position.x > target_position.x - attack_range and my_position.x < target_position.x + attack_range
+			and my_position.y > target_position.y - attack_range and my_position.y < target_position.y + attack_range):
 			stop()
 			
 			if since_last_hit > attack_rate:
@@ -71,7 +83,12 @@ func handle_move(delta):
 	if move_destination.z < translation.z and translation.z - step_size < move_destination.z:
 		move_direction.z = 0
 	
-	translation += move_direction.normalized() * step_size
+	var collision = move_and_collide(move_direction.normalized() * step_size)
+#
+#	if collision:
+		#print("collision", collision.collider)
+
+	#translation += move_direction.normalized() * step_size
 
 	if move_direction.x == 0 and move_direction.z == 0:
 		move_direction = null
@@ -119,15 +136,20 @@ func find_closest_enemy():
 
 
 func attack_closest_unit():
-	var units = path_coordinator.get_units()
+	print("attack_closest_unit")
 	
-	for unit in units:
-		if unit != self and unit.team != team:
-			set_current_target(unit)
-			return
+	auto_attack = true
 
 func take_damage(amount: int):
 	health -= amount
+	
+	var ratio: float = health / max_health
+	
+	var health_percent = ratio * 100
+	
+	print("health_percent ", health_percent)
+	
+	emit_signal("health_changed", health_percent)
 	
 	if health <= 0:
 		print("It is deadth")

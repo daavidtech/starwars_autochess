@@ -25,6 +25,7 @@ func _ready():
 func spawn_unit(x: int, y: int, Unit, team: int):
 	var new_unit = Unit.instance()
 	
+	new_unit.translation.y = game_map.translation.y
 	new_unit.set_position(x, y)
 	
 	new_unit.team = team
@@ -33,25 +34,41 @@ func spawn_unit(x: int, y: int, Unit, team: int):
 	path_coordinator.add_unit(new_unit)
 	
 	game_map.add_child(new_unit)
+#
+#	new_unit.attack()
 	
 	return new_unit
 
 func start():
+	#Logger.info()
+	
 	game_start_timer.start()
 	
 	start_time_left.text = String(game_start_time)
 	
 	var size = game_map.get_size()
 	
-	var your_unit = spawn_unit(0, -2, Droid, YOU)
+	var d = spawn_unit(0, 0, Droid, YOU)
 	
-	var your_unit2 = spawn_unit(6, -3, Droid, YOU)
-	
-	var enemy_unit = spawn_unit(0, 2, Droid, ENEMY)
-	
-	your_unit.attack()
-	enemy_unit.attack()
-	your_unit2.attack()
+	#d.move(-1, 1)
+	d.attack()
+#
+	var d1 = spawn_unit(8, 7, Droid, ENEMY)
+	d1.move(8, 0)
+	var d2 = spawn_unit(7, 7, Droid, ENEMY)
+	d2.move(7, 0)
+	var d3 = spawn_unit(6, 7, Droid, ENEMY)
+	d3.move(6, 0)
+	var d4 = spawn_unit(5, 7, Droid, ENEMY)
+	d4.move(5, 0)
+	var d5 = spawn_unit(4, 7, Droid, ENEMY)
+	d5.move(4, 0)
+#
+#	spawn_unit(0, 2, Droid, ENEMY)
+#
+#	spawn_unit(1, 3, Droid, ENEMY)
+#
+#	spawn_unit(2, 1, Droid, ENEMY)
 
 func _on_unit_death(unit):
 	print("on unit death")
