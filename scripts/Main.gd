@@ -16,6 +16,8 @@ var game_coordinator = null
 
 var gold = 0
 
+var health = 100
+
 var start_ticks = 10
 
 var setup_stage = false
@@ -35,10 +37,15 @@ func _ready():
 	
 	game_coordinator.connect("someone_won", self, "on_someone_won")
 	
-func on_someone_won(unit):
+func on_someone_won(team):
 	print("Someone won")
 	
-	game_end_text.visible = true
+	if game_end_text:
+		game_end_text.visible = true
+		if team == 1:	
+			game_end_text.text = "You win"
+		else:
+			game_end_text.text = "Enemy won"
 	
 func _physics_process(delta):
 	if dragging_unit != null:
