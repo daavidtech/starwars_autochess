@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 1, 0, 0, 1 )
+
+[node name="Node2D" type="Node2D"]
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+margin_right = 183.0
+margin_bottom = 23.0
+custom_styles/fg = SubResource( 1 )
+value = 45.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.14902, 1, 0.027451, 1 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0.670588, 1, 1 )
+
+[node name="Node2D" type="Node2D"]
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+margin_right = 330.0
+margin_bottom = 50.0
+custom_styles/fg = SubResource( 1 )
+value = 50.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ProgressBar2" type="ProgressBar" parent="."]
+margin_top = 49.3513
+margin_right = 330.0
+margin_bottom = 77.3513
+custom_styles/fg = SubResource( 2 )
+value = 25.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
