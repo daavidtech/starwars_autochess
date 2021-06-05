@@ -10,10 +10,10 @@
 script = ExtResource( 2 )
 
 [node name="PickingUi" parent="." instance=ExtResource( 5 )]
-margin_left = 116.0
-margin_top = -8.0
-margin_right = -457.0
-margin_bottom = -272.0
+margin_left = 36.0
+margin_top = 0.0
+margin_right = -804.0
+margin_bottom = -489.0
 
 [node name="Map" parent="." instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.578236, 0 )
@@ -22,7 +22,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.578236, 0 )
 transform = Transform( -0.00925767, 0.960535, -0.278006, -0.000308698, 0.278015, 0.960577, 0.999957, 0.00897853, -0.00227726, -6.059, 17.3673, 0.0971999 )
 
 [node name="PickingOptions" parent="." instance=ExtResource( 3 )]
-transform = Transform( 0.474803, 0.156723, 0, -0.156723, 0.474803, 0, 0, 0, 0.5, -4.84835, 7.24754, 0.196697 )
+transform = Transform( 0.27727, 0.416079, 0, -0.416079, 0.27727, 0, 0, 0, 0.5, -1.42168, 10.0365, 0.196697 )
 
 [node name="UnitBarrack" parent="." instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.69865, 0.960815, -0.0567195 )
