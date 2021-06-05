@@ -1,4 +1,4 @@
-extends "res://scripts/Unit.gd"
+extends "res://scenes/unit/Unit.gd"
 
 onready var health_bar = $HealthBar
 

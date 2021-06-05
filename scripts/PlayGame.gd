@@ -1,6 +1,6 @@
 extends Spatial
 
-var Droid = preload("res://scenes/Droid.tscn")
+var Droid = preload("res://scenes/droid/Droid.tscn")
 var PathCoordinator = preload("res://scripts/PathCoordinator.gd")
 
 onready var game_map = $GameMap

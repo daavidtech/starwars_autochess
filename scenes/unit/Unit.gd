@@ -12,7 +12,7 @@ signal health_changed(new_value)
 var move_destination = null
 var move_direction = null
 
-var path_coordinator = null
+var game_coordinator = null
 
 var current_target = null
 
@@ -23,13 +23,13 @@ var team = null
 var since_last_hit = 0
 
 func set_path_coordinator(c):
-	path_coordinator = c
+	game_coordinator = c
 
 func _physics_process(delta):
 	since_last_hit += delta
 	
-	if auto_attack == true and current_target == null and path_coordinator.count_units() > 0:
-		var units = path_coordinator.get_units()
+	if auto_attack == true and current_target == null and game_coordinator.count_units() > 0:
+		var units = game_coordinator.get_units()
 	
 		for unit in units:
 			if unit != self and unit.team != team:

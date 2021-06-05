@@ -5,7 +5,7 @@
 [sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0.0392157, 1, 0.0705882, 1 )
 
-[sub_resource type="ViewportTexture" id=1]
+[sub_resource type="ViewportTexture" id=3]
 viewport_path = NodePath("Viewport")
 
 [node name="Spatial" type="Spatial"]
@@ -35,4 +35,4 @@ __meta__ = {
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
 billboard = 1
-texture = SubResource( 1 )
+texture = SubResource( 3 )
