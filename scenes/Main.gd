@@ -9,12 +9,13 @@ onready var picking_ui = $PickingUi
 
 onready var setup_timer = $SetupTimer
 onready var setup_timer_text = $SetupTimerText
+onready var gold_remaining_text = $CurrentCold
 
 onready var game_end_text = $GameEndText
 
 var game_coordinator = null
 
-var gold = 0
+export var gold = 50
 
 var health = 100
 
@@ -37,6 +38,8 @@ func _ready():
 	
 	game_coordinator.connect("someone_won", self, "on_someone_won")
 	
+	gold_remaining_text.text = String(gold)
+	
 func on_someone_won(team):
 	print("Someone won")
 	
@@ -46,6 +49,8 @@ func on_someone_won(team):
 			game_end_text.text = "You win"
 		else:
 			game_end_text.text = "Enemy won"
+			
+	handle_round_end()
 	
 func _physics_process(delta):
 	if dragging_unit != null:
@@ -74,6 +79,8 @@ func handle_option_clicked(opt):
 	picking_options.remove_option(opt)
 	
 	unit_barrack.apply_option(opt)
+	
+	set_gold(gold - opt.cost)
 
 
 func _on_SetupTimer_timeout():
@@ -88,6 +95,8 @@ func _on_SetupTimer_timeout():
 		start_game()
 	
 func start_game():
+	allow_dragging = false
+	
 	for unit in units:
 		var droid = Droid.instance()
 
@@ -139,6 +148,20 @@ func on_game_start():
 	setup_stage = true
 	allow_dragging = true
 	setup_timer.start()
+
+func set_gold(g: int):
+	gold = g 
+	gold_remaining_text.text = String(g)
+
+func handle_round_end():
+	set_gold(gold + 10)
+	
+	transistion_to_picking_phase()
+	
+func transistion_to_picking_phase():
+	print("Transistioning...")
+	picking_options.visible = true
+	picking_options.reset()
 
 func on_drag_started(unit):
 	if allow_dragging:

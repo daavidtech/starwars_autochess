@@ -33,3 +33,10 @@ func remove_option(opt):
 		
 	if option5 == opt:
 		option5.visible = false
+
+func reset():
+	option1.visible = true
+	option2.visible = true
+	option3.visible = true
+	option4.visible = true
+	option5.visible = true
