@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scenes/picking_screen/Stars.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/picking_screen/Stars3D.gd" type="Script" id=2]
+
+[sub_resource type="ViewportTexture" id=1]
+viewport_path = NodePath("Viewport")
+
+[node name="Spatial" type="Spatial"]
+script = ExtResource( 2 )
+
+[node name="Viewport" type="Viewport" parent="."]
+size = Vector2( 90, 40 )
+transparent_bg = true
+
+[node name="Stars2D" parent="Viewport" instance=ExtResource( 1 )]
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+billboard = 1
+texture = SubResource( 1 )
