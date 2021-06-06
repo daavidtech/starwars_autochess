@@ -8,9 +8,11 @@ func set_stars(v: int):
 	var text = ""
 	
 	for i in range(v):
-		text += "T"
+		text += "X"
 		
 	label.text = text
 
 func get_stars():
-	return label.text.size()
+	print("get_stars ", label.text, " ", label.text.length())
+	
+	return label.text.length()

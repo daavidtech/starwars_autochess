@@ -8,6 +8,8 @@ onready var unit_barrack = $UnitBarrack
 onready var picking_ui = $PickingUi
 
 onready var setup_timer = $SetupTimer
+onready var new_round_timer = $NewRoundTimer
+
 onready var setup_timer_text = $SetupTimerText
 onready var gold_remaining_text = $CurrentCold
 
@@ -75,6 +77,11 @@ func move_to_mouse_position(unit):
 		unit.translation.z = collision.position.z
 	
 func handle_option_clicked(opt):
+	if unit_barrack.is_full():
+		print("Barrack is full")
+		
+		return 
+	
 	if opt.cost > gold:
 		print("Not enough cold left")
 		
@@ -89,16 +96,7 @@ func handle_option_clicked(opt):
 	set_gold(gold - opt.cost)
 
 
-func _on_SetupTimer_timeout():
-	start_ticks -= 1
-	
-	setup_timer_text.text = String(start_ticks)
-	
-	if start_ticks == 0:
-		setup_timer_text.visible = false
-		setup_timer.stop()
-		
-		start_game()
+
 	
 func start_game():
 	allow_dragging = false
@@ -165,24 +163,48 @@ func set_gold(g: int):
 
 func handle_round_end():
 	set_gold(gold + 10)
+	units.clear()
 	
-	transistion_to_picking_phase()
+	new_round_timer.start()
 	
 func transistion_to_picking_phase():
 	print("Transistioning...")
+	
+	picking_ui.visible = true
 	picking_options.visible = true
 	picking_options.reset()
+	setup_timer_text.visible = true
+	game_end_text.visible = false
+	start_ticks = 10
+	
 	
 	for unit in battle_units:
 		remove_child(unit)
 		
 	battle_units.clear()
+	
+	unit_barrack.show_all()
 
 func on_drag_started(unit):
 	if allow_dragging:
 		print("Drag started")
-		unit_barrack.remove_unit(unit)
-		self.add_child(unit)
-		units.push_back(unit)
-		dragging_unit = unit
-		move_to_mouse_position(unit)
+		var cloned_unit = unit.duplicate()
+		self.add_child(cloned_unit)
+		unit_barrack.hide_unit(unit)
+		units.push_back(cloned_unit)
+		dragging_unit = cloned_unit
+		move_to_mouse_position(cloned_unit)
+
+func _on_SetupTimer_timeout():
+	start_ticks -= 1
+	
+	setup_timer_text.text = String(start_ticks)
+	
+	if start_ticks == 0:
+		setup_timer_text.visible = false
+		setup_timer.stop()
+		
+		start_game()
+
+func _on_NewRoundTimer_timeout():
+	transistion_to_picking_phase()

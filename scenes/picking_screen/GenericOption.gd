@@ -3,6 +3,7 @@ extends StaticBody
 signal clicked
 
 onready var cost_label = $Viewport/CostLabel
+onready var stars = $Stars
 
 export var level = 1
 export var unit_type = "droid"
@@ -12,6 +13,7 @@ var mouse_over = false
 
 func _ready():
 	cost_label.set_cost(cost)
+	stars.stars = 1
 
 func _process(delta):
 	if Input.is_action_just_pressed("left_mouse_button") and mouse_over == true:

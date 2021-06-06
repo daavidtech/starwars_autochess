@@ -7,9 +7,7 @@ var UnitBarrackUnit = preload("res://scenes/barrack/UnitBarrackUnit.tscn")
 
 onready var shape = $Shape
 
-var units = []
-
-#func _ready():
+const max_units = 5
 
 func get_z_translation(index: int):
 	var size = shape.shape.extents
@@ -39,9 +37,7 @@ func spawn_unit(opt):
 			
 			barrack_unit.set_content(droid)
 			
-			var index = units.size() + 1
-			
-			units.push_back(opt)
+			var index = shape.get_child_count() + 1
 			
 			barrack_unit.translation.z = get_z_translation(index)
 
@@ -50,6 +46,13 @@ func handle_drag_start(unit):
 	emit_signal("on_drag_started", unit)
 
 func apply_option(opt):
+	if shape.get_child_count() >= max_units:
+		print("Barrack is full")
+		
+		return
+	
+	print("apply_opt ", opt.stars.stars)
+	
 	spawn_unit(opt)
 	
 #	var units_with_same_type = []
@@ -68,9 +71,18 @@ func apply_option(opt):
 #	else:
 #		spawn_unit(opt)
 	
+func show_all():
+	for unit in shape.get_children():
+		unit.visible = true
+	
+func hide_unit(unit):
+	unit.visible = false
 
 func remove_unit(unit):
 	shape.remove_child(unit)
 
-
-
+func is_full():
+	if shape.get_child_count() >= max_units:
+		return true
+		
+	return false

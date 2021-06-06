@@ -30,7 +30,7 @@ transform = Transform( 0.0497911, 0, -0.99876, 0, 1, 0, 0.99876, 0, 0.0497911, -
 billboard = 1
 texture = SubResource( 2 )
 
-[node name="Spatial" parent="." instance=ExtResource( 4 )]
+[node name="Stars" parent="." instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.97401, 0, -0.709424 )
 
 [connection signal="mouse_entered" from="." to="." method="_on_Spatial_mouse_entered"]

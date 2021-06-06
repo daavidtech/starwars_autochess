@@ -30,6 +30,10 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.69865, 0.960815, -0.0567195
 
 [node name="SetupTimer" type="Timer" parent="."]
 
+[node name="NewRoundTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+
 [node name="SetupTimerText" type="Label" parent="."]
 margin_left = 769.0
 margin_top = 171.0
@@ -64,3 +68,4 @@ __meta__ = {
 }
 
 [connection signal="timeout" from="SetupTimer" to="." method="_on_SetupTimer_timeout"]
+[connection signal="timeout" from="NewRoundTimer" to="." method="_on_NewRoundTimer_timeout"]
