@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://scenes/droid/DroidModel.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/picking_screen/GenericOption.gd" type="Script" id=2]
 [ext_resource path="res://scenes/picking_screen/OptionCost.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/picking_screen/Stars3D.tscn" type="PackedScene" id=4]
 
 [sub_resource type="BoxShape" id=1]
 
@@ -28,6 +29,9 @@ render_target_v_flip = true
 transform = Transform( 0.0497911, 0, -0.99876, 0, 1, 0, 0.99876, 0, 0.0497911, -0.709351, -0.658478, 0.996081 )
 billboard = 1
 texture = SubResource( 2 )
+
+[node name="Spatial" parent="." instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.97401, 0, -0.709424 )
 
 [connection signal="mouse_entered" from="." to="." method="_on_Spatial_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_Spatial_mouse_exited"]

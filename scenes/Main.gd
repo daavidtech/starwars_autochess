@@ -15,7 +15,7 @@ onready var game_end_text = $GameEndText
 
 var game_coordinator = null
 
-export var gold = 50
+export var gold = 40
 
 var health = 100
 
@@ -28,6 +28,7 @@ var dragging_unit = null
 var allow_dragging = false
 
 var units = []
+var battle_units = []
 
 func _ready():
 	picking_options.connect("option_clicked", self, "handle_option_clicked")
@@ -74,6 +75,11 @@ func move_to_mouse_position(unit):
 		unit.translation.z = collision.position.z
 	
 func handle_option_clicked(opt):
+	if opt.cost > gold:
+		print("Not enough cold left")
+		
+		return
+		
 	print("unit picked ", opt.unit_type, " level ", opt.level)
 	
 	picking_options.remove_option(opt)
@@ -115,6 +121,8 @@ func start_game():
 		remove_child(child)
 		add_child(droid)
 		
+		battle_units.push_back(droid)
+		
 		droid.attack()
 		
 		
@@ -133,6 +141,8 @@ func spawn_enemy_unit(x, y):
 	game_coordinator.add_unit(enemy_droid)
 	
 	enemy_droid.connect("death", self, "handle_death")
+	
+	battle_units.push_back(enemy_droid)
 	
 	add_child(enemy_droid)
 	
@@ -162,6 +172,11 @@ func transistion_to_picking_phase():
 	print("Transistioning...")
 	picking_options.visible = true
 	picking_options.reset()
+	
+	for unit in battle_units:
+		remove_child(unit)
+		
+	battle_units.clear()
 
 func on_drag_started(unit):
 	if allow_dragging:
