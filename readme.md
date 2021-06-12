@@ -23,3 +23,5 @@ Game server
 ## Requirements
 
 - git-lfs
+- godot
+- go (if you develop server)
