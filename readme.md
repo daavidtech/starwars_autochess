@@ -2,13 +2,11 @@
 
 ## Project structure
 
-### /assets/exported
+### /assets
+
+All the assests used in the project. Files should be named like /assets/unit_droid/unit_droid.blend
 
 Exported 3dmodes and materials. 3d models should be named like unit_droid.glb
-
-### /assets/blender
-
-Blender files naming should be for a form of unit_droid.blend 
 
 ### /fonts
 

@@ -2,12 +2,12 @@
 
 importer="scene"
 type="PackedScene"
-path="res://.import/arena.glb-d241f35aa7d680692711a57f417fcff5.scn"
+path="res://.import/unit_clone.gltf-c0d1d0afe757075a31b92b7d371bc221.scn"
 
 [deps]
 
-source_file="res://assets/exported/arena.glb"
-dest_files=[ "res://.import/arena.glb-d241f35aa7d680692711a57f417fcff5.scn" ]
+source_file="res://assets/unit_clone/unit_clone.gltf"
+dest_files=[ "res://.import/unit_clone.gltf-c0d1d0afe757075a31b92b7d371bc221.scn" ]
 
 [params]
 

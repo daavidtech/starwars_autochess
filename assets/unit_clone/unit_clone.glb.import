@@ -2,12 +2,12 @@
 
 importer="scene"
 type="PackedScene"
-path="res://.import/clone01.gltf-3daa45252f9953d822f2b69fd64a63ea.scn"
+path="res://.import/unit_clone.glb-69f2618524349cdba8adae48de369449.scn"
 
 [deps]
 
-source_file="res://assets/blender/exported/clone01.gltf"
-dest_files=[ "res://.import/clone01.gltf-3daa45252f9953d822f2b69fd64a63ea.scn" ]
+source_file="res://assets/unit_clone/unit_clone.glb"
+dest_files=[ "res://.import/unit_clone.glb-69f2618524349cdba8adae48de369449.scn" ]
 
 [params]
 
