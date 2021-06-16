@@ -4,10 +4,31 @@ var GameState = preload("res://scenes/game_state.gd")
 var Unit = preload("res://scenes/unit.tscn")
 
 onready var placement_area = $StaticBody/PlacementArea
+onready var unit_shop = $unit_shop
 
 var unit_map = {}
 
 var game_state
+
+func load_thing(type: String):
+#	var path = "res://assets/exported/"
+#
+#	path += type + "/" + type + ".gltf"
+	
+	var path = "res://assets/unit_droid/unit_droid.glb"
+	
+	print("Loading resource from ", path)
+	
+	var does_exists = ResourceLoader.has(path)
+	
+	print("does_exists " + String(does_exists))
+	
+	var Droid = ResourceLoader.load(path)
+	
+	var i = Droid.instance()
+	
+	add_child(i)
+	
 
 func move_to_point(u, x: int, y: int):
 	print("move_to ", x, " y ", y)
@@ -41,6 +62,16 @@ func _ready():
 	
 	game_state.connect("create_unit", self, "_handle_create_unit")
 	game_state.connect("unit_position_changed", self, "_handle_change_unit_position")
+	
+	load_thing("unit_clone")
+	
+	unit_shop.fill([{
+		"unit_type": "unit_droid"
+	}, {
+		"unit_type": "unit_clone"
+	}, {
+		"unit_type": "unit_droid"
+	}])
 
 func _handle_create_unit(id, unit_type, x, y):
 	print("handle create unit")

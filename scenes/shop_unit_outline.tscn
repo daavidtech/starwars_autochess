@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://scenes/unit_level3d.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/picking_screen/Stars3D.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/shop_unit_outline.gd" type="Script" id=3]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 0.66569, 1, 0.843051 )
+
+[node name="Spatial" type="StaticBody"]
+script = ExtResource( 3 )
+
+[node name="shape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )
+
+[node name="Spatial" parent="." instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.841179, -1.02561, -0.658988 )
+stars = 3
+
+[node name="Spatial2" parent="." instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.04407, -0.768097, 0.871133 )
