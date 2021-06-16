@@ -72,13 +72,28 @@ type UnitStoppedAttacking struct {
 	UnitID string `json:"unitId"`
 }
 
-type LaunchParticle struct {
+type LaunchProjectile struct {
 	StartPointX  int    `json:"startPointX"`
 	StartPointY  int    `json:"startPointY"`
 	EndPointX    int    `json:"endPointX"`
 	EndPointY    int    `json:"endPointY"`
 	Speed        int    `json:"speed"`
 	ParticleType string `json:"particleType"`
+}
+
+type UnitTookDamage struct {
+	UnitID string `json:"unitId"`
+	Amount int    `json:"amount"`
+}
+
+type UnitUsedMana struct {
+	UnitID string `json:"unitId"`
+	Amount int    `json:"amount"`
+}
+
+type UnitUsedAbility struct {
+	UnitID    string `json:"unitId"`
+	AbilityID string `json:"abilityId"`
 }
 
 type MessageToClient struct {
@@ -88,9 +103,12 @@ type MessageToClient struct {
 	StartTimerTimeChanged *StartTimerTimeChanged `json:"startTimerTimeChanged"`
 	UnitDied              *UnitDied              `json:"unitDied"`
 	UnitPlaced            *UnitPlaced            `json:"unitPlaced"`
+	UnitTookDamage        *UnitTookDamage        `json:"unitTookDamage"`
+	UnitUsedMana          *UnitUsedMana          `json:"unitUsedMana"`
+	UnitUsedAbility       *UnitUsedAbility       `json:"unitUsedAbility"`
 	UnitStartedMovingTo   *UnitStartedMovingTo   `json:"unitStartedMovingTo"`
 	UnitArrivedToPosition *UnitArrivedToPosition `json:"unitArrivedToPosition"`
 	UnitStartedAttacking  *UnitStartedAttacking  `json:"unitStartedAttacking"`
 	UnitStoppedAttacking  *UnitStoppedAttacking  `json:"unitStoppedAttacking"`
-	LaunchParticle        *LaunchParticle        `json:"launchParticle"`
+	LaunchProjectile      *LaunchProjectile      `json:"launchParticle"`
 }
