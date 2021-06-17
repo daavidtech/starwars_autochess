@@ -1,11 +1,11 @@
 extends Spatial
 
-onready var level = $Viewport/level
+onready var cost = $Viewport/cost
 
 export var value: int setget set_value, get_value
 
 func set_value(v: int):
-	level.value = v
+	cost.value = v
 	
 func get_value() -> int:
-	return level.value
+	return cost.value

@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://scenes/unit_level2d.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/unit_level3d.gd" type="Script" id=2]
+[ext_resource path="res://scenes/unit_cost2d.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/unit_cost3d.gd" type="Script" id=2]
 
 [sub_resource type="ViewportTexture" id=1]
 viewport_path = NodePath("Viewport")
@@ -10,11 +10,11 @@ viewport_path = NodePath("Viewport")
 script = ExtResource( 2 )
 
 [node name="Viewport" type="Viewport" parent="."]
-size = Vector2( 40, 40 )
+size = Vector2( 80, 45 )
 transparent_bg = true
 render_target_v_flip = true
 
-[node name="level" parent="Viewport" instance=ExtResource( 1 )]
+[node name="cost" parent="Viewport" instance=ExtResource( 1 )]
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
 billboard = 1

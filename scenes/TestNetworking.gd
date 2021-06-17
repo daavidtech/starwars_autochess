@@ -3,6 +3,8 @@ extends Node
 var GameState = preload("res://scenes/game_state.gd")
 var Unit = preload("res://scenes/unit.tscn")
 
+signal unit_choosen
+
 onready var placement_area = $StaticBody/PlacementArea
 onready var unit_shop = $unit_shop
 
@@ -66,12 +68,29 @@ func _ready():
 	load_thing("unit_clone")
 	
 	unit_shop.fill([{
-		"unit_type": "unit_droid"
+		"id": 1,
+		"unit_type": "unit_droid",
+		"level": 3,
+		"rank": 3,
+		"cost": 300
 	}, {
-		"unit_type": "unit_clone"
+		"id": 2,
+		"unit_type": "unit_clone",
+		"level": 2,
+		"rank": 1,
+		"cost": 420
 	}, {
-		"unit_type": "unit_droid"
+		"id": 3,
+		"unit_type": "unit_droid",
+		"level": 2,
+		"rank": 2,
+		"cost": 500
 	}])
+	
+	unit_shop.connect("unit_bought", self, "_handle_unit_bought")
+
+func _handle_unit_bought(unit):
+	print("unit bought ", unit)
 
 func _handle_create_unit(id, unit_type, x, y):
 	print("handle create unit")

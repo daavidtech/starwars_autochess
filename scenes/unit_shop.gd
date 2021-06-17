@@ -1,5 +1,7 @@
 extends StaticBody
 
+signal unit_bought(item)
+
 var ShopUnitOutline = preload("res://scenes/shop_unit_outline.tscn")
 
 onready var shape = $Shape
@@ -22,14 +24,20 @@ func fill(units):
 		var path = "res://assets/" + unit.unit_type + "/" + unit.unit_type + ".glb"
 		
 		var outline = ShopUnitOutline.instance()
+		shape.add_child(outline)
+		
+		outline.set_properties(unit)
 		
 		outline.translation.z = start_x + one_half_width
+		outline.connect("unit_choosen", self, "handle_unit_choosen")
 		
 		start_x += one_width
-		
-		shape.add_child(outline)
 		
 		var model = ResourceLoader.load(path).instance()
 		
 		outline.set_content(model)
 
+func handle_unit_choosen(props):
+	print("handle_unit_choosen ", props)
+	
+	emit_signal("unit_bought", props)
