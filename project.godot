@@ -14,10 +14,6 @@ config/name="Starwars Autochess"
 run/main_scene="res://scenes/Main.tscn"
 config/icon="res://icon.png"
 
-[autoload]
-
-Logger="*res://scripts/logger.gd"
-
 [gdnative]
 
 singletons=[  ]
