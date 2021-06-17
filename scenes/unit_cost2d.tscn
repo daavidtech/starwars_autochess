@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://fonts/new_dynamicfont.tres" type="DynamicFont" id=1]
-[ext_resource path="res://scenes/Label.gd" type="Script" id=2]
 [ext_resource path="res://scenes/unit_cost2d.gd" type="Script" id=3]
 
 [node name="Spatial" type="Control"]
@@ -15,7 +14,6 @@ margin_right = 40.0
 margin_bottom = 14.0
 custom_fonts/font = ExtResource( 1 )
 text = "1234"
-script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

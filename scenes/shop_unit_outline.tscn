@@ -8,7 +8,7 @@
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 0.66569, 1, 0.843051 )
 
-[node name="Spatial" type="StaticBody"]
+[node name="Spatial2" type="StaticBody"]
 script = ExtResource( 3 )
 
 [node name="shape" type="CollisionShape" parent="."]
