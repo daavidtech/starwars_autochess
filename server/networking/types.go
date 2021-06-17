@@ -112,3 +112,31 @@ type MessageToClient struct {
 	UnitStoppedAttacking  *UnitStoppedAttacking  `json:"unitStoppedAttacking"`
 	LaunchProjectile      *LaunchProjectile      `json:"launchParticle"`
 }
+
+type BuyUnit struct {
+	ShopUnitID string `json:"shopUnitId"`
+}
+
+type PlaceUnit struct {
+	UnitID string
+}
+
+type SellUnit struct {
+	UnitID string
+}
+
+type BuyLevelUp struct {
+}
+
+type RecycleShopUnits struct{}
+
+type MessageFromClient struct {
+	BuyUnit          *BuyUnit          `json:"buyUnit"`
+	PlaceUnit        *PlaceUnit        `json:"placeUnit"`
+	SellUnit         *SellUnit         `json:"sellUnit"`
+	BuyLevelUp       *BuyLevelUp       `json:"buyLevelUp"`
+	RecycleShopUnits *RecycleShopUnits `json:"recycleShopUnits"`
+}
+
+type GameSnapshot struct {
+}
