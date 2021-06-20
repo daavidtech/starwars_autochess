@@ -20,21 +20,37 @@ type ChangeUnitPosition struct {
 	Y  int    `json:"y"`
 }
 
+type GamePhase string
+
+const (
+	BuyingPhase    GamePhase = "BuyingPhase"
+	PlacementPhase           = "PlacementPhase"
+	BattlePhase              = "BattlePhase"
+)
+
 type GamePhaseChanged struct {
-	NewPhaseType string
+	NewPhaseType GamePhase
 }
 
 type UnitBought struct {
-	UnitType string `json:"unitType"`
+	UnitID     string `json:"unitId"`
+	UnitType   string `json:"unitType"`
+	Rank       int    `json:"rank"`
+	HP         int    `json:"hp"`
+	Mana       int    `json:"mana"`
+	AttackRate int    `json:"attackRate"`
 }
 
 type UnitUpgraded struct {
-	UnitId string `json:"unitId"`
-	Rank   int    `json:"rank"`
+	UnitID     string `json:"unitId"`
+	Rank       int    `json:"rank"`
+	HP         int    `json:"hp"`
+	Mana       int    `json:"mana"`
+	AttackRate int    `json:"attackRate"`
 }
 
 type UnitSold struct {
-	UnitId string `json:"unitId"`
+	UnitID string `json:"unitId"`
 }
 
 type StartTimerTimeChanged struct {
@@ -96,10 +112,26 @@ type UnitUsedAbility struct {
 	AbilityID string `json:"abilityId"`
 }
 
+type PlayerMoneyChanged struct {
+	PlayerID string `json:"playerId"`
+	NewMoney int    `json:"newMoney"`
+}
+
+type PlayerLevelChanged struct {
+	PlayerID string `json:"playerId"`
+	NewLevel int    `json:"newLevel"`
+}
+
+type PlayerHealthChanged struct {
+	PlayerID string `json:"playerId"`
+	NewHP    int    `json:"newHp"`
+}
+
 type MessageToClient struct {
 	GamePhaseChanged      *GamePhaseChanged      `json:"gamePhaseChanged"`
 	UnitBought            *UnitBought            `json:"unitBought"`
 	UnitSold              *UnitSold              `json:"unitSold"`
+	UnitUpgraded          *UnitUpgraded          `json:"unitUpgraded"`
 	StartTimerTimeChanged *StartTimerTimeChanged `json:"startTimerTimeChanged"`
 	UnitDied              *UnitDied              `json:"unitDied"`
 	UnitPlaced            *UnitPlaced            `json:"unitPlaced"`
@@ -111,6 +143,9 @@ type MessageToClient struct {
 	UnitStartedAttacking  *UnitStartedAttacking  `json:"unitStartedAttacking"`
 	UnitStoppedAttacking  *UnitStoppedAttacking  `json:"unitStoppedAttacking"`
 	LaunchProjectile      *LaunchProjectile      `json:"launchParticle"`
+	PlayerMoneyChanged    *PlayerMoneyChanged    `json:"playerMoneyChanged"`
+	PlayerLevelChanged    *PlayerLevelChanged    `json:"playerLevelChanged"`
+	PlayerHealthChanged   *PlayerHealthChanged   `json:"playerHealthChanged"`
 }
 
 type BuyUnit struct {
