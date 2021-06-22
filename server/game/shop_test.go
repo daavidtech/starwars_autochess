@@ -44,7 +44,7 @@ func TestChoosesThirdTier(t *testing.T) {
 
 func TestPicksOneUnit(t *testing.T) {
 	shop := Shop{
-		units: []ShopUnit{ShopUnit{Unit{unitId: "UNIT1"}}, ShopUnit{Unit{unitId: "UNIT1"}}},
+		units: []ShopUnit{ShopUnit{UnitType: "unit_clone"}, ShopUnit{UnitType: "unit_droid"}},
 	}
 
 	if shop.GetUnitsCount() != 2 {
@@ -59,7 +59,7 @@ func TestPicksOneUnit(t *testing.T) {
 
 	unit := shop.Pick(0)
 
-	if unit.unitId != "UNIT1" {
+	if unit.UnitType != "UNIT1" {
 		t.Errorf("Pick gives wrong unit")
 	}
 
