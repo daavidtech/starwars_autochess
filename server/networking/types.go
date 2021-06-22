@@ -165,12 +165,18 @@ type BuyLevelUp struct {
 
 type RecycleShopUnits struct{}
 
+type JoinGame struct{}
+
+type SeekMatch struct{}
+
 type MessageFromClient struct {
 	BuyUnit          *BuyUnit          `json:"buyUnit"`
 	PlaceUnit        *PlaceUnit        `json:"placeUnit"`
 	SellUnit         *SellUnit         `json:"sellUnit"`
 	BuyLevelUp       *BuyLevelUp       `json:"buyLevelUp"`
 	RecycleShopUnits *RecycleShopUnits `json:"recycleShopUnits"`
+	JoinGame         *JoinGame         `json:"joinGame"`
+	SeekMatch        *SeekMatch        `json:"seekMatch"`
 }
 
 type GameSnapshot struct {
