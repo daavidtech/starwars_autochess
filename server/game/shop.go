@@ -30,6 +30,8 @@ func CreateShop() Shop {
 }
 
 func (shop *Shop) Fill(level int) {
+	shop.units = []ShopUnit{}
+
 	for i := 0; i < shop.size; i++ {
 		probabilities := shop.tierProbabilities.PickLevel(level)
 
