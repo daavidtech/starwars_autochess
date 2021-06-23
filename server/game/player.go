@@ -82,6 +82,10 @@ func (player *Player) getBattleUnits() []*BattleUnit {
 	return battleUnits
 }
 
+func (player *Player) GetUnit(unitID string) *BattleUnit {
+	return player.battleUnits[unitID]
+}
+
 func (player *Player) RemoveUnit(unitID string) {
 	delete(player.battleUnits, unitID)
 }
