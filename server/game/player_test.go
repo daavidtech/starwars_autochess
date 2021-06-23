@@ -3,7 +3,7 @@ package game
 import "testing"
 
 func TestAddsNewShopUnitWhenNoOthers(t *testing.T) {
-	player := Player{}
+	player := NewPlayer()
 
 	player.AddShopUnit(ShopUnit{
 		UnitType: "unit_droid",
@@ -18,12 +18,12 @@ func TestAddsNewShopUnitWhenNoOthers(t *testing.T) {
 
 func TestUpgradeUnit(t *testing.T) {
 	player := Player{
-		battleUnits: []BattleUnit{
-			BattleUnit{
+		battleUnits: map[string]*BattleUnit{
+			"1": &BattleUnit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
-			BattleUnit{
+			"2": &BattleUnit{
 				unitType: "unit_droid",
 				rank:     1,
 			},

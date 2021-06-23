@@ -1,55 +1,61 @@
 package game
 
+import "github.com/google/uuid"
+
 type Player struct {
 	id          string
 	credits     int
 	health      int
 	accepted    bool
-	battleUnits []BattleUnit
+	battleUnits map[string]*BattleUnit
+}
+
+func NewPlayer() *Player {
+	return &Player{
+		battleUnits: make(map[string]*BattleUnit),
+	}
 }
 
 func (player *Player) AddShopUnit(shopUnit ShopUnit) {
+	unitID := uuid.New().String()
+
 	count := player.countUnitType(shopUnit.UnitType, 1)
 
 	if count != 2 {
-		player.battleUnits = append(player.battleUnits, BattleUnit{
-			unitId:     shopUnit.UnitID,
+		player.battleUnits[unitID] = &BattleUnit{
+			unitId:     unitID,
 			unitType:   shopUnit.UnitType,
 			tier:       shopUnit.Tier,
 			rank:       1,
 			hp:         shopUnit.HP,
 			mana:       shopUnit.Mana,
 			attackRate: shopUnit.AttackRate,
-		})
+		}
 
 		return
 	}
 
-	newBattleUnits := []BattleUnit{}
-
 	removedCount := 0
 
-	for _, unit := range player.battleUnits {
-		if unit.unitType == shopUnit.UnitType || unit.rank == 1 || removedCount < 2 {
-			removedCount += 1
-
+	for unitID, unit := range player.battleUnits {
+		if unit.unitType != shopUnit.UnitType && unit.rank != 1 || removedCount > 2 {
 			continue
 		}
 
-		newBattleUnits = append(newBattleUnits, unit)
+		removedCount += 1
+
+		delete(player.battleUnits, unitID)
 	}
 
-	newBattleUnits = append(newBattleUnits, BattleUnit{
-		unitId:     shopUnit.UnitID,
+	player.battleUnits[unitID] = &BattleUnit{
+		unitId:     unitID,
 		unitType:   shopUnit.UnitType,
 		tier:       shopUnit.Tier,
 		rank:       2,
 		hp:         shopUnit.HP,
 		mana:       shopUnit.Mana,
 		attackRate: shopUnit.AttackRate,
-	})
-
-	player.battleUnits = newBattleUnits
+	}
 }
 
 func (player *Player) countUnitType(unitType string, rank int) int {
@@ -66,6 +72,16 @@ func (player *Player) countUnitType(unitType string, rank int) int {
 	return count
 }
 
-func (player *Player) getBattleUnits() []BattleUnit {
-	return player.battleUnits
+func (player *Player) getBattleUnits() []*BattleUnit {
+	battleUnits := []*BattleUnit{}
+
+	for _, unit := range player.battleUnits {
+		battleUnits = append(battleUnits, unit)
+	}
+
+	return battleUnits
+}
+
+func (player *Player) RemoveUnit(unitID string) {
+	delete(player.battleUnits, unitID)
 }
