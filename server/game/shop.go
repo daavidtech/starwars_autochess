@@ -5,7 +5,6 @@ import (
 )
 
 type ShopUnit struct {
-	UnitID     string
 	UnitType   string
 	Tier       int
 	HP         int
