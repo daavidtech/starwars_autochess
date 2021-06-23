@@ -26,3 +26,11 @@ func NewMatch() Match {
 func (match *Match) start() {
 
 }
+
+func (match *Match) CountPlayers() int {
+	return len(match.players)
+}
+
+func (match *Match) IsFull() bool {
+	return len(match.players) > 7
+}
