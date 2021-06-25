@@ -10,6 +10,11 @@ export var websocket_url = "ws://localhost:4100/api/socket"
 # Our WebSocketClient instance
 var _client = WebSocketClient.new()
 
+func send_msg(msg):
+	var json_msg = JSON.print(msg)
+	
+	_client.get_peer(1).put_packet(json_msg.to_utf8())
+
 func _ready():
 	# Connect base signals to get notified of connection open, close, and errors.
 	_client.connect("connection_closed", self, "_closed")
