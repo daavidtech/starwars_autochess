@@ -127,6 +127,19 @@ type PlayerHealthChanged struct {
 	NewHP    int    `json:"newHp"`
 }
 
+type ShopUnit struct {
+	UnitType string `json:"unit_type"`
+	Level    int    `json:"level"`
+	HP       int    `json:"hp"`
+	Mana     int    `json:"mana"`
+	Rank     int    `json:"rank"`
+	Cost     int    `json:"cost"`
+}
+
+type ShopRefilled struct {
+	ShopUnits []ShopUnit `json:"shop_units"`
+}
+
 type MessageToClient struct {
 	GamePhaseChanged      *GamePhaseChanged      `json:"gamePhaseChanged"`
 	UnitBought            *UnitBought            `json:"unitBought"`
@@ -146,6 +159,7 @@ type MessageToClient struct {
 	PlayerMoneyChanged    *PlayerMoneyChanged    `json:"playerMoneyChanged"`
 	PlayerLevelChanged    *PlayerLevelChanged    `json:"playerLevelChanged"`
 	PlayerHealthChanged   *PlayerHealthChanged   `json:"playerHealthChanged"`
+	ShopRefilled          *ShopRefilled          `json:"shopRefilled"`
 }
 
 type BuyUnit struct {
@@ -154,6 +168,8 @@ type BuyUnit struct {
 
 type PlaceUnit struct {
 	UnitID string
+	X      int
+	Y      int
 }
 
 type SellUnit struct {
@@ -161,6 +177,7 @@ type SellUnit struct {
 }
 
 type BuyLevelUp struct {
+	ShopUnitID int `json:"shop_unit_id"`
 }
 
 type RecycleShopUnits struct{}
