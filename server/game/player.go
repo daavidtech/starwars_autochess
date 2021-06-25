@@ -7,6 +7,7 @@ type Player struct {
 	credits     int
 	health      int
 	accepted    bool
+	xp          int
 	battleUnits map[string]*BattleUnit
 }
 
@@ -89,3 +90,12 @@ func (player *Player) GetUnit(unitID string) *BattleUnit {
 func (player *Player) RemoveUnit(unitID string) {
 	delete(player.battleUnits, unitID)
 }
+
+func (player *Player) AddXP(amount int) {
+	player.xp += amount
+}
+
+func (player *Player) GetLevel() int {
+	return player.xp / 100
+}
+
