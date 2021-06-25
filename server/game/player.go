@@ -99,3 +99,6 @@ func (player *Player) GetLevel() int {
 	return player.xp / 100
 }
 
+func (player *Player) UseCredits(amount int) {
+	player.credits -= amount
+}
