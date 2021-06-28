@@ -1,4 +1,4 @@
-package game
+package match
 
 type Round struct {
 	id           string

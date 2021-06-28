@@ -1,4 +1,6 @@
-package game
+package match
+
+import "github.com/google/uuid"
 
 type MatchPhase string
 
@@ -20,7 +22,13 @@ type Match struct {
 }
 
 func NewMatch() Match {
-	return Match{}
+	return Match{
+		id: uuid.New().String(),
+	}
+}
+
+func (match *Match) GetID() string {
+	return match.id
 }
 
 func (match *Match) start() {

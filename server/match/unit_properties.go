@@ -1,4 +1,4 @@
-package game
+package match
 
 type UnitProperties struct {
 	UnitType  string

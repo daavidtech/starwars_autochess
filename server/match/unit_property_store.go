@@ -1,4 +1,4 @@
-package game
+package match
 
 type UnitPropertyStore struct {
 	units map[string]UnitProperties
