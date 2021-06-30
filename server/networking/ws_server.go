@@ -3,13 +3,15 @@ package networking
 import (
 	"log"
 	"net/http"
-	"time"
 
+	"github.com/daavidtech/starwars_autochess/game"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
 type WsServer struct {
+	UserRepository  game.UserRepository
+	GameCoordinator *game.GameCoordinator
 }
 
 func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
@@ -26,6 +28,36 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 
 	log.Println("New ws connection")
 
+	// ws.WriteJSON(MessageToClient{
+	// 	ShopRefilled: &ShopRefilled{
+	// 		ShopUnits: []ShopUnit{
+	// 			ShopUnit{
+	// 				UnitType: "unit_droid",
+	// 				Level:    3,
+	// 				HP:       200,
+	// 				Mana:     300,
+	// 				Rank:     3,
+	// 				Cost:     100,
+	// 			},
+	// 		},
+	// 	},
+	// })
+
+	user := wsServer.UserRepository.Fetch("1")
+
+	currentMatch := user.GetCurrentMatch()
+
+	if currentMatch == nil {
+		currentMatch = wsServer.GameCoordinator.FindNewMatch()
+		newPlayer := currentMatch.CreatePlayer()
+
+		user.SetCurrentPlayerID(newPlayer.GetID())
+		user.SetCurrentMatch(currentMatch)
+	}
+
+	matchID := currentMatch.GetID()
+	playerID := user.GetCurrentPlayerID()
+
 	// err = ws.WriteJSON(MessageToClient{
 	// 	CreateUnit: &CreateUnit{
 	// 		ID:       "1",
@@ -39,39 +71,132 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 	// 	log.Println("Failed to send json message", err)
 	// }
 
-	x := 0
+	// reqCtx := getReqCtx(ctx)
 
-	ws.WriteJSON(MessageToClient{
-		CreateUnit: &CreateUnit{
-			ID:       "1",
-			UnitType: "UNIT_DROID",
-			X:        x,
-			Y:        2,
-		},
-	})
+	// playerControls := game.PlayerControls{}
 
-	for {
-		ws.WriteJSON(MessageToClient{
-			ChangeUnitPosition: &ChangeUnitPosition{
-				ID: "1",
-				X:  x,
-			},
-		})
+	go func() {
+		for {
+			var msg MessageFromClient
 
-		timer := time.NewTimer(20 * time.Millisecond)
-		<-timer.C
+			err := ws.ReadJSON(&msg)
 
-		x += 2
+			if err != nil {
+				log.Printf("error while receiving %v", err)
+
+				break
+			}
+
+			log.Printf("received msg %v", msg)
+
+			if msg.BuyUnit != nil {
+				log.Printf("BuyUnit %v", msg.BuyUnit)
+
+				currentMatch.BuyUnit(playerID, 1)
+			}
+
+			if msg.PlaceUnit != nil {
+				log.Printf("PlaceUnit %v", msg.PlaceUnit)
+
+				currentMatch.PlaceUnit(playerID, msg.PlaceUnit.UnitID, msg.PlaceUnit.X, msg.PlaceUnit.Y)
+			}
+
+			if msg.SellUnit != nil {
+				log.Println("SellUnit")
+
+				currentMatch.SellUnit(playerID, msg.SellUnit.UnitID)
+			}
+
+			if msg.BuyLevelUp != nil {
+				log.Println("BuyLevelUp")
+				currentMatch.BuyLevelUp(playerID)
+			}
+
+			if msg.RecycleShopUnits != nil {
+				log.Println("RecycleShopUnit")
+				currentMatch.RecycleShopUnits(playerID)
+			}
+		}
+	}()
+
+	eventBroker := currentMatch.GetEventBroker()
+
+	ch := eventBroker.Subscribe(matchID)
+
+	for event := range ch {
+		log.Printf("Received event %v", event)
+
+		// if event.NewBarrackUnit != nil {
+
+		// }
+
+		if event.ShopRefilled != nil {
+			shopRefilled := ShopRefilled{}
+
+			for _, shopUnit := range event.ShopRefilled.ShopUnits {
+				shopRefilled.ShopUnits = append(shopRefilled.ShopUnits, ShopUnit{
+					UnitType: shopUnit.UnitType,
+				})
+			}
+
+			msg := MessageToClient{
+				ShopRefilled: &shopRefilled,
+			}
+
+			log.Printf("Sending message to client %v", msg)
+
+			ws.WriteJSON(msg)
+		}
+
+		if event.BarrackUnitAdded != nil {
+			unitAdded := UnitAdded{
+				UnitID:     event.BarrackUnitAdded.UnitID,
+				UnitType:   event.BarrackUnitAdded.UnitType,
+				Rank:       event.BarrackUnitAdded.Rank,
+				HP:         event.BarrackUnitAdded.HP,
+				Mana:       event.BarrackUnitAdded.Mana,
+				AttackRate: event.BarrackUnitAdded.AttackRate,
+			}
+
+			msg := MessageToClient{
+				UnitAdded: &unitAdded,
+			}
+
+			log.Printf("Seding unitAdded to client")
+
+			ws.WriteJSON(msg)
+		}
+
+		if event.BarrackUnitRemoved != nil {
+			unitRemoved := UnitRemoved{
+				UnitID: event.BarrackUnitRemoved.UnitID,
+			}
+
+			msg := MessageToClient{
+				UnitRemoved: &unitRemoved,
+			}
+
+			log.Println("Sending unitRemoved to client")
+
+			ws.WriteJSON(msg)
+		}
+
+		if event.BarrackUnitUpgraded != nil {
+			unitUpgraded := UnitUpgraded{
+				UnitID:     event.BarrackUnitAdded.UnitID,
+				Rank:       event.BarrackUnitAdded.Rank,
+				HP:         event.BarrackUnitAdded.HP,
+				Mana:       event.BarrackUnitAdded.Mana,
+				AttackRate: event.BarrackUnitAdded.AttackRate,
+			}
+
+			log.Println("Sending unitUpgraded to client")
+
+			ws.WriteJSON(MessageToClient{
+				UnitUpgraded: &unitUpgraded,
+			})
+		}
 	}
 
-	// for i := 0; i < 10; i++ {
-	// 	ws.WriteJSON(MessageToClient{
-	// 		CreateUnit: &CreateUnit{
-	// 			ID:       "1",
-	// 			UnitType: "UNIT_DROID",
-	// 			X:        20 * i,
-	// 			Y:        2,
-	// 		},
-	// 	})
-	// }
+	log.Println("Event broker subscription stopped")
 }

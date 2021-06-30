@@ -32,13 +32,17 @@ type GamePhaseChanged struct {
 	NewPhaseType GamePhase
 }
 
-type UnitBought struct {
+type UnitAdded struct {
 	UnitID     string `json:"unitId"`
 	UnitType   string `json:"unitType"`
 	Rank       int    `json:"rank"`
 	HP         int    `json:"hp"`
 	Mana       int    `json:"mana"`
 	AttackRate int    `json:"attackRate"`
+}
+
+type UnitRemoved struct {
+	UnitID string `json:"unitId"`
 }
 
 type UnitUpgraded struct {
@@ -142,7 +146,8 @@ type ShopRefilled struct {
 
 type MessageToClient struct {
 	GamePhaseChanged      *GamePhaseChanged      `json:"gamePhaseChanged"`
-	UnitBought            *UnitBought            `json:"unitBought"`
+	UnitAdded             *UnitAdded             `json:"unitAdded"`
+	UnitRemoved           *UnitRemoved           `json:"unitRemoved"`
 	UnitSold              *UnitSold              `json:"unitSold"`
 	UnitUpgraded          *UnitUpgraded          `json:"unitUpgraded"`
 	StartTimerTimeChanged *StartTimerTimeChanged `json:"startTimerTimeChanged"`

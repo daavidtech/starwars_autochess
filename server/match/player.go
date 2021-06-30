@@ -17,7 +17,11 @@ func NewPlayer() *Player {
 	}
 }
 
-func (player *Player) AddShopUnit(shopUnit ShopUnit) {
+func (player *Player) GetID() string {
+	return player.id
+}
+
+func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 	unitID := uuid.New().String()
 
 	count := player.countUnitType(shopUnit.UnitType, 1)
@@ -33,8 +37,21 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) {
 			attackRate: shopUnit.AttackRate,
 		}
 
-		return
+		return []MatchEvent{
+			MatchEvent{
+				BarrackUnitAdded: &BarrackUnitAdded{
+					UnitID:     unitID,
+					UnitType:   shopUnit.UnitType,
+					Rank:       1,
+					HP:         shopUnit.HP,
+					Mana:       shopUnit.Mana,
+					AttackRate: shopUnit.AttackRate,
+				},
+			},
+		}
 	}
+
+	events := []MatchEvent{}
 
 	removedCount := 0
 
@@ -46,6 +63,12 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) {
 		removedCount += 1
 
 		delete(player.battleUnits, unitID)
+
+		events = append(events, MatchEvent{
+			BarrackUnitRemoved: &BarrackUnitRemoved{
+				UnitID: unitID,
+			},
+		})
 	}
 
 	player.battleUnits[unitID] = &BattleUnit{
@@ -57,6 +80,20 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) {
 		mana:       shopUnit.Mana,
 		attackRate: shopUnit.AttackRate,
 	}
+
+	events = append(events, MatchEvent{
+		BarrackUnitUpgraded: &BarrackUnitUpgraded{
+			UnitID:     unitID,
+			UnitType:   shopUnit.UnitType,
+			Tier:       shopUnit.Tier,
+			Rank:       2,
+			HP:         shopUnit.HP,
+			Mana:       shopUnit.Mana,
+			AttackRate: shopUnit.AttackRate,
+		},
+	})
+
+	return events
 }
 
 func (player *Player) countUnitType(unitType string, rank int) int {

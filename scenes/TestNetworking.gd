@@ -1,6 +1,5 @@
 extends Node
 
-var GameState = preload("res://scenes/game_state.gd")
 var YourUnit = preload("res://scenes/your_unit.tscn")
 
 var ServerConnection = preload("res://scenes/server_connection.gd")
@@ -77,75 +76,72 @@ func _ready():
 	conn = ServerConnection.new()
 	conn.connect("new_message", self, "_handle_msg")
 	
-	game_state = GameState.new()
-	add_child(game_state)
+	add_child(conn)
 	
-	print(placement_area.shape.extents.x)
+#	game_state = GameState.new()
+#	add_child(game_state)
+#
+#	print(placement_area.shape.extents.x)
+#
+#	game_state.connect("create_unit", self, "_handle_create_unit")
+#	game_state.connect("unit_position_changed", self, "_handle_change_unit_position")
 	
-	game_state.connect("create_unit", self, "_handle_create_unit")
-	game_state.connect("unit_position_changed", self, "_handle_change_unit_position")
-	
-	load_thing("unit_clone")
-	
-	unit_shop.fill([{
-		"id": 1,
-		"unit_type": "unit_droid",
-		"level": 3,
-		"rank": 3,
-		"cost": 300
-	}, {
-		"id": 2,
-		"unit_type": "unit_clone",
-		"level": 2,
-		"rank": 1,
-		"cost": 420
-	}, {
-		"id": 3,
-		"unit_type": "unit_droid",
-		"level": 2,
-		"rank": 2,
-		"cost": 500
-	}])
+#	load_thing("unit_clone")
 	
 	unit_shop.connect("unit_bought", self, "_handle_unit_bought")
 
 func _handle_msg(msg):
-	if msg.has("gamePhaseChanged"):
+	print("handle_msg ", msg)
+	
+	if msg.gamePhaseChanged != null:
 		handle_game_phase_changed(msg.gamePhaseChanged)
-	if msg.has("unitBought"):
-		handle_unit_bought(msg.unitBought)
-	if msg.has("unitSold"):
+	if msg.unitAdded != null:
+		handle_unit_added(msg.unitAdded)
+	if msg.unitRemoved != null:
+		handle_unit_removed(msg.unitRemoved)
+	if msg.unitSold != null:
 		handle_unit_sold(msg.unitSold)
-	if msg.has("unitUpgraded"):
+	if msg.unitUpgraded != null:
 		handle_unit_upgraded(msg.unitUpgraded)
-	if msg.has("startTimerTimeChanged"):
+	if msg.startTimerTimeChanged != null:
 		pass
-	if msg.has("unitDied"):
+	if msg.unitDied != null:
 		handle_unit_died(msg.unitDied)
-	if msg.has("unitPlaced"):
+	if msg.unitPlaced != null:
 		handle_unit_placed(msg.unitPlaced)
-	if msg.has("unitTookDamage"):
+	if msg.unitTookDamage != null:
 		pass
-	if msg.has("unitUsedMana"):
+	if msg.unitUsedMana != null:
 		pass
-	if msg.has("unitUsedAbility"):
+	if msg.unitUsedAbility != null:
 		pass
-	if msg.has("unitStartedMovingTo"):
+	if msg.unitStartedMovingTo != null:
 		handle_unit_started_moving(msg.unitStartedMovingTo)
-	if msg.has("unitArrivedToPosition"):
+	if msg.unitArrivedToPosition != null:
 		handle_unit_arrived_to_position(msg.unitArrivedToPosition)
-	if msg.has("unitStartedAttacking"):
+	if msg.unitStartedAttacking != null:
 		handle_unit_started_attacking(msg["unitStartedAttacking"])
-	if msg.has("unitStoppedAttacking"):
+	if msg.unitStoppedAttacking != null:
 		handle_unit_stopped_attacking(msg["unitStoppedAttacking"])
-	if msg.has("launchParticle"):
+	if msg.launchParticle != null:
 		pass
-	if msg.has("playerMoneyChanged"):
+	if msg.playerMoneyChanged != null:
 		handle_player_money_changed(msg["playerMoneyChanged"])
-	if msg.has("playerLevelChanged"):
+	if msg.playerLevelChanged != null:
 		handle_player_level_changed(msg["playerLevelChanged"])
-	if msg.has("playerHealthChanged"):
+	if msg.playerHealthChanged != null:
 		handle_player_health_changed(msg["playerHealthChanged"])
+	if msg.shopRefilled != null:
+		handle_shop_refilled(msg["shopRefilled"])
+
+func handle_shop_refilled(shop_refilled):
+	unit_shop.fill(shop_refilled.shop_units)
+
+func handle_unit_took_damage(unit_took_damage):
+	if units.has(unit_took_damage.unitId):
+		var unit = units[unit_took_damage.unitId]
+		
+		unit.health -= unit_took_damage.amount
 
 func handle_unit_started_moving(unit_started_moving):
 	if units.has(unit_started_moving.unitId):
@@ -189,17 +185,21 @@ func handle_game_phase_changed(game_phase_changed):
 		"BattlePhase":
 			unit_shop.visible = false
 
-func handle_unit_bought(unit_bought):
+func handle_unit_added(unit_bought):
 	var new_unit = YourUnit.instance()
+	unit_barrack.add_unit(new_unit)
 	
-	new_unit.unit_id = unit_bought.unit_id
 	new_unit.unit_type 
 	new_unit.hp = unit_bought.hp
 	new_unit.mana = unit_bought.mana
 	new_unit.attack_rate = unit_bought.attackRate
 	
-	units[unit_bought.unit_id] = new_unit
-	unit_barrack.add_unit(new_unit)
+	units[unit_bought.unitId] = new_unit
+	
+func handle_unit_removed(unit_removed):
+	var unit = units[unit_removed.unitId]
+	
+	unit_barrack.remove_unit(unit)
 	
 func handle_unit_upgraded(unit_upgraded):
 	var unit = units[unit_upgraded.unit_id]
@@ -227,6 +227,12 @@ func handle_unit_placed(unit_placed):
 
 func _handle_unit_bought(unit):
 	print("unit bought ", unit)
+	
+	conn.send_msg({
+		"buyUnit": {
+			"shop_unit_id": 1
+		}
+	})
 
 func conv_coords(x: int, y: int) -> Vector3:
 	var size = placement_area.shape.extents
