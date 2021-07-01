@@ -86,6 +86,7 @@ func (eventBus *MatchEventBroker) Run() {
 				select {
 				case sub <- matchEvent:
 				default:
+					log.Println("Subscriber is lagging")
 				}
 			}
 		}
@@ -103,7 +104,7 @@ func (eventBus *MatchEventBroker) publishEvent(matchEvents ...MatchEvent) {
 func (eventBus *MatchEventBroker) Subscribe(matchID string) <-chan MatchEvent {
 	log.Println("MatchEventBroker Subscribe")
 
-	ch := make(chan MatchEvent)
+	ch := make(chan MatchEvent, 20)
 
 	eventBus.subch <- ch
 
