@@ -143,7 +143,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				ShopRefilled: &shopRefilled,
 			}
 
-			log.Printf("Sending message to client %v", msg)
+			log.Println("Sending shopRefilled to client")
 
 			ws.WriteJSON(msg)
 		}
@@ -162,7 +162,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				UnitAdded: &unitAdded,
 			}
 
-			log.Printf("Seding unitAdded to client")
+			log.Println("Seding unitAdded to client")
 
 			ws.WriteJSON(msg)
 		}
@@ -183,11 +183,11 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 
 		if event.BarrackUnitUpgraded != nil {
 			unitUpgraded := UnitUpgraded{
-				UnitID:     event.BarrackUnitAdded.UnitID,
-				Rank:       event.BarrackUnitAdded.Rank,
-				HP:         event.BarrackUnitAdded.HP,
-				Mana:       event.BarrackUnitAdded.Mana,
-				AttackRate: event.BarrackUnitAdded.AttackRate,
+				UnitID:     event.BarrackUnitUpgraded.UnitID,
+				Rank:       event.BarrackUnitUpgraded.Rank,
+				HP:         event.BarrackUnitUpgraded.HP,
+				Mana:       event.BarrackUnitUpgraded.Mana,
+				AttackRate: event.BarrackUnitUpgraded.AttackRate,
 			}
 
 			log.Println("Sending unitUpgraded to client")
