@@ -1,6 +1,8 @@
 package match
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Player struct {
 	id          string
@@ -22,13 +24,17 @@ func (player *Player) GetID() string {
 }
 
 func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
-	unitID := uuid.New().String()
-
 	count := player.countUnitType(shopUnit.UnitType, 1)
 
 	if count != 2 {
-		player.battleUnits[unitID] = &BattleUnit{
-			unitId:     unitID,
+		if player.IsBarrackFull() {
+			return []MatchEvent{}
+		}
+
+		newUnitID := uuid.New().String()
+
+		player.battleUnits[newUnitID] = &BattleUnit{
+			unitId:     newUnitID,
 			unitType:   shopUnit.UnitType,
 			tier:       shopUnit.Tier,
 			rank:       1,
@@ -40,7 +46,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 		return []MatchEvent{
 			MatchEvent{
 				BarrackUnitAdded: &BarrackUnitAdded{
-					UnitID:     unitID,
+					UnitID:     newUnitID,
 					UnitType:   shopUnit.UnitType,
 					Rank:       1,
 					HP:         shopUnit.HP,
@@ -53,14 +59,62 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 	events := []MatchEvent{}
 
-	removedCount := 0
+	count = player.countUnitType(shopUnit.UnitType, 2)
+
+	upgraded := false
+	removeTwoRanks := 0
+	removeOneRanks := 1
+	upgradeRank := 1
+
+	if count == 2 {
+		upgradeRank = 2
+		removeTwoRanks = 1
+		removeOneRanks = 2
+	}
 
 	for unitID, unit := range player.battleUnits {
-		if unit.unitType != shopUnit.UnitType && unit.rank != 1 || removedCount > 2 {
+		if unit.unitType != shopUnit.UnitType {
 			continue
 		}
 
-		removedCount += 1
+		if !upgraded && upgradeRank == unit.rank {
+			unit.rank += 1
+			unit.hp = shopUnit.HP
+			unit.mana = shopUnit.Mana
+			unit.attackRate = shopUnit.AttackRate
+
+			events = append(events, MatchEvent{
+				BarrackUnitUpgraded: &BarrackUnitUpgraded{
+					UnitID:     unitID,
+					UnitType:   shopUnit.UnitType,
+					Tier:       shopUnit.Tier,
+					Rank:       2,
+					HP:         shopUnit.HP,
+					Mana:       shopUnit.Mana,
+					AttackRate: shopUnit.AttackRate,
+				},
+			})
+
+			upgraded = true
+
+			continue
+		}
+
+		if unit.rank == 1 {
+			if removeOneRanks == 0 {
+				continue
+			}
+
+			removeOneRanks -= 1
+		}
+
+		if unit.rank == 2 {
+			if removeTwoRanks == 0 {
+				continue
+			}
+
+			removeTwoRanks -= 1
+		}
 
 		delete(player.battleUnits, unitID)
 
@@ -69,29 +123,8 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 				UnitID: unitID,
 			},
 		})
-	}
 
-	player.battleUnits[unitID] = &BattleUnit{
-		unitId:     unitID,
-		unitType:   shopUnit.UnitType,
-		tier:       shopUnit.Tier,
-		rank:       2,
-		hp:         shopUnit.HP,
-		mana:       shopUnit.Mana,
-		attackRate: shopUnit.AttackRate,
 	}
-
-	events = append(events, MatchEvent{
-		BarrackUnitUpgraded: &BarrackUnitUpgraded{
-			UnitID:     unitID,
-			UnitType:   shopUnit.UnitType,
-			Tier:       shopUnit.Tier,
-			Rank:       2,
-			HP:         shopUnit.HP,
-			Mana:       shopUnit.Mana,
-			AttackRate: shopUnit.AttackRate,
-		},
-	})
 
 	return events
 }
@@ -138,4 +171,8 @@ func (player *Player) GetLevel() int {
 
 func (player *Player) UseCredits(amount int) {
 	player.credits -= amount
+}
+
+func (player *Player) IsBarrackFull() bool {
+	return len(player.battleUnits) > 8
 }
