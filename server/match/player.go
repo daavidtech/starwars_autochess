@@ -1,6 +1,8 @@
 package match
 
 import (
+	"log"
+
 	"github.com/google/uuid"
 )
 
@@ -83,12 +85,14 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 			unit.mana = shopUnit.Mana
 			unit.attackRate = shopUnit.AttackRate
 
+			log.Printf("Unit %v upgraded to rank %v", unitID, unit.rank)
+
 			events = append(events, MatchEvent{
 				BarrackUnitUpgraded: &BarrackUnitUpgraded{
 					UnitID:     unitID,
 					UnitType:   shopUnit.UnitType,
 					Tier:       shopUnit.Tier,
-					Rank:       2,
+					Rank:       unit.rank,
 					HP:         shopUnit.HP,
 					Mana:       shopUnit.Mana,
 					AttackRate: shopUnit.AttackRate,
@@ -115,6 +119,12 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 			removeTwoRanks -= 1
 		}
+
+		if unit.rank == 3 {
+			continue
+		}
+
+		log.Println("Removing unit " + unitID)
 
 		delete(player.battleUnits, unitID)
 

@@ -237,3 +237,57 @@ func Test_cannot_upgrade_to_rank3_when_different_unit_type(t *testing.T) {
 		t.Error("Unit was not upgraded correctly")
 	}
 }
+
+func Test_upgrades_to_rank2_unit_when_there_is_rank3_unit(t *testing.T) {
+	player := Player{
+		battleUnits: map[string]*BattleUnit{
+			"1": &BattleUnit{
+				unitType: "unit_droid",
+				rank:     3,
+			},
+			"2": &BattleUnit{
+				unitType: "unit_droid",
+				rank:     1,
+			},
+			"3": &BattleUnit{
+				unitType: "unit_droid",
+				rank:     1,
+			},
+		},
+	}
+
+	events := player.AddShopUnit(ShopUnit{
+		UnitType: "unit_droid",
+	})
+
+	if len(events) != 2 {
+		t.Errorf("Invalid number of events %v", len(events))
+	}
+
+	units := player.getBattleUnits()
+
+	if len(units) != 2 {
+		t.Errorf("Invalid number of units %v", len(units))
+	}
+
+	rank3Unit := 0
+	rank2Unit := 0
+
+	for _, unit := range units {
+		if unit.rank == 2 {
+			rank2Unit += 1
+		}
+
+		if unit.rank == 3 {
+			rank3Unit += 1
+		}
+	}
+
+	if rank2Unit != 1 {
+		t.Errorf("Invalid number of rank2Units %v", rank2Unit)
+	}
+
+	if rank3Unit != 1 {
+		t.Errorf("Invalid number of rank3Units %v", rank3Unit)
+	}
+}
