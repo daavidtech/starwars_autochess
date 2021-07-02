@@ -78,7 +78,7 @@ func (eventBus *MatchEventBroker) Run() {
 
 			delete(subs, ch)
 		case matchEvent := <-eventBus.pubch:
-			log.Printf("Run publish matchEvent %v", matchEvent)
+			log.Printf("Run publish matchEvent")
 
 			for sub := range subs {
 				log.Println("Publishing event to subscriber")
