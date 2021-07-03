@@ -193,6 +193,7 @@ func handle_unit_added(unit_bought):
 	new_unit.hp = unit_bought.hp
 	new_unit.mana = unit_bought.mana
 	new_unit.attack_rate = unit_bought.attackRate
+	new_unit.rank = unit_bought.rank
 	
 	units[unit_bought.unitId] = new_unit
 	
@@ -200,13 +201,14 @@ func handle_unit_removed(unit_removed):
 	var unit = units[unit_removed.unitId]
 	
 	unit_barrack.remove_unit(unit)
+	units.erase(unit_removed.unitId)
 	
 func handle_unit_upgraded(unit_upgraded):
-	var unit = units[unit_upgraded.unit_id]
+	var unit = units[unit_upgraded.unitId]
 	
 	unit.hp = unit_upgraded.hp
 	unit.mana = unit_upgraded.mana
-	unit.attack_rate = unit_upgraded.attack_rate
+	unit.attack_rate = unit_upgraded.attackRate
 	unit.rank = unit_upgraded.rank
 	
 func handle_unit_sold(unit_sold):

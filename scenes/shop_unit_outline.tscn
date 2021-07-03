@@ -16,7 +16,6 @@ shape = SubResource( 1 )
 
 [node name="rank" parent="." instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.841179, -1.02561, -0.658988 )
-stars = 3
 
 [node name="level" parent="." instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.687164, -0.768097, 0.871133 )

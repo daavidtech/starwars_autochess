@@ -8,7 +8,7 @@ onready var cost = $cost
 signal unit_choosen(props)
 
 func _ready():
-	rank.stars = 3
+	rank.value = 3
 
 var properties
 
@@ -17,7 +17,7 @@ var mouse_over = false
 func set_properties(props):
 	properties = props
 	
-	rank.stars = props.rank
+	rank.value = props.rank
 	level.value = props.level
 	cost.value = props.cost
 

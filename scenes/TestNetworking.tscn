@@ -29,7 +29,7 @@ transform = Transform( -2.32424e-08, 0.846918, -0.531724, 3.702e-08, 0.531724, 0
 transform = Transform( 0.832979, 0.553304, 0, -0.553304, 0.832979, 0, 0, 0, 1, -9.20689, 14.2337, 0 )
 
 [node name="unit_barrack" parent="." instance=ExtResource( 4 )]
-transform = Transform( 0.670297, 0.742093, 0, -0.742093, 0.670297, 0, 0, 0, 1, -18.6243, 12.7863, 0 )
+transform = Transform( 0.46229, 0.886729, 0, -0.886729, 0.46229, 0, 0, 0, 1, -18.4827, 9.49489, -0.554922 )
 
 [node name="your_money" type="Label" parent="."]
 margin_left = 938.0

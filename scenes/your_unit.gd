@@ -1,6 +1,7 @@
 extends "res://scenes/unit.gd"
 
 onready var friendly_bars = $friendly_bars
+onready var rank_indicator = $rank
 	
 var unit_id: String
 
@@ -29,3 +30,11 @@ func set_mana(value: int):
 	
 func get_mana() -> int:
 	return friendly_bars.mana 
+
+export var rank: int setget set_rank, get_rank
+
+func set_rank(v: int):
+	rank_indicator.value = v
+
+func get_rank():
+	return rank_indicator.value
