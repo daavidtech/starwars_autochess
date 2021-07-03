@@ -60,6 +60,12 @@ func (match *Match) BuyUnit(playerID string, index int) {
 
 	player := match.players[playerID]
 
+	if player.IsBarrackFull() {
+		log.Println("Barrack is full")
+
+		return
+	}
+
 	events := player.AddShopUnit(ShopUnit{
 		UnitType:   "unit_droid",
 		Tier:       1,
