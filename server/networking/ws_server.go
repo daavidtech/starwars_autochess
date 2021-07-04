@@ -196,6 +196,14 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				UnitUpgraded: &unitUpgraded,
 			})
 		}
+
+		if event.PhaseChanged != nil {
+			ws.WriteJSON(MessageToClient{
+				MatchPhaseChanged: &MatchPhaseChanged{
+					MatchPhase: event.PhaseChanged.MatchPhase,
+				},
+			})
+		}
 	}
 
 	log.Println("Event broker subscription stopped")

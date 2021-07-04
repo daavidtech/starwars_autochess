@@ -1,5 +1,7 @@
 package networking
 
+import "github.com/daavidtech/starwars_autochess/match"
+
 type CreateUnit struct {
 	ID       string `json:"id"`
 	UnitType string `json:"unitType"`
@@ -28,8 +30,8 @@ const (
 	BattlePhase              = "BattlePhase"
 )
 
-type GamePhaseChanged struct {
-	NewPhaseType GamePhase
+type MatchPhaseChanged struct {
+	MatchPhase match.MatchPhase `json:"matchPhase"`
 }
 
 type UnitAdded struct {
@@ -145,7 +147,6 @@ type ShopRefilled struct {
 }
 
 type MessageToClient struct {
-	GamePhaseChanged      *GamePhaseChanged      `json:"gamePhaseChanged"`
 	UnitAdded             *UnitAdded             `json:"unitAdded"`
 	UnitRemoved           *UnitRemoved           `json:"unitRemoved"`
 	UnitSold              *UnitSold              `json:"unitSold"`
@@ -165,6 +166,7 @@ type MessageToClient struct {
 	PlayerLevelChanged    *PlayerLevelChanged    `json:"playerLevelChanged"`
 	PlayerHealthChanged   *PlayerHealthChanged   `json:"playerHealthChanged"`
 	ShopRefilled          *ShopRefilled          `json:"shopRefilled"`
+	MatchPhaseChanged     *MatchPhaseChanged     `json:"matchPhaseChanged"`
 }
 
 type BuyUnit struct {

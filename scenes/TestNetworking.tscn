@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://scenes/TestNetworking.gd" type="Script" id=1]
 [ext_resource path="res://assets/arena/arena.glb" type="PackedScene" id=2]
 [ext_resource path="res://scenes/unit_shop.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/unit_barrack.tscn" type="PackedScene" id=4]
 [ext_resource path="res://fonts/new_dynamicfont.tres" type="DynamicFont" id=5]
+[ext_resource path="res://scenes/lobby_ui.tscn" type="PackedScene" id=6]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 9.09594, 0.001, 10.5745 )
@@ -63,3 +64,9 @@ text = "5"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="lobby" parent="." instance=ExtResource( 6 )]
+margin_left = -347.0
+margin_top = 55.0
+margin_right = 434.0
+margin_bottom = 574.0

@@ -12,7 +12,8 @@ import (
 type MatchPhase string
 
 const (
-	Lobby          MatchPhase = "Lobby"
+	InitPhase      MatchPhase = "InitPhase"
+	LobbyPhase     MatchPhase = "LobbyPhase"
 	ShoppingPhase  MatchPhase = "ShoppingPhase"
 	PlacementPhase MatchPhase = "PlacementPhase"
 	BattlePhase    MatchPhase = "BattlePhase"
@@ -45,6 +46,7 @@ func NewMatch(ctx context.Context) *Match {
 		id:          uuid.New().String(),
 		eventBroker: eventBroker,
 		players:     make(map[string]*Player),
+		phase:       InitPhase,
 	}
 }
 
@@ -93,6 +95,10 @@ func (match *Match) RecycleShopUnits(playerID string) {
 
 }
 
+func (match *Match) CreateSnapshop() MatchSnapshot {
+	return MatchSnapshot{}
+}
+
 func (match *Match) CreatePlayer() *Player {
 	newPlayer := NewPlayer()
 
@@ -118,7 +124,29 @@ func (match *Match) IsFull() bool {
 }
 
 func (match *Match) Run() {
-	<-time.NewTimer(1 * time.Second).C
+	<-time.NewTimer(500 * time.Millisecond).C
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PhaseChanged: &PhaseChanged{
+			MatchPhase: InitPhase,
+		},
+	})
+
+	<-time.NewTimer(2 * time.Second).C
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PhaseChanged: &PhaseChanged{
+			MatchPhase: LobbyPhase,
+		},
+	})
+
+	<-time.NewTimer(2 * time.Second).C
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PhaseChanged: &PhaseChanged{
+			MatchPhase: ShoppingPhase,
+		},
+	})
 
 	log.Printf("Refilling shop")
 
@@ -127,6 +155,12 @@ func (match *Match) Run() {
 			ShopUnits: []ShopUnit{
 				ShopUnit{
 					UnitType: "unit_clone",
+				},
+				ShopUnit{
+					UnitType: "unit_clone",
+				},
+				ShopUnit{
+					UnitType: "unit_droid",
 				},
 			},
 		},

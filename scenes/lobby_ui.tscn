@@ -39,9 +39,19 @@ func remove_player(player_id: String):
 anchor_left = 0.5
 anchor_right = 0.5
 margin_left = -512.0
-margin_right = 512.0
-margin_bottom = 600.0
+margin_right = 316.0
+margin_bottom = 517.0
 script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 778.0
+margin_bottom = 475.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 0.443137, 0.443137, 0.443137, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

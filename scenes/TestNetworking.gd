@@ -12,6 +12,7 @@ onready var unit_barrack = $unit_barrack
 onready var your_health = $your_health
 onready var your_level = $your_level
 onready var your_money = $your_money
+onready var lobby = $lobby
 
 var units = {}
 var placement_units = {}
@@ -78,6 +79,13 @@ func _ready():
 	
 	add_child(conn)
 	
+	lobby.visible = false
+	your_money.visible = false
+	your_health.visible = false
+	your_level.visible = false
+	unit_shop.visible = false
+	unit_barrack.visible = false
+	
 #	game_state = GameState.new()
 #	add_child(game_state)
 #
@@ -93,8 +101,8 @@ func _ready():
 func _handle_msg(msg):
 	print("handle_msg ", msg)
 	
-	if msg.gamePhaseChanged != null:
-		handle_game_phase_changed(msg.gamePhaseChanged)
+	if msg.matchPhaseChanged != null:
+		handle_game_phase_changed(msg.matchPhaseChanged.matchPhase)
 	if msg.unitAdded != null:
 		handle_unit_added(msg.unitAdded)
 	if msg.unitRemoved != null:
@@ -178,12 +186,41 @@ func handle_player_health_changed(player_health_changed):
 
 func handle_game_phase_changed(game_phase_changed):
 	match game_phase_changed:
-		"BuyingPhase":
+		"InitPhase":
+			lobby.visible = false
+			your_money.visible = false
+			your_health.visible = false
+			your_level.visible = false
+			unit_shop.visible = false
+			unit_barrack.visible = false
+		"LobbyPhase":
+			lobby.visible = true
+			your_money.visible = false
+			your_health.visible = false
+			your_level.visible = false
+			unit_shop.visible = false
+			unit_barrack.visible = false
+		"ShoppingPhase":
+			lobby.visible = false
+			your_money.visible = true
+			your_health.visible = true
+			your_level.visible = true
 			unit_shop.visible = true
+			unit_barrack.visible = true
 		"PlacementPhase":
+			lobby.visible = false
+			your_money.visible = true
+			your_health.visible = true
+			your_level.visible = true
 			unit_shop.visible = false
+			unit_barrack.visible = true
 		"BattlePhase":
+			lobby.visible = false
+			your_money.visible = true
+			your_health.visible = true
+			your_level.visible = true
 			unit_shop.visible = false
+			unit_barrack.visible = true
 
 func handle_unit_added(unit_bought):
 	var new_unit = YourUnit.instance()
