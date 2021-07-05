@@ -134,6 +134,7 @@ type PlayerHealthChanged struct {
 }
 
 type ShopUnit struct {
+	ID       int    `json:"id"`
 	UnitType string `json:"unit_type"`
 	Level    int    `json:"level"`
 	HP       int    `json:"hp"`
@@ -142,8 +143,17 @@ type ShopUnit struct {
 	Cost     int    `json:"cost"`
 }
 
+type ShopUnitRemoved struct {
+	ShopUnitID int `json:"shopUnitId"`
+}
+
 type ShopRefilled struct {
 	ShopUnits []ShopUnit `json:"shop_units"`
+}
+
+type CountdownStarted struct {
+	StartValue int     `json:"startValue"`
+	Interval   float32 `json:"interval"`
 }
 
 type MessageToClient struct {
@@ -165,12 +175,15 @@ type MessageToClient struct {
 	PlayerMoneyChanged    *PlayerMoneyChanged    `json:"playerMoneyChanged"`
 	PlayerLevelChanged    *PlayerLevelChanged    `json:"playerLevelChanged"`
 	PlayerHealthChanged   *PlayerHealthChanged   `json:"playerHealthChanged"`
+	ShopUnitRemoved       *ShopUnitRemoved       `json:"shopUnitRemoved"`
 	ShopRefilled          *ShopRefilled          `json:"shopRefilled"`
-	MatchPhaseChanged     *MatchPhaseChanged     `json:"matchPhaseChanged"`
+	CountdownStarted      *CountdownStarted      `json:"countdownStarted"`
+
+	MatchPhaseChanged *MatchPhaseChanged `json:"matchPhaseChanged"`
 }
 
 type BuyUnit struct {
-	ShopUnitID string `json:"shopUnitId"`
+	ShopUnitIndex int `json:"shopUnitIndex"`
 }
 
 type PlaceUnit struct {

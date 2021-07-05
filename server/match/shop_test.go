@@ -44,7 +44,10 @@ func TestChoosesThirdTier(t *testing.T) {
 
 func TestPicksOneUnit(t *testing.T) {
 	shop := Shop{
-		units: []ShopUnit{ShopUnit{UnitType: "unit_clone"}, ShopUnit{UnitType: "unit_droid"}},
+		units: map[int]ShopUnit{
+			1: ShopUnit{UnitType: "unit_clone"},
+			2: ShopUnit{UnitType: "unit_droid"},
+		},
 	}
 
 	if shop.GetUnitsCount() != 2 {

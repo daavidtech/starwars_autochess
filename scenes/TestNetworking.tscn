@@ -70,3 +70,18 @@ margin_left = -347.0
 margin_top = 55.0
 margin_right = 434.0
 margin_bottom = 574.0
+
+[node name="CountDownLabel" type="Label" parent="."]
+margin_left = 23.0
+margin_top = 85.0
+margin_right = 83.0
+margin_bottom = 127.0
+custom_fonts/font = ExtResource( 5 )
+text = "5"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CountdownTimer" type="Timer" parent="."]
+
+[connection signal="timeout" from="CountdownTimer" to="." method="_on_CountdownTimer_timeout"]

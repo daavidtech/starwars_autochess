@@ -9,6 +9,9 @@ import (
 type GameCoordinator struct {
 	ctx     context.Context
 	matches map[string]*match.Match
+
+	UnitPropertyStore *match.UnitPropertyStore
+	TierProbabilities *match.TierProbabilities
 }
 
 func NewGameCoordinator(ctx context.Context) *GameCoordinator {
@@ -28,6 +31,9 @@ func (gameCoordinator *GameCoordinator) FindNewMatch() *match.Match {
 	}
 
 	newMatch := match.NewMatch(gameCoordinator.ctx)
+
+	newMatch.UnitPropertyStore = gameCoordinator.UnitPropertyStore
+	newMatch.TierProbabilities = gameCoordinator.TierProbabilities
 
 	go newMatch.Run()
 

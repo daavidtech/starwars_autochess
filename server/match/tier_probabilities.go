@@ -11,6 +11,9 @@ func NewTierProbabilities(probabilities [][]int) TierProbabilities {
 }
 
 func (t *TierProbabilities) PickLevel(level int) []int {
+	if level < 1 || level > 9 {
+		return []int{}
+	}
 
-	return []int{}
+	return t.probabilities[level-1]
 }

@@ -92,7 +92,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 			if msg.BuyUnit != nil {
 				log.Printf("BuyUnit %v", msg.BuyUnit)
 
-				currentMatch.BuyUnit(playerID, 1)
+				currentMatch.BuyUnit(playerID, msg.BuyUnit.ShopUnitIndex)
 			}
 
 			if msg.PlaceUnit != nil {
@@ -131,11 +131,19 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 		// }
 
 		if event.ShopRefilled != nil {
-			shopRefilled := ShopRefilled{}
+			shopRefilled := ShopRefilled{
+				ShopUnits: []ShopUnit{},
+			}
 
 			for _, shopUnit := range event.ShopRefilled.ShopUnits {
 				shopRefilled.ShopUnits = append(shopRefilled.ShopUnits, ShopUnit{
+					ID:       shopUnit.ID,
 					UnitType: shopUnit.UnitType,
+					Level:    shopUnit.Level,
+					HP:       shopUnit.HP,
+					Mana:     shopUnit.Mana,
+					Rank:     shopUnit.Rank,
+					Cost:     shopUnit.Cost,
 				})
 			}
 
@@ -146,6 +154,25 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 			log.Println("Sending shopRefilled to client")
 
 			ws.WriteJSON(msg)
+		}
+
+		if event.CountdownStarted != nil {
+			ws.WriteJSON(MessageToClient{
+				CountdownStarted: &CountdownStarted{
+					StartValue: event.CountdownStarted.StartValue,
+					Interval:   event.CountdownStarted.Interval,
+				},
+			})
+		}
+
+		if event.ShopUnitRemoved != nil {
+			log.Println("Sending shop unit removed")
+
+			ws.WriteJSON(MessageToClient{
+				ShopUnitRemoved: &ShopUnitRemoved{
+					ShopUnitID: event.ShopUnitRemoved.ShopUnitID,
+				},
+			})
 		}
 
 		if event.BarrackUnitAdded != nil {

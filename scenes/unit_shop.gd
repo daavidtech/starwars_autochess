@@ -10,6 +10,9 @@ func _ready():
 	pass # Replace with function body.
 	
 func fill(units):
+	if units.size() == 0:
+		return
+	
 	var size = shape.shape.extents
 	
 	var start_x = -size.x
@@ -17,6 +20,8 @@ func fill(units):
 	
 	var one_width = (size.x * 2) / units.size()
 	var one_half_width = one_width / 2
+	
+	var index = 0
 	
 	for unit in units:
 		print("adding to shop ", unit.unit_type)
@@ -26,7 +31,10 @@ func fill(units):
 		var outline = ShopUnitOutline.instance()
 		shape.add_child(outline)
 		
-		outline.set_properties(unit)
+		outline.id = unit.id
+		outline.level = unit.level
+		outline.rank = unit.rank
+		outline.cost = unit.cost
 		
 		outline.translation.z = start_x + one_half_width
 		outline.connect("unit_choosen", self, "handle_unit_choosen")
@@ -37,7 +45,11 @@ func fill(units):
 		
 		outline.set_content(model)
 
-func handle_unit_choosen(props):
-	print("handle_unit_choosen ", props)
-	
-	emit_signal("unit_bought", props)
+func remove_unit(id: int):
+	for child in shape.get_children():
+		if child.id == id:
+			shape.remove_child(child)
+			break
+
+func handle_unit_choosen(index):
+	emit_signal("unit_bought", index)

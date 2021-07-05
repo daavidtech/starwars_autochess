@@ -2,7 +2,11 @@ extends "res://scenes/unit.gd"
 
 onready var friendly_bars = $friendly_bars
 onready var rank_indicator = $rank
+onready var place_holder = $PlaceHolder
 	
+func _ready():
+	place_holder.visible = false	
+
 var unit_id: String
 
 var _unit_type: String
@@ -11,6 +15,10 @@ export var unit_type: String setget set_unit_type, get_unit_type
 
 func set_unit_type(t: String):
 	_unit_type = t
+	
+	var path = "res://assets/" + _unit_type + "/" + _unit_type + ".glb"
+	var model = ResourceLoader.load(path).instance()
+	add_child(model)
 	
 func get_unit_type() -> String:
 	return _unit_type

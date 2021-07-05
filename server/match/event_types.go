@@ -34,6 +34,15 @@ type PhaseChanged struct {
 	MatchPhase MatchPhase
 }
 
+type ShopUnitRemoved struct {
+	ShopUnitID int
+}
+
+type CountdownStarted struct {
+	StartValue int
+	Interval   float32
+}
+
 type MatchEvent struct {
 	UnitBought          *UnitBought
 	BarrackUnitAdded    *BarrackUnitAdded
@@ -41,4 +50,6 @@ type MatchEvent struct {
 	BarrackUnitUpgraded *BarrackUnitUpgraded
 	ShopRefilled        *ShopRefilled
 	PhaseChanged        *PhaseChanged
+	ShopUnitRemoved     *ShopUnitRemoved
+	CountdownStarted    *CountdownStarted
 }

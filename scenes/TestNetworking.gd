@@ -13,6 +13,10 @@ onready var your_health = $your_health
 onready var your_level = $your_level
 onready var your_money = $your_money
 onready var lobby = $lobby
+onready var countdown_label = $CountDownLabel
+onready var countdown_timer = $CountdownTimer
+
+var countdown_time: int
 
 var units = {}
 var placement_units = {}
@@ -79,6 +83,7 @@ func _ready():
 	
 	add_child(conn)
 	
+	countdown_label.visible = false
 	lobby.visible = false
 	your_money.visible = false
 	your_health.visible = false
@@ -141,9 +146,24 @@ func _handle_msg(msg):
 		handle_player_health_changed(msg["playerHealthChanged"])
 	if msg.shopRefilled != null:
 		handle_shop_refilled(msg["shopRefilled"])
+	if msg.shopUnitRemoved != null:
+		handle_shop_unit_removed(msg["shopUnitRemoved"])
+	if msg.countdownStarted != null:
+		handle_countdown_started(msg.countdownStarted)
+		
+func handle_countdown_started(countdown_started):
+	countdown_label.visible = true
+	
+	countdown_time = countdown_started.startValue
+	countdown_label.text = String(countdown_time)
+	countdown_timer.wait_time = countdown_started.interval
+	countdown_timer.start()	
 
 func handle_shop_refilled(shop_refilled):
 	unit_shop.fill(shop_refilled.shop_units)
+
+func handle_shop_unit_removed(shop_unit_removed):
+	unit_shop.remove_unit(shop_unit_removed.shopUnitId)
 
 func handle_unit_took_damage(unit_took_damage):
 	if units.has(unit_took_damage.unitId):
@@ -222,17 +242,19 @@ func handle_game_phase_changed(game_phase_changed):
 			unit_shop.visible = false
 			unit_barrack.visible = true
 
-func handle_unit_added(unit_bought):
+func handle_unit_added(unit_added):
+	print("Unit added " + unit_added.unitType)
+		
 	var new_unit = YourUnit.instance()
 	unit_barrack.add_unit(new_unit)
 	
-	new_unit.unit_type 
-	new_unit.hp = unit_bought.hp
-	new_unit.mana = unit_bought.mana
-	new_unit.attack_rate = unit_bought.attackRate
-	new_unit.rank = unit_bought.rank
+	new_unit.unit_type = unit_added.unitType
+	new_unit.hp = unit_added.hp
+	new_unit.mana = unit_added.mana
+	new_unit.attack_rate = unit_added.attackRate
+	new_unit.rank = unit_added.rank
 	
-	units[unit_bought.unitId] = new_unit
+	units[unit_added.unitId] = new_unit
 	
 func handle_unit_removed(unit_removed):
 	var unit = units[unit_removed.unitId]
@@ -264,12 +286,12 @@ func handle_unit_placed(unit_placed):
 	pass
 
 
-func _handle_unit_bought(unit):
-	print("unit bought ", unit)
+func _handle_unit_bought(index):
+	print("unit bought ", index)
 	
 	conn.send_msg({
 		"buyUnit": {
-			"shop_unit_id": 1
+			"shopUnitIndex": index
 		}
 	})
 
@@ -301,3 +323,16 @@ func conv_coords(x: int, y: int) -> Vector3:
 #	var unit = unit_map.get(id)
 #
 #	move_to_point(unit, x, y)
+
+
+func _on_CountdownTimer_timeout():
+	if countdown_time < 1:
+		countdown_timer.stop()
+		countdown_label.visible = false
+	
+	countdown_time -= 1
+	
+	countdown_label.text = String(countdown_time)
+	
+	if countdown_time < 1:
+		countdown_timer.start(0.2)

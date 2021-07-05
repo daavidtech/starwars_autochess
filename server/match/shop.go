@@ -5,19 +5,22 @@ import (
 )
 
 type ShopUnit struct {
+	ID         int
 	UnitType   string
-	Tier       int
+	Level      int
 	HP         int
 	Mana       int
+	Rank       int
+	Cost       int
 	AttackRate int
 }
 
 type Shop struct {
 	size  int
-	units []ShopUnit
+	units map[int]ShopUnit
 
-	tierProbabilities TierProbabilities
-	unitPropertyStore UnitPropertyStore
+	TierProbabilities *TierProbabilities
+	UnitPropertyStore *UnitPropertyStore
 }
 
 func (shop *Shop) SetSize(s int) {
@@ -25,38 +28,71 @@ func (shop *Shop) SetSize(s int) {
 
 }
 
-func CreateShop() Shop {
-	return Shop{}
-}
-
-func (shop *Shop) Fill(level int) {
-	shop.units = []ShopUnit{}
-
-	for i := 0; i < shop.size; i++ {
-		probabilities := shop.tierProbabilities.PickLevel(level)
-
-		tier := chooseRandomTier(probabilities)
-
-		unit := shop.unitPropertyStore.ChooseRandomUnitFromTier(tier)
-
-		shop.units = append(shop.units, ShopUnit{
-			UnitType: unit.UnitType,
-		})
+func NewShop() *Shop {
+	return &Shop{
+		units: make(map[int]ShopUnit),
 	}
 }
 
+func (shop *Shop) Fill(level int) ShopRefilled {
+	shop.units = make(map[int]ShopUnit)
+
+	shopRefilled := ShopRefilled{
+		ShopUnits: []ShopUnit{},
+	}
+
+	if shop.TierProbabilities == nil {
+		return shopRefilled
+	}
+
+	if shop.UnitPropertyStore == nil {
+		return shopRefilled
+	}
+
+	if shop.UnitPropertyStore.CountUnits() == 0 {
+		return shopRefilled
+	}
+
+	for i := 0; i < shop.size; i++ {
+		id := i + 1
+
+		probabilities := shop.TierProbabilities.PickLevel(level)
+
+		tier := chooseRandomTier(probabilities)
+
+		unit := shop.UnitPropertyStore.ChooseRandomUnitFromTier(tier)
+
+		shopUnit := ShopUnit{
+			ID:       id,
+			UnitType: unit.UnitType,
+		}
+
+		shop.units[id] = shopUnit
+
+		shopRefilled.ShopUnits = append(shopRefilled.ShopUnits, shopUnit)
+	}
+
+	return shopRefilled
+}
+
 func (shop *Shop) GetUnits() []ShopUnit {
-	return shop.units
+	shopUnits := []ShopUnit{}
+
+	for _, unit := range shop.units {
+		shopUnits = append(shopUnits, unit)
+	}
+
+	return shopUnits
 }
 
 func (shop *Shop) GetUnitsCount() int {
 	return len(shop.units)
 }
 
-func (shop *Shop) Pick(index int) ShopUnit {
-	unit := shop.units[index]
+func (shop *Shop) Pick(id int) ShopUnit {
+	unit := shop.units[id]
 
-	shop.units = append(shop.units[:index], shop.units[index+1:]...)
+	delete(shop.units, id)
 
 	return unit
 }

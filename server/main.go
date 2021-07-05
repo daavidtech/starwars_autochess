@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/daavidtech/starwars_autochess/game"
+	"github.com/daavidtech/starwars_autochess/match"
 	"github.com/daavidtech/starwars_autochess/networking"
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +14,30 @@ func main() {
 
 	ctx := context.Background()
 
+	unitPropertyStore := match.NewUnitPropertyStore()
+
+	unitPropertyStore.SaveUnit(match.UnitProperties{
+		UnitType: "unit_droid",
+		Tier:     1,
+		Cost:     20,
+	})
+
+	unitPropertyStore.SaveUnit(match.UnitProperties{
+		UnitType: "unit_clone",
+		Tier:     1,
+		Cost:     65,
+	})
+
+	tierProbabilities := match.NewTierProbabilities([][]int{
+		[]int{
+			100,
+		},
+	})
+
 	gameCoordinator := game.NewGameCoordinator(ctx)
+
+	gameCoordinator.UnitPropertyStore = &unitPropertyStore
+	gameCoordinator.TierProbabilities = &tierProbabilities
 
 	userRepo := game.NewUserRepository()
 

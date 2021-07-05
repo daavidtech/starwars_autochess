@@ -13,11 +13,17 @@ type Player struct {
 	accepted    bool
 	xp          int
 	battleUnits map[string]*BattleUnit
+	shop        *Shop
 }
 
 func NewPlayer() *Player {
+	shop := NewShop()
+
+	shop.SetSize(5)
+
 	return &Player{
 		battleUnits: make(map[string]*BattleUnit),
+		shop:        shop,
 	}
 }
 
@@ -36,9 +42,9 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 		newUnitID := uuid.New().String()
 
 		player.battleUnits[newUnitID] = &BattleUnit{
-			unitId:     newUnitID,
-			unitType:   shopUnit.UnitType,
-			tier:       shopUnit.Tier,
+			unitId:   newUnitID,
+			unitType: shopUnit.UnitType,
+			//tier:       shopUnit.Tier,
 			rank:       1,
 			hp:         shopUnit.HP,
 			mana:       shopUnit.Mana,
@@ -89,9 +95,9 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 			events = append(events, MatchEvent{
 				BarrackUnitUpgraded: &BarrackUnitUpgraded{
-					UnitID:     unitID,
-					UnitType:   shopUnit.UnitType,
-					Tier:       shopUnit.Tier,
+					UnitID:   unitID,
+					UnitType: shopUnit.UnitType,
+					//Tier:       shopUnit.Tier,
 					Rank:       unit.rank,
 					HP:         shopUnit.HP,
 					Mana:       shopUnit.Mana,
@@ -176,7 +182,11 @@ func (player *Player) AddXP(amount int) {
 }
 
 func (player *Player) GetLevel() int {
-	return player.xp / 100
+	if player.xp == 0 {
+		return 1
+	}
+
+	return player.xp/100 + 1
 }
 
 func (player *Player) UseCredits(amount int) {

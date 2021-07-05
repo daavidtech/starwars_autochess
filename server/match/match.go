@@ -27,8 +27,8 @@ type Match struct {
 	phase              MatchPhase
 	players            map[string]*Player
 
-	shop              Shop
-	TierProbabilities TierProbabilities
+	TierProbabilities *TierProbabilities
+	UnitPropertyStore *UnitPropertyStore
 
 	eventBroker *MatchEventBroker
 
@@ -54,11 +54,9 @@ func (match *Match) GetEventBroker() *MatchEventBroker {
 	return match.eventBroker
 }
 
-func (match *Match) BuyUnit(playerID string, index int) {
+func (match *Match) BuyUnit(playerID string, id int) {
 	match.mu.Lock()
 	defer match.mu.Unlock()
-
-	// match.shop.Pick(1)
 
 	player := match.players[playerID]
 
@@ -68,12 +66,14 @@ func (match *Match) BuyUnit(playerID string, index int) {
 		return
 	}
 
-	events := player.AddShopUnit(ShopUnit{
-		UnitType:   "unit_droid",
-		Tier:       1,
-		HP:         100,
-		Mana:       100,
-		AttackRate: 1,
+	shopUnit := player.shop.Pick(id)
+
+	events := player.AddShopUnit(shopUnit)
+
+	events = append(events, MatchEvent{
+		ShopUnitRemoved: &ShopUnitRemoved{
+			ShopUnitID: id,
+		},
 	})
 
 	match.eventBroker.publishEvent(events...)
@@ -102,6 +102,9 @@ func (match *Match) CreateSnapshop() MatchSnapshot {
 func (match *Match) CreatePlayer() *Player {
 	newPlayer := NewPlayer()
 
+	newPlayer.shop.UnitPropertyStore = match.UnitPropertyStore
+	newPlayer.shop.TierProbabilities = match.TierProbabilities
+
 	match.players[newPlayer.GetID()] = newPlayer
 
 	return newPlayer
@@ -123,6 +126,34 @@ func (match *Match) IsFull() bool {
 	return len(match.players) > 7
 }
 
+func (match *Match) moveToShoppingPhase() {
+	match.mu.Lock()
+	defer match.mu.Unlock()
+
+	match.phase = ShoppingPhase
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PhaseChanged: &PhaseChanged{
+			MatchPhase: ShoppingPhase,
+		},
+	})
+
+	for _, player := range match.players {
+		shopRefilled := player.shop.Fill(player.GetLevel())
+
+		match.eventBroker.publishEvent(MatchEvent{
+			ShopRefilled: &shopRefilled,
+		})
+	}
+
+	match.eventBroker.publishEvent(MatchEvent{
+		CountdownStarted: &CountdownStarted{
+			StartValue: 10,
+			Interval:   1.0,
+		},
+	})
+}
+
 func (match *Match) Run() {
 	<-time.NewTimer(500 * time.Millisecond).C
 
@@ -140,31 +171,43 @@ func (match *Match) Run() {
 		},
 	})
 
-	<-time.NewTimer(2 * time.Second).C
-
 	match.eventBroker.publishEvent(MatchEvent{
-		PhaseChanged: &PhaseChanged{
-			MatchPhase: ShoppingPhase,
+		CountdownStarted: &CountdownStarted{
+			StartValue: 2,
+			Interval:   1.0,
 		},
 	})
+
+	<-time.NewTimer(2 * time.Second).C
 
 	log.Printf("Refilling shop")
 
-	match.eventBroker.publishEvent(MatchEvent{
-		ShopRefilled: &ShopRefilled{
-			ShopUnits: []ShopUnit{
-				ShopUnit{
-					UnitType: "unit_clone",
-				},
-				ShopUnit{
-					UnitType: "unit_clone",
-				},
-				ShopUnit{
-					UnitType: "unit_droid",
-				},
-			},
-		},
-	})
+	match.moveToShoppingPhase()
+
+	// match.eventBroker.publishEvent(MatchEvent{
+	// 	ShopRefilled: &ShopRefilled{
+	// 		ShopUnits: []ShopUnit{
+	// 			ShopUnit{
+	// 				UnitType: "unit_clone",
+	// 				Rank:     1,
+	// 				Cost:     60,
+	// 				Level:    1,
+	// 			},
+	// 			ShopUnit{
+	// 				UnitType: "unit_clone",
+	// 				Rank:     1,
+	// 				Cost:     100,
+	// 				Level:    1,
+	// 			},
+	// 			ShopUnit{
+	// 				UnitType: "unit_droid",
+	// 				Rank:     1,
+	// 				Cost:     120,
+	// 				Level:    1,
+	// 			},
+	// 		},
+	// 	},
+	// })
 
 	for {
 		select {
