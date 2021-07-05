@@ -145,11 +145,37 @@ func (match *Match) moveToShoppingPhase() {
 			ShopRefilled: &shopRefilled,
 		})
 	}
+}
+
+func (match *Match) moveToPlacementPhase() {
+	match.mu.Lock()
+	defer match.mu.Unlock()
+
+	match.phase = PlacementPhase
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PhaseChanged: &PhaseChanged{
+			MatchPhase: PlacementPhase,
+		},
+	})
 
 	match.eventBroker.publishEvent(MatchEvent{
 		CountdownStarted: &CountdownStarted{
 			StartValue: 10,
 			Interval:   1.0,
+		},
+	})
+}
+
+func (match *Match) moveToBattlePhase() {
+	match.mu.Lock()
+	defer match.mu.Unlock()
+
+	match.phase = BattlePhase
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PhaseChanged: &PhaseChanged{
+			MatchPhase: BattlePhase,
 		},
 	})
 }
@@ -178,41 +204,30 @@ func (match *Match) Run() {
 		},
 	})
 
-	<-time.NewTimer(2 * time.Second).C
+	select {
+	case <-time.NewTimer(2 * time.Second).C:
+	case <-match.ctx.Done():
+		return
+	}
 
 	log.Printf("Refilling shop")
 
-	match.moveToShoppingPhase()
-
-	// match.eventBroker.publishEvent(MatchEvent{
-	// 	ShopRefilled: &ShopRefilled{
-	// 		ShopUnits: []ShopUnit{
-	// 			ShopUnit{
-	// 				UnitType: "unit_clone",
-	// 				Rank:     1,
-	// 				Cost:     60,
-	// 				Level:    1,
-	// 			},
-	// 			ShopUnit{
-	// 				UnitType: "unit_clone",
-	// 				Rank:     1,
-	// 				Cost:     100,
-	// 				Level:    1,
-	// 			},
-	// 			ShopUnit{
-	// 				UnitType: "unit_droid",
-	// 				Rank:     1,
-	// 				Cost:     120,
-	// 				Level:    1,
-	// 			},
-	// 		},
-	// 	},
-	// })
-
 	for {
-		select {
-		case <-match.ctx.Done():
-			return
-		}
+		match.moveToShoppingPhase()
+
+		match.eventBroker.publishEvent(MatchEvent{
+			CountdownStarted: &CountdownStarted{
+				StartValue: 10,
+				Interval:   1.0,
+			},
+		})
+
+		<-time.NewTimer(10 * time.Second).C
+
+		match.moveToPlacementPhase()
+
+		<-time.NewTimer(10 * time.Second).C
+
+		match.moveToBattlePhase()
 	}
 }
