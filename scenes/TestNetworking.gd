@@ -15,6 +15,7 @@ onready var your_money = $your_money
 onready var lobby = $lobby
 onready var countdown_label = $CountDownLabel
 onready var countdown_timer = $CountdownTimer
+onready var game_phase_label = $GamePhaseLabel
 
 var countdown_time: int
 
@@ -205,8 +206,10 @@ func handle_player_health_changed(player_health_changed):
 	your_health.text = String(player_health_changed.newHp)
 
 func handle_game_phase_changed(game_phase_changed):
+	game_phase_label.text = game_phase_changed
+	
 	match game_phase_changed:
-		"InitPhase":
+		"InitPhase":			
 			lobby.visible = false
 			your_money.visible = false
 			your_health.visible = false
