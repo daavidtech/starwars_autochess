@@ -62,7 +62,7 @@ func load_thing(type: String):
 	add_child(i)
 	
 	i.move_speed = 5;
-	i.start_move(conv_coords(50, 50))
+	i.start_move(conv_server_coords(50, 50))
 	
 
 func move_to_point(u, x: int, y: int):
@@ -88,17 +88,6 @@ func move_to_point(u, x: int, y: int):
 	u.translation.x = translation_x
 	u.translation.z = translation_z
 	u.translation.y = placement_area.translation.y
-
-func trans_to_server_coord(z, x):
-	var size = placement_area.shape.extents
-	
-	var z_ratio = width / (size.z * 2)
-	var x_ratio = heigth / (size.x * 2)
-	
-	return {
-		"x": round(abs(size.z + z) * z_ratio),
-		"y": round(abs(size.x + x) * x_ratio)
-	}
 	
 func _ready():
 	conn = ServerConnection.new()
@@ -137,12 +126,12 @@ func _handle_msg(msg):
 		handle_unit_sold(msg.unitSold)
 	if msg.unitUpgraded != null:
 		handle_unit_upgraded(msg.unitUpgraded)
+	if msg.unitPlaced != null:
+		handle_unit_placed(msg.unitPlaced)
 	if msg.startTimerTimeChanged != null:
 		pass
 	if msg.unitDied != null:
 		handle_unit_died(msg.unitDied)
-	if msg.unitPlaced != null:
-		handle_unit_placed(msg.unitPlaced)
 	if msg.unitTookDamage != null:
 		pass
 	if msg.unitUsedMana != null:
@@ -196,13 +185,13 @@ func handle_unit_started_moving(unit_started_moving):
 	if units.has(unit_started_moving.unitId):
 		var unit = units[unit_started_moving.unitId]
 		
-		unit.start_moving(conv_coords(unit_started_moving.x, unit_started_moving.y))
+		unit.start_moving(conv_server_coords(unit_started_moving.x, unit_started_moving.y))
 	
 func handle_unit_arrived_to_position(unit_arrived):
 	if units.has(unit_arrived.unitId):
 		var unit = units[unit_arrived.unitId]
 		
-		unit.move_to_position(conv_coords(unit_arrived.x, unit_arrived.y))
+		unit.move_to_position(conv_server_coords(unit_arrived.x, unit_arrived.y))
 
 func handle_unit_started_attacking(unit_started_attacking):
 	if units.has(unit_started_attacking.unitId):
@@ -265,6 +254,14 @@ func handle_game_phase_changed(game_phase_changed):
 			your_level.visible = true
 			unit_shop.visible = false
 			unit_barrack.visible = true
+			
+			if placing_unit != null:
+				dragging_area.remove_child(placing_unit)
+				unit_barrack.add_unit(placing_unit)
+				
+				placing_unit.location = "barrack"
+				placing_unit.dragging = false
+				placing_unit = null
 
 func handle_unit_added(unit_added):
 	print("Unit added " + unit_added.unitType)
@@ -307,6 +304,13 @@ func handle_unit_upgraded(unit_upgraded):
 	unit.attack_rate = unit_upgraded.attackRate
 	unit.rank = unit_upgraded.rank
 	
+func handle_unit_placed(unit_placed):
+	var unit = units[unit_placed.unitId]
+	
+	var new_translation = conv_server_coords(unit_placed.x, unit_placed.y)
+	
+	unit.translation = new_translation
+
 func handle_unit_sold(unit_sold):
 	if units.has(unit_sold.unitId):
 		var unit = units[unit_sold.unitId]
@@ -318,10 +322,6 @@ func handle_unit_died(unit_died):
 		var unit = units[unit_died.unitId]
 		
 		placement_area.remove_child(unit)
-	
-func handle_unit_placed(unit_placed):
-	pass
-
 
 func _handle_unit_bought(index):
 	print("unit bought ", index)
@@ -332,19 +332,30 @@ func _handle_unit_bought(index):
 		}
 	})
 
-func conv_coords(x: int, y: int) -> Vector3:
+func conv_server_coords(x: int, y: int) -> Vector3:
 	var size = placement_area.shape.extents
 	
 	var start_x = -size.x
 	var start_y = -size.z
 	
-	var x_ratio = size.z / width
-	var y_ratio = size.x / heigth
+	var z_ratio = (size.z * 2) / width
+	var x_ratio = (size.x * 2) / heigth
 	
-	var convz = start_x + x_ratio * x
-	var convx = start_y + y_ratio * y
+	var z_conv = x * z_ratio - size.z
+	var x_conv = y * x_ratio - size.x
 	
-	return Vector3(convx, placement_area.translation.y, convz)
+	return Vector3(x_conv, placement_area.translation.y, z_conv)
+
+func trans_to_server_coord(z, x):
+	var size = placement_area.shape.extents
+	
+	var z_ratio = width / (size.z * 2)
+	var x_ratio = heigth / (size.x * 2)
+	
+	return {
+		"x": round(abs(size.z + z) * z_ratio),
+		"y": round(abs(size.x + x) * x_ratio)
+	}
 
 func _unhandled_input(event):
 	if placing_unit != null and event is InputEventMouseMotion:
@@ -361,6 +372,7 @@ func _unhandled_input(event):
 		if collision:			
 			placing_unit.translation.x = collision.position.x
 			placing_unit.translation.z = collision.position.z
+			placing_unit.translation.y = collision.position.y
 
 
 func _on_drag_started(unit):
@@ -408,6 +420,8 @@ func _on_drag_finished(unit):
 			}
 		})
 	else:
+		unit.location = "barrack"		
+		
 		dragging_area.remove_child(placing_unit)
 		unit_barrack.add_unit(placing_unit)
 		
