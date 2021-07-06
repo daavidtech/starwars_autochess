@@ -15,13 +15,12 @@ func _ready():
 func add_unit(unit):
 	var size = shape.shape.extents
 	
-	var start_x = -size.z
-	var start_y = -size.z
+	var start_z = -size.z
 	
 	var one_width = (size.z * 2) / 9
 	var one_half_width = one_width / 2
 	
-	print("add_unit to barrack")
+	print("add_unit " + unit.unit_id + " to barrack")
 	
 	for i in range(9):
 		if index_unit.has(i):
@@ -30,15 +29,20 @@ func add_unit(unit):
 		index_unit[i] = unit
 		unit_index[unit] = i
 		
-		var x = start_x + one_width * i + one_half_width
+		var z = start_z + one_width * i + one_half_width
 		
 		shape.add_child(unit)
-		unit.translation.z = x
+
+		unit.translation.x = 0
+		unit.translation.y = shape.translation.y		
+		unit.translation.z = z
 		unit.rotation.z = -62
 		
 		break
 
 func remove_unit(unit):
+	print("Removing unit " + unit.unit_id + " from barrack")
+	
 	var index = unit_index[unit]
 	index_unit.erase(index)
 	unit_index.erase(unit) 
