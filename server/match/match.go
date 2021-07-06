@@ -84,7 +84,25 @@ func (match *Match) SellUnit(playerID string, unitID string) {
 }
 
 func (match *Match) PlaceUnit(playerID string, unitID string, x int, y int) {
+	match.mu.Lock()
+	defer match.mu.Unlock()
 
+	player := match.players[playerID]
+
+	unit := player.battleUnits[unitID]
+
+	unit.placement = &Placement{
+		x: x,
+		y: y,
+	}
+
+	match.eventBroker.publishEvent(MatchEvent{
+		UnitPlaced: &UnitPlaced{
+			UnitID: unitID,
+			X:      x,
+			Y:      y,
+		},
+	})
 }
 
 func (match *Match) BuyLevelUp(playerID string) {

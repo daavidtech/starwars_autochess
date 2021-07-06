@@ -224,6 +224,18 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 			})
 		}
 
+		if event.UnitPlaced != nil {
+			unitPlaced := UnitPlaced{
+				UnitID: event.UnitPlaced.UnitID,
+				X:      event.UnitPlaced.X,
+				Y:      event.UnitPlaced.Y,
+			}
+
+			ws.WriteJSON(MessageToClient{
+				UnitPlaced: &unitPlaced,
+			})
+		}
+
 		if event.PhaseChanged != nil {
 			ws.WriteJSON(MessageToClient{
 				MatchPhaseChanged: &MatchPhaseChanged{

@@ -68,10 +68,9 @@ type UnitDied struct {
 }
 
 type UnitPlaced struct {
-	UintID   string `json:"unitId"`
-	UnitType string `json:"unitType"`
-	X        int    `json:"x"`
-	Y        int    `json:"y"`
+	UnitID string `json:"unitId"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
 }
 
 type UnitStartedMovingTo struct {
