@@ -187,9 +187,9 @@ type BuyUnit struct {
 }
 
 type PlaceUnit struct {
-	UnitID string
-	X      int
-	Y      int
+	UnitID string `json:"unitId"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
 }
 
 type SellUnit struct {

@@ -89,6 +89,17 @@ func move_to_point(u, x: int, y: int):
 	u.translation.z = translation_z
 	u.translation.y = placement_area.translation.y
 
+func trans_to_server_coord(z, x):
+	var size = placement_area.shape.extents
+	
+	var z_ratio = width / (size.z * 2)
+	var x_ratio = heigth / (size.x * 2)
+	
+	return {
+		"x": round(abs(size.z + z) * z_ratio),
+		"y": round(abs(size.x + x) * x_ratio)
+	}
+	
 func _ready():
 	conn = ServerConnection.new()
 	conn.connect("new_message", self, "_handle_msg")
@@ -261,6 +272,7 @@ func handle_unit_added(unit_added):
 	var new_unit = YourUnit.instance()
 	unit_barrack.add_unit(new_unit)
 	
+	new_unit.unit_id = unit_added.unitId
 	new_unit.unit_type = unit_added.unitType
 	new_unit.hp = unit_added.hp
 	new_unit.mana = unit_added.mana
@@ -359,7 +371,7 @@ func _on_drag_started(unit):
 			unit_barrack.remove_unit(unit)
 		
 		if unit.location == "battlefield":
-			placement_area.remove_unit(unit)
+			placement_area.remove_child(unit)
 			
 		dragging_area.add_child(unit)
 		unit.dragging = true
@@ -385,6 +397,16 @@ func _on_drag_finished(unit):
 		placing_unit.translation.z = collision.position.z
 		
 		unit.location = "battlefield"
+		
+		var server_coord = trans_to_server_coord(collision.position.z, collision.position.x)
+		
+		conn.send_msg({
+			"placeUnit": {
+				"unitId": unit.unit_id,
+				"x": server_coord.x,
+				"y": server_coord.y
+			}
+		})
 	else:
 		dragging_area.remove_child(placing_unit)
 		unit_barrack.add_unit(placing_unit)

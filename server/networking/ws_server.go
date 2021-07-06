@@ -96,7 +96,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 			}
 
 			if msg.PlaceUnit != nil {
-				log.Printf("PlaceUnit %v", msg.PlaceUnit)
+				log.Printf("PlaceUnit %v to %v:%v", msg.PlaceUnit.UnitID, msg.PlaceUnit.X, msg.PlaceUnit.Y)
 
 				currentMatch.PlaceUnit(playerID, msg.PlaceUnit.UnitID, msg.PlaceUnit.X, msg.PlaceUnit.Y)
 			}
