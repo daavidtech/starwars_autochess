@@ -12,6 +12,9 @@ func _ready():
 func fill(units):
 	if units.size() == 0:
 		return
+		
+	for child in shape.get_children():
+		shape.remove_child(child)
 	
 	var size = shape.shape.extents
 	
