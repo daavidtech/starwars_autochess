@@ -13,6 +13,4 @@ func set_stars(v: int):
 	label.text = text
 
 func get_stars():
-	print("get_stars ", label.text, " ", label.text.length())
-	
 	return label.text.length()
