@@ -95,8 +95,6 @@ func handle_option_clicked(opt):
 	
 	set_gold(gold - opt.cost)
 
-
-
 	
 func start_game():
 	allow_dragging = false
