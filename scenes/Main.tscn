@@ -1,75 +1,108 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://scenes/GameMap.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/Main.gd" type="Script" id=2]
-[ext_resource path="res://scenes/picking_screen/PickingOptions.tscn" type="PackedScene" id=3]
-[ext_resource path="res://scenes/barrack/UnitBarrack.tscn" type="PackedScene" id=4]
-[ext_resource path="res://scenes/picking_screen/PickingUi.tscn" type="PackedScene" id=5]
-[ext_resource path="res://fonts/new_dynamicfont.tres" type="DynamicFont" id=6]
-[ext_resource path="res://assets/arena/arena.glb" type="PackedScene" id=7]
+[ext_resource path="res://scenes/main.gd" type="Script" id=1]
+[ext_resource path="res://fonts/new_dynamicfont.tres" type="DynamicFont" id=2]
+[ext_resource path="res://scenes/unit_shop.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/lobby_ui.tscn" type="PackedScene" id=4]
+[ext_resource path="res://assets/arena/arena.glb" type="PackedScene" id=5]
+[ext_resource path="res://scenes/unit_barrack.tscn" type="PackedScene" id=6]
 
-[node name="Main" type="Spatial"]
-script = ExtResource( 2 )
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 9.09594, 0.001, 10.5745 )
 
-[node name="PickingUi" parent="." instance=ExtResource( 5 )]
-margin_left = 36.0
-margin_top = 0.0
-margin_right = -804.0
-margin_bottom = -489.0
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 50, 0, 50 )
 
-[node name="Map" parent="." instance=ExtResource( 1 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.578236, 0 )
+[node name="Spatial" type="Spatial"]
+script = ExtResource( 1 )
+
+[node name="arena" parent="." instance=ExtResource( 5 )]
+transform = Transform( 0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0 )
+
+[node name="StaticBody" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.29591, 0 )
+collision_layer = 16
+collision_mask = 0
+
+[node name="PlacementArea" type="CollisionShape" parent="StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.251892, 0 )
+shape = SubResource( 1 )
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( -0.00925767, 0.960535, -0.278006, -0.000308698, 0.278015, 0.960577, 0.999957, 0.00897853, -0.00227726, -6.059, 17.3673, 0.0971999 )
+transform = Transform( -2.32424e-08, 0.846918, -0.531724, 3.702e-08, 0.531724, 0.846918, 1, -1.59872e-14, -4.37114e-08, -19.5022, 25.0761, -0.338867 )
 
-[node name="PickingOptions" parent="." instance=ExtResource( 3 )]
-transform = Transform( 0.27727, 0.416079, 0, -0.416079, 0.27727, 0, 0, 0, 0.5, -1.42168, 10.0365, 0.196697 )
+[node name="unit_shop" parent="." instance=ExtResource( 3 )]
+transform = Transform( 0.832979, 0.553304, 0, -0.553304, 0.832979, 0, 0, 0, 1, -9.20689, 14.2337, 0 )
 
-[node name="UnitBarrack" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.69865, 0.960815, -0.0567195 )
+[node name="unit_barrack" parent="." instance=ExtResource( 6 )]
+transform = Transform( 0.46229, 0.886729, 0, -0.886729, 0.46229, 0, 0, 0, 1, -17.8087, 6.19634, -0.554922 )
 
-[node name="SetupTimer" type="Timer" parent="."]
-
-[node name="NewRoundTimer" type="Timer" parent="."]
-wait_time = 3.0
-one_shot = true
-
-[node name="SetupTimerText" type="Label" parent="."]
-margin_left = 769.0
-margin_top = 171.0
-margin_right = 831.0
-margin_bottom = 207.0
-text = "3"
+[node name="your_money" type="Label" parent="."]
+margin_left = 938.0
+margin_top = 2.0
+margin_right = 1022.0
+margin_bottom = 46.0
+custom_fonts/font = ExtResource( 2 )
+text = "400"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="GameEndText" type="Label" parent="."]
-visible = false
-margin_left = 399.0
-margin_top = 81.0
-margin_right = 638.0
-margin_bottom = 122.0
-custom_fonts/font = ExtResource( 6 )
-text = "Peli loopus lolw"
+[node name="your_health" type="Label" parent="."]
+margin_left = 940.0
+margin_top = 43.0
+margin_right = 1000.0
+margin_bottom = 85.0
+custom_fonts/font = ExtResource( 2 )
+text = "100"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CurrentCold" type="Label" parent="."]
-margin_left = 891.0
-margin_top = 12.0
-margin_right = 1007.0
-margin_bottom = 72.0
-custom_fonts/font = ExtResource( 6 )
-text = "1000"
+[node name="your_level" type="Label" parent="."]
+margin_left = 974.0
+margin_top = 170.0
+margin_right = 1019.0
+margin_bottom = 212.0
+custom_fonts/font = ExtResource( 2 )
+text = "5"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="arena" parent="." instance=ExtResource( 7 )]
-transform = Transform( 0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, -0.523969, 0 )
+[node name="lobby" parent="." instance=ExtResource( 4 )]
+margin_left = -347.0
+margin_top = 55.0
+margin_right = 434.0
+margin_bottom = 574.0
 
-[connection signal="timeout" from="SetupTimer" to="." method="_on_SetupTimer_timeout"]
-[connection signal="timeout" from="NewRoundTimer" to="." method="_on_NewRoundTimer_timeout"]
+[node name="CountDownLabel" type="Label" parent="."]
+margin_left = 23.0
+margin_top = 85.0
+margin_right = 83.0
+margin_bottom = 127.0
+custom_fonts/font = ExtResource( 2 )
+text = "5"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CountdownTimer" type="Timer" parent="."]
+
+[node name="GamePhaseLabel" type="Label" parent="."]
+margin_left = 417.0
+margin_right = 493.0
+margin_bottom = 51.0
+custom_fonts/font = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StaticBody2" type="StaticBody" parent="."]
+collision_layer = 32
+collision_mask = 0
+
+[node name="DraggingArea" type="CollisionShape" parent="StaticBody2"]
+shape = SubResource( 2 )
+
+[connection signal="timeout" from="CountdownTimer" to="." method="_on_CountdownTimer_timeout"]

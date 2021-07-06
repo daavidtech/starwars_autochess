@@ -1,208 +1,458 @@
 extends Spatial
 
-var GameCoordinator = preload("res://scripts/GameCoordinator.gd")
-var Droid = preload("res://scenes/droid/Droid.tscn")
+var YourUnit = preload("res://scenes/your_unit.tscn")
 
-onready var picking_options = $PickingOptions
-onready var unit_barrack = $UnitBarrack
-onready var picking_ui = $PickingUi
+var ServerConnection = preload("res://scenes/server_connection.gd")
 
-onready var setup_timer = $SetupTimer
-onready var new_round_timer = $NewRoundTimer
+signal unit_choosen
 
-onready var setup_timer_text = $SetupTimerText
-onready var gold_remaining_text = $CurrentCold
+onready var placement_area = $StaticBody/PlacementArea
+onready var dragging_area = $StaticBody2/DraggingArea
+onready var unit_shop = $unit_shop
+onready var unit_barrack = $unit_barrack
+onready var your_health = $your_health
+onready var your_level = $your_level
+onready var your_money = $your_money
+onready var lobby = $lobby
+onready var countdown_label = $CountDownLabel
+onready var countdown_timer = $CountdownTimer
+onready var game_phase_label = $GamePhaseLabel
 
-onready var game_end_text = $GameEndText
+var placing_unit = null
 
-var game_coordinator = null
+var game_phase
 
-export var gold = 40
+var countdown_time: int
 
-var health = 100
+enum LocationType {
+	Barrack,
+	BattleField,
+	Placing
+}
 
-var start_ticks = 10
+var units = {}
+var placement_units = {}
 
-var setup_stage = false
+var width = 100
+var heigth = 100
 
-var dragging_unit = null
+var game_state
 
-var allow_dragging = false
+var conn
 
-var units = []
-var battle_units = []
+func load_thing(type: String):
+#	var path = "res://assets/exported/"
+#
+#	path += type + "/" + type + ".gltf"
+	
+	var path = "res://scenes/your_unit.tscn"
+	
+	print("Loading resource from ", path)
+	
+	var does_exists = ResourceLoader.has(path)
+	
+	print("does_exists " + String(does_exists))
+	
+	var Droid = ResourceLoader.load(path)
+	
+	var i = Droid.instance()
+	
+	i.translation.y = placement_area.translation.y
+	
+	add_child(i)
+	
+	i.move_speed = 5;
+	i.start_move(conv_server_coords(50, 50))
+	
 
+func move_to_point(u, x: int, y: int):
+	print("move_to ", x, " y ", y)
+	
+	var size = placement_area.shape.extents
+	
+	var start_x = -size.x
+	var start_y = -size.z
+	
+	print("start_x ", start_x)
+	print("start_y ", start_y)
+	
+	var x_ratio = size.z / game_state.width
+	var y_ratio = size.x / game_state.height
+	
+	var translation_z = start_x + x_ratio * x
+	var translation_x = start_y + y_ratio * y
+	
+	print("translation_x ", translation_x)
+	print("translation_z ", translation_z)
+	
+	u.translation.x = translation_x
+	u.translation.z = translation_z
+	u.translation.y = placement_area.translation.y
+	
 func _ready():
-	picking_options.connect("option_clicked", self, "handle_option_clicked")
-	picking_ui.connect("start_game_clicked", self, "on_game_start")
-	unit_barrack.connect("on_drag_started", self, "on_drag_started")
+	conn = ServerConnection.new()
+	conn.connect("new_message", self, "_handle_msg")
 	
-	game_coordinator = GameCoordinator.new()
+	add_child(conn)
 	
-	game_coordinator.connect("someone_won", self, "on_someone_won")
+	countdown_label.visible = false
+	lobby.visible = false
+	your_money.visible = false
+	your_health.visible = false
+	your_level.visible = false
+	unit_shop.visible = false
+	unit_barrack.visible = false
 	
-	gold_remaining_text.text = String(gold)
+#	game_state = GameState.new()
+#	add_child(game_state)
+#
+#	print(placement_area.shape.extents.x)
+#
+#	game_state.connect("create_unit", self, "_handle_create_unit")
+#	game_state.connect("unit_position_changed", self, "_handle_change_unit_position")
 	
-func on_someone_won(team):
-	print("Someone won")
+#	load_thing("unit_clone")
 	
-	if game_end_text:
-		game_end_text.visible = true
-		if team == 1:	
-			game_end_text.text = "You win"
-		else:
-			game_end_text.text = "Enemy won"
+	unit_shop.connect("unit_bought", self, "_handle_unit_bought")
+
+func _handle_msg(msg):	
+	if msg.matchPhaseChanged != null:
+		handle_game_phase_changed(msg.matchPhaseChanged.matchPhase)
+	if msg.unitAdded != null:
+		handle_unit_added(msg.unitAdded)
+	if msg.unitRemoved != null:
+		handle_unit_removed(msg.unitRemoved)
+	if msg.unitSold != null:
+		handle_unit_sold(msg.unitSold)
+	if msg.unitUpgraded != null:
+		handle_unit_upgraded(msg.unitUpgraded)
+	if msg.unitPlaced != null:
+		handle_unit_placed(msg.unitPlaced)
+	if msg.startTimerTimeChanged != null:
+		pass
+	if msg.unitDied != null:
+		handle_unit_died(msg.unitDied)
+	if msg.unitTookDamage != null:
+		pass
+	if msg.unitUsedMana != null:
+		pass
+	if msg.unitUsedAbility != null:
+		pass
+	if msg.unitStartedMovingTo != null:
+		handle_unit_started_moving(msg.unitStartedMovingTo)
+	if msg.unitArrivedToPosition != null:
+		handle_unit_arrived_to_position(msg.unitArrivedToPosition)
+	if msg.unitStartedAttacking != null:
+		handle_unit_started_attacking(msg["unitStartedAttacking"])
+	if msg.unitStoppedAttacking != null:
+		handle_unit_stopped_attacking(msg["unitStoppedAttacking"])
+	if msg.launchParticle != null:
+		pass
+	if msg.playerMoneyChanged != null:
+		handle_player_money_changed(msg["playerMoneyChanged"])
+	if msg.playerLevelChanged != null:
+		handle_player_level_changed(msg["playerLevelChanged"])
+	if msg.playerHealthChanged != null:
+		handle_player_health_changed(msg["playerHealthChanged"])
+	if msg.shopRefilled != null:
+		handle_shop_refilled(msg["shopRefilled"])
+	if msg.shopUnitRemoved != null:
+		handle_shop_unit_removed(msg["shopUnitRemoved"])
+	if msg.countdownStarted != null:
+		handle_countdown_started(msg.countdownStarted)
+		
+func handle_countdown_started(countdown_started):
+	countdown_label.visible = true
+	
+	countdown_time = countdown_started.startValue
+	countdown_label.text = String(countdown_time)
+	countdown_timer.wait_time = countdown_started.interval
+	countdown_timer.start()	
+
+func handle_shop_refilled(shop_refilled):
+	unit_shop.fill(shop_refilled.shop_units)
+
+func handle_shop_unit_removed(shop_unit_removed):
+	unit_shop.remove_unit(shop_unit_removed.shopUnitId)
+
+func handle_unit_took_damage(unit_took_damage):
+	if units.has(unit_took_damage.unitId):
+		var unit = units[unit_took_damage.unitId]
+		
+		unit.health -= unit_took_damage.amount
+
+func handle_unit_started_moving(unit_started_moving):
+	if units.has(unit_started_moving.unitId):
+		var unit = units[unit_started_moving.unitId]
+		
+		unit.start_moving(conv_server_coords(unit_started_moving.x, unit_started_moving.y))
+	
+func handle_unit_arrived_to_position(unit_arrived):
+	if units.has(unit_arrived.unitId):
+		var unit = units[unit_arrived.unitId]
+		
+		unit.move_to_position(conv_server_coords(unit_arrived.x, unit_arrived.y))
+
+func handle_unit_started_attacking(unit_started_attacking):
+	if units.has(unit_started_attacking.unitId):
+		var unit = units[unit_started_attacking.unitId]
+		
+		unit.attacking = true
+
+func handle_unit_stopped_attacking(unit_stopped_attacking):
+	if units.has(unit_stopped_attacking.unit):
+		var unit = units[unit_stopped_attacking.unit]
+		
+		unit.attacking = false
+
+func handle_player_money_changed(your_money_changed):
+	your_money.text = String(your_money_changed.newMoney)
+
+func handle_player_level_changed(player_level_changed):
+	your_level.text = String(player_level_changed.newLevel)
+
+func handle_player_health_changed(player_health_changed):
+	your_health.text = String(player_health_changed.newHp)
+
+func handle_game_phase_changed(game_phase_changed):
+	game_phase_label.text = game_phase_changed
+	game_phase = game_phase_changed
+	
+	match game_phase_changed:
+		"InitPhase":			
+			lobby.visible = false
+			your_money.visible = false
+			your_health.visible = false
+			your_level.visible = false
+			unit_shop.visible = false
+			unit_barrack.visible = false
+		"LobbyPhase":
+			lobby.visible = true
+			your_money.visible = false
+			your_health.visible = false
+			your_level.visible = false
+			unit_shop.visible = false
+			unit_barrack.visible = false
+		"ShoppingPhase":
+			lobby.visible = false
+			your_money.visible = true
+			your_health.visible = true
+			your_level.visible = true
+			unit_shop.visible = true
+			unit_barrack.visible = true
+		"PlacementPhase":
+			lobby.visible = false
+			your_money.visible = true
+			your_health.visible = true
+			your_level.visible = true
+			unit_shop.visible = false
+			unit_barrack.visible = true
+		"BattlePhase":
+			lobby.visible = false
+			your_money.visible = true
+			your_health.visible = true
+			your_level.visible = true
+			unit_shop.visible = false
+			unit_barrack.visible = true
 			
-	handle_round_end()
+			if placing_unit != null:
+				dragging_area.remove_child(placing_unit)
+				unit_barrack.add_unit(placing_unit)
+				
+				placing_unit.location = "barrack"
+				placing_unit.dragging = false
+				placing_unit = null
+
+func handle_unit_added(unit_added):
+	print("Unit added " + unit_added.unitType)
+		
+	var new_unit = YourUnit.instance()
+	unit_barrack.add_unit(new_unit)
 	
-func _physics_process(delta):
-	if dragging_unit != null:
-		if Input.is_action_just_released("left_mouse_button"):
-			dragging_unit = null
-		else:
-			move_to_mouse_position(dragging_unit)
+	new_unit.unit_id = unit_added.unitId
+	new_unit.unit_type = unit_added.unitType
+	new_unit.hp = unit_added.hp
+	new_unit.mana = unit_added.mana
+	new_unit.attack_rate = unit_added.attackRate
+	new_unit.rank = unit_added.rank
+	new_unit.location = "barrack"
+	
+	units[unit_added.unitId] = new_unit
+	
+	new_unit.connect("drag_started", self, "_on_drag_started")
+	new_unit.connect("drag_finished", self, "_on_drag_finished")
+	
+func handle_unit_removed(unit_removed):
+	var unit = units[unit_removed.unitId]
+	
+	if unit.location == "placing":
+		dragging_area.remove_child(unit)
+	
+	if unit.location == "barrack":
+		unit_barrack.remove_unit(unit)
+		
+	if unit.location == "battlefield":
+		placement_area.remove_child(unit)
+	
+	units.erase(unit_removed.unitId)
+	
+func handle_unit_upgraded(unit_upgraded):
+	var unit = units[unit_upgraded.unitId]
+	
+	unit.hp = unit_upgraded.hp
+	unit.mana = unit_upgraded.mana
+	unit.attack_rate = unit_upgraded.attackRate
+	unit.rank = unit_upgraded.rank
+	
+func handle_unit_placed(unit_placed):
+	var unit = units[unit_placed.unitId]
+	
+	var new_translation = conv_server_coords(unit_placed.x, unit_placed.y)
+	
+	unit.translation = new_translation
+
+func handle_unit_sold(unit_sold):
+	if units.has(unit_sold.unitId):
+		var unit = units[unit_sold.unitId]
+		
+		unit_barrack.remove_unit(unit)
+	
+func handle_unit_died(unit_died):
+	if units.has(unit_died.unitId):
+		var unit = units[unit_died.unitId]
+		
+		placement_area.remove_child(unit)
+
+func _handle_unit_bought(index):
+	print("unit bought ", index)
+	
+	conn.send_msg({
+		"buyUnit": {
+			"shopUnitIndex": index
+		}
+	})
+
+func conv_server_coords(x: int, y: int) -> Vector3:
+	var size = placement_area.shape.extents
+	
+	var start_x = -size.x
+	var start_y = -size.z
+	
+	var z_ratio = (size.z * 2) / width
+	var x_ratio = (size.x * 2) / heigth
+	
+	var z_conv = x * z_ratio - size.z
+	var x_conv = y * x_ratio - size.x
+	
+	return Vector3(x_conv, placement_area.translation.y, z_conv)
+
+func trans_to_server_coord(z, x):
+	var size = placement_area.shape.extents
+	
+	var z_ratio = width / (size.z * 2)
+	var x_ratio = heigth / (size.x * 2)
+	
+	return {
+		"x": round(abs(size.z + z) * z_ratio),
+		"y": round(abs(size.x + x) * x_ratio)
+	}
+
+func _unhandled_input(event):
+	if placing_unit != null and event is InputEventMouseMotion:
+		var viewport = get_viewport()
+		var camera = viewport.get_camera()
+		var mouse_position = viewport.get_mouse_position()
+		var from = camera.project_ray_origin(mouse_position)
+		var to = from + camera.project_ray_normal(mouse_position) * 200
+		var direct_state = get_world().direct_space_state
+		var collision = direct_state.intersect_ray(from, to, [], 32)
+		
+		
+#		print("Collision ", collision)
+		if collision:			
+			placing_unit.translation.x = collision.position.x
+			placing_unit.translation.z = collision.position.z
+			placing_unit.translation.y = collision.position.y
 
 
-func move_to_mouse_position(unit):
+func _on_drag_started(unit):
+	print("On drag started")
+	
+	if game_phase == "PlacementPhase":
+		if unit.location == "barrack":
+			unit_barrack.remove_unit(unit)
+		
+		if unit.location == "battlefield":
+			placement_area.remove_child(unit)
+			
+		dragging_area.add_child(unit)
+		unit.dragging = true
+		unit.location = "placing"
+		placing_unit = unit
+	
+func _on_drag_finished(unit):
+	print("On drag finisehed")
+	
 	var viewport = get_viewport()
 	var camera = viewport.get_camera()
 	var mouse_position = viewport.get_mouse_position()
 	var from = camera.project_ray_origin(mouse_position)
 	var to = from + camera.project_ray_normal(mouse_position) * 200
 	var direct_state = get_world().direct_space_state
-	var collision = direct_state.intersect_ray(from, to)
+	var collision = direct_state.intersect_ray(from, to, [], 16)
 	
-	if collision:			
-		unit.translation.x = collision.position.x
-		unit.translation.z = collision.position.z
-	
-func handle_option_clicked(opt):
-	if unit_barrack.is_full():
-		print("Barrack is full")
+	if collision:
+		dragging_area.remove_child(placing_unit)
+		placement_area.add_child(placing_unit)
 		
-		return 
-	
-	if opt.cost > gold:
-		print("Not enough cold left")
+		placing_unit.translation.x = collision.position.x
+		placing_unit.translation.z = collision.position.z
 		
-		return
+		unit.location = "battlefield"
 		
-	print("unit picked ", opt.unit_type, " level ", opt.level)
-	
-	picking_options.remove_option(opt)
-	
-	unit_barrack.apply_option(opt)
-	
-	set_gold(gold - opt.cost)
+		var server_coord = trans_to_server_coord(collision.position.z, collision.position.x)
+		
+		conn.send_msg({
+			"placeUnit": {
+				"unitId": unit.unit_id,
+				"x": server_coord.x,
+				"y": server_coord.y
+			}
+		})
+	else:
+		unit.location = "barrack"		
+		
+		dragging_area.remove_child(placing_unit)
+		unit_barrack.add_unit(placing_unit)
+		
+	unit.dragging = false
+	placing_unit = null
 
 	
-func start_game():
-	allow_dragging = false
-	
-	for unit in units:
-		var droid = Droid.instance()
+#func _handle_create_unit(id, unit_type, x, y):
+#	print("handle create unit")
+#
+#	var new_unit = Unit.instance()
+#
+#	move_to_point(new_unit, x, y)
+#
+#	placement_area.add_child(new_unit)
+#	unit_map[id] = new_unit
 
-		var child = get_child(get_children().find(unit))
-		
-		droid.translation.x = child.translation.x
-		droid.translation.y = child.translation.y
-		droid.translation.z = child.translation.z
-		
-		droid.team = 1
-		droid.game_coordinator = game_coordinator
-		game_coordinator.add_unit(droid)
-		
-		droid.connect("death", self, "handle_death")
-		
-		remove_child(child)
-		add_child(droid)
-		
-		battle_units.push_back(droid)
-		
-		droid.attack()
-		
-		
-	spawn_enemy_unit(0, 3)
-	spawn_enemy_unit(-1, 3)
-	spawn_enemy_unit(1, 3)
-	spawn_enemy_unit(2, 3)
-	spawn_enemy_unit(3, 3)
+#func _handle_change_unit_position(id, x: int, y: int):
+#	var unit = unit_map.get(id)
+#
+#	move_to_point(unit, x, y)
 
-func spawn_enemy_unit(x, y):
-	var enemy_droid = Droid.instance()
-	
-	enemy_droid.game_coordinator = game_coordinator
-	enemy_droid.set_position(x, y)
-	enemy_droid.team = 2
-	game_coordinator.add_unit(enemy_droid)
-	
-	enemy_droid.connect("death", self, "handle_death")
-	
-	battle_units.push_back(enemy_droid)
-	
-	add_child(enemy_droid)
-	
-	enemy_droid.attack()
 
-func handle_death(unit):
-	game_coordinator.remove_unit(unit)
-	remove_child(unit)
-
-func on_game_start():
-	picking_ui.visible = false
-	picking_options.visible = false
-	setup_stage = true
-	allow_dragging = true
-	setup_timer.start()
-
-func set_gold(g: int):
-	gold = g 
-	gold_remaining_text.text = String(g)
-
-func handle_round_end():
-	set_gold(gold + 10)
-	units.clear()
+func _on_CountdownTimer_timeout():
+	if countdown_time < 1:
+		countdown_timer.stop()
+		countdown_label.visible = false
 	
-	new_round_timer.start()
+	countdown_time -= 1
 	
-func transistion_to_picking_phase():
-	print("Transistioning...")
+	countdown_label.text = String(countdown_time)
 	
-	picking_ui.visible = true
-	picking_options.visible = true
-	picking_options.reset()
-	setup_timer_text.visible = true
-	game_end_text.visible = false
-	start_ticks = 10
-	
-	
-	for unit in battle_units:
-		remove_child(unit)
-		
-	battle_units.clear()
-	
-	unit_barrack.show_all()
-
-func on_drag_started(unit):
-	if allow_dragging:
-		print("Drag started")
-		var cloned_unit = unit.duplicate()
-		self.add_child(cloned_unit)
-		unit_barrack.hide_unit(unit)
-		units.push_back(cloned_unit)
-		dragging_unit = cloned_unit
-		move_to_mouse_position(cloned_unit)
-
-func _on_SetupTimer_timeout():
-	start_ticks -= 1
-	
-	setup_timer_text.text = String(start_ticks)
-	
-	if start_ticks == 0:
-		setup_timer_text.visible = false
-		setup_timer.stop()
-		
-		start_game()
-
-func _on_NewRoundTimer_timeout():
-	transistion_to_picking_phase()
+	if countdown_time < 1:
+		countdown_timer.start(0.2)

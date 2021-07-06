@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scenes/your_unit.gd" type="Script" id=1]
-[ext_resource path="res://scenes/unit/FriendlyBars3D.tscn" type="PackedScene" id=2]
-[ext_resource path="res://scenes/picking_screen/Stars3D.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/friendly_bars.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/rank_3D.tscn" type="PackedScene" id=3]
 
 [sub_resource type="CubeMesh" id=1]
 
