@@ -3,6 +3,14 @@ extends "res://scenes/unit.gd"
 onready var friendly_bars = $friendly_bars
 onready var rank_indicator = $rank
 onready var place_holder = $PlaceHolder
+
+var location
+
+var mouse_over = false
+var dragging = false
+
+signal drag_started(unit)
+signal drag_finished(unit)
 	
 func _ready():
 	place_holder.visible = false	
@@ -46,3 +54,17 @@ func set_rank(v: int):
 
 func get_rank():
 	return rank_indicator.value
+
+
+func _unhandled_input(event):
+	if mouse_over and event.is_action_pressed("left_mouse_button"):
+		emit_signal("drag_started", self)
+		
+	if dragging and event.is_action_released("left_mouse_button"):
+		emit_signal("drag_finished", self)
+
+func _on_Spatial_mouse_entered():
+	mouse_over = true
+
+func _on_Spatial_mouse_exited():
+	mouse_over = false

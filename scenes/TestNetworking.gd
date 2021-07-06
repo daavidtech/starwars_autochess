@@ -1,4 +1,4 @@
-extends Node
+extends Spatial
 
 var YourUnit = preload("res://scenes/your_unit.tscn")
 
@@ -7,6 +7,7 @@ var ServerConnection = preload("res://scenes/server_connection.gd")
 signal unit_choosen
 
 onready var placement_area = $StaticBody/PlacementArea
+onready var dragging_area = $StaticBody2/DraggingArea
 onready var unit_shop = $unit_shop
 onready var unit_barrack = $unit_barrack
 onready var your_health = $your_health
@@ -17,7 +18,17 @@ onready var countdown_label = $CountDownLabel
 onready var countdown_timer = $CountdownTimer
 onready var game_phase_label = $GamePhaseLabel
 
+var placing_unit = null
+
+var game_phase
+
 var countdown_time: int
+
+enum LocationType {
+	Barrack,
+	BattleField,
+	Placing
+}
 
 var units = {}
 var placement_units = {}
@@ -104,9 +115,7 @@ func _ready():
 	
 	unit_shop.connect("unit_bought", self, "_handle_unit_bought")
 
-func _handle_msg(msg):
-	print("handle_msg ", msg)
-	
+func _handle_msg(msg):	
 	if msg.matchPhaseChanged != null:
 		handle_game_phase_changed(msg.matchPhaseChanged.matchPhase)
 	if msg.unitAdded != null:
@@ -207,6 +216,7 @@ func handle_player_health_changed(player_health_changed):
 
 func handle_game_phase_changed(game_phase_changed):
 	game_phase_label.text = game_phase_changed
+	game_phase = game_phase_changed
 	
 	match game_phase_changed:
 		"InitPhase":			
@@ -256,13 +266,25 @@ func handle_unit_added(unit_added):
 	new_unit.mana = unit_added.mana
 	new_unit.attack_rate = unit_added.attackRate
 	new_unit.rank = unit_added.rank
+	new_unit.location = "barrack"
 	
 	units[unit_added.unitId] = new_unit
+	
+	new_unit.connect("drag_started", self, "_on_drag_started")
+	new_unit.connect("drag_finished", self, "_on_drag_finished")
 	
 func handle_unit_removed(unit_removed):
 	var unit = units[unit_removed.unitId]
 	
-	unit_barrack.remove_unit(unit)
+	if unit.location == "placing":
+		dragging_area.remove_child(unit)
+	
+	if unit.location == "barrack":
+		unit_barrack.remove_unit(unit)
+		
+	if unit.location == "battlefield":
+		placement_area.remove_child(unit)
+	
 	units.erase(unit_removed.unitId)
 	
 func handle_unit_upgraded(unit_upgraded):
@@ -311,6 +333,65 @@ func conv_coords(x: int, y: int) -> Vector3:
 	var convx = start_y + y_ratio * y
 	
 	return Vector3(convx, placement_area.translation.y, convz)
+
+func _unhandled_input(event):
+	if placing_unit != null and event is InputEventMouseMotion:
+		var viewport = get_viewport()
+		var camera = viewport.get_camera()
+		var mouse_position = viewport.get_mouse_position()
+		var from = camera.project_ray_origin(mouse_position)
+		var to = from + camera.project_ray_normal(mouse_position) * 200
+		var direct_state = get_world().direct_space_state
+		var collision = direct_state.intersect_ray(from, to, [], 32)
+		
+		
+#		print("Collision ", collision)
+		if collision:			
+			placing_unit.translation.x = collision.position.x
+			placing_unit.translation.z = collision.position.z
+
+
+func _on_drag_started(unit):
+	print("On drag started")
+	
+	if game_phase == "PlacementPhase":
+		if unit.location == "barrack":
+			unit_barrack.remove_unit(unit)
+		
+		if unit.location == "battlefield":
+			placement_area.remove_unit(unit)
+			
+		dragging_area.add_child(unit)
+		unit.dragging = true
+		unit.location = "placing"
+		placing_unit = unit
+	
+func _on_drag_finished(unit):
+	print("On drag finisehed")
+	
+	var viewport = get_viewport()
+	var camera = viewport.get_camera()
+	var mouse_position = viewport.get_mouse_position()
+	var from = camera.project_ray_origin(mouse_position)
+	var to = from + camera.project_ray_normal(mouse_position) * 200
+	var direct_state = get_world().direct_space_state
+	var collision = direct_state.intersect_ray(from, to, [], 16)
+	
+	if collision:
+		dragging_area.remove_child(placing_unit)
+		placement_area.add_child(placing_unit)
+		
+		placing_unit.translation.x = collision.position.x
+		placing_unit.translation.z = collision.position.z
+		
+		unit.location = "battlefield"
+	else:
+		dragging_area.remove_child(placing_unit)
+		unit_barrack.add_unit(placing_unit)
+		
+	unit.dragging = false
+	placing_unit = null
+
 	
 #func _handle_create_unit(id, unit_type, x, y):
 #	print("handle create unit")
