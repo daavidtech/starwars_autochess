@@ -7,6 +7,8 @@ signal disconnected
 # The URL we will connect to
 export var websocket_url = "ws://localhost:4100/api/socket"
 
+var retry_timer
+
 # Our WebSocketClient instance
 var _client = WebSocketClient.new()
 
@@ -16,28 +18,42 @@ func send_msg(msg):
 	_client.get_peer(1).put_packet(json_msg.to_utf8())
 
 func _ready():
-	# Connect base signals to get notified of connection open, close, and errors.
+	retry_timer = Timer.new()
+	add_child(retry_timer)
+	retry_timer.wait_time = 2
+	retry_timer.connect("timeout", self, "_retry_now")	
+
+	retry_timer.start()
+
+func _retry_now():
+	print("Retry timer triggered")
+	
+	_client.disconnect_from_host()
+	
+	try_to_connect()
+
+func try_to_connect():
+	print("try_to_connect")
+	
+	_client = WebSocketClient.new()
+	
 	_client.connect("connection_closed", self, "_closed")
 	_client.connect("connection_error", self, "_closed")
 	_client.connect("connection_established", self, "_connected")
-	# This signal is emitted when not using the Multiplayer API every time
-	# a full packet is received.
-	# Alternatively, you could check get_peer(1).get_available_packets() in a loop.
 	_client.connect("data_received", self, "_on_data")
-
-	# Initiate connection to the given URL.
+	
 	var err = _client.connect_to_url(websocket_url)
 	if err != OK:
 		print("Unable to connect")
-		set_process(false)
 
 func _closed(was_clean = false):
-	# was_clean will tell you if the disconnection was correctly notified
-	# by the remote peer before closing the socket.
+	print("Connection closed")
+	
 	print("Closed, clean: ", was_clean)
-	set_process(false)
 	
 	emit_signal("disconnected")
+	
+	retry_timer.start()
 
 func _connected(proto = ""):
 	# This is called on connection, "proto" will be the selected WebSocket
@@ -45,6 +61,8 @@ func _connected(proto = ""):
 	print("Connected with protocol: ", proto)
 	
 	emit_signal("connected")
+	
+	retry_timer.stop()
 
 func _on_data():
 	var msg = _client.get_peer(1).get_packet().get_string_from_utf8()

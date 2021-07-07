@@ -17,6 +17,7 @@ onready var lobby = $lobby
 onready var countdown_label = $CountDownLabel
 onready var countdown_timer = $CountdownTimer
 onready var game_phase_label = $GamePhaseLabel
+onready var connected_label = $ConnectedLabel
 
 var placing_unit = null
 
@@ -92,6 +93,8 @@ func move_to_point(u, x: int, y: int):
 func _ready():
 	conn = ServerConnection.new()
 	conn.connect("new_message", self, "_handle_msg")
+	conn.connect("connected", self, "_on_connected")
+	conn.connect("disconnected", self, "_on_disconnected")
 	
 	add_child(conn)
 	
@@ -114,6 +117,12 @@ func _ready():
 #	load_thing("unit_clone")
 	
 	unit_shop.connect("unit_bought", self, "_handle_unit_bought")
+
+func _on_connected():
+	connected_label.text = "Connected"
+	
+func _on_disconnected():
+	connected_label.text = "Disconnected"
 
 func _handle_msg(msg):	
 	if msg.matchPhaseChanged != null:
