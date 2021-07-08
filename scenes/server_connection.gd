@@ -66,8 +66,7 @@ func _connected(proto = ""):
 
 func _on_data():
 	var msg = _client.get_peer(1).get_packet().get_string_from_utf8()
-	
-	print("Received msg", msg)
+
 	
 	var json_msg = JSON.parse(msg)
 	

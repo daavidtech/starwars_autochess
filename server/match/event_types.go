@@ -49,6 +49,26 @@ type UnitPlaced struct {
 	Y      int
 }
 
+type UnitStartedMovingTo struct {
+	UnitID string
+	X      int
+	Y      int
+}
+
+type UnitArrivedTo struct {
+	UnitID string
+	X      int
+	Y      int
+}
+
+type UnitDied struct {
+	UnitID string
+}
+
+type RoundCreated struct {
+	Units []BattleUnit
+}
+
 type MatchEvent struct {
 	UnitBought          *UnitBought
 	BarrackUnitAdded    *BarrackUnitAdded
@@ -59,4 +79,8 @@ type MatchEvent struct {
 	ShopUnitRemoved     *ShopUnitRemoved
 	CountdownStarted    *CountdownStarted
 	UnitPlaced          *UnitPlaced
+	UnitStartedMovingTo *UnitStartedMovingTo
+	UnitArrivedTo       *UnitArrivedTo
+	UnitDied            *UnitDied
+	RoundCreated        *RoundCreated
 }

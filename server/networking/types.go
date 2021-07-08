@@ -79,10 +79,10 @@ type UnitStartedMovingTo struct {
 	Y      int    `json:"y"`
 }
 
-type UnitArrivedToPosition struct {
+type UnitArrivedTo struct {
 	UnitID string `json:"unitId"`
 	X      int    `json:"x"`
-	Y      int    `json:"Y"`
+	Y      int    `json:"y"`
 }
 
 type UnitStartedAttacking struct {
@@ -155,6 +155,29 @@ type CountdownStarted struct {
 	Interval   float32 `json:"interval"`
 }
 
+type BattleUnit struct {
+	Team          int    `json:"team"`
+	UnitID        string `json:"unitId"`
+	UnitType      string `json:"unitType"`
+	Rank          int    `json:"rank"`
+	MaxHP         int    `json:"maxHp"`
+	HP            int    `json:"hp"`
+	MaxMana       int    `json:"maxMana"`
+	Mana          int    `json:"mana"`
+	AttackRate    int    `json:"attackRate"`
+	AttackRange   int    `json:"attackRange"`
+	AttackDamage  int    `json:"attackDamage"`
+	InstantAttack bool   `json:"instantAttack"`
+	MoveSpeed     int    `json:"moveSpeed"`
+	Dead          bool   `json:"dead"`
+	X             int    `json:"x"`
+	Y             int    `json:"y"`
+}
+
+type RoundCreated struct {
+	Units []BattleUnit `json:"units"`
+}
+
 type MessageToClient struct {
 	UnitAdded             *UnitAdded             `json:"unitAdded"`
 	UnitRemoved           *UnitRemoved           `json:"unitRemoved"`
@@ -167,7 +190,7 @@ type MessageToClient struct {
 	UnitUsedMana          *UnitUsedMana          `json:"unitUsedMana"`
 	UnitUsedAbility       *UnitUsedAbility       `json:"unitUsedAbility"`
 	UnitStartedMovingTo   *UnitStartedMovingTo   `json:"unitStartedMovingTo"`
-	UnitArrivedToPosition *UnitArrivedToPosition `json:"unitArrivedToPosition"`
+	UnitArrivedTo         *UnitArrivedTo         `json:"unitArrivedToPosition"`
 	UnitStartedAttacking  *UnitStartedAttacking  `json:"unitStartedAttacking"`
 	UnitStoppedAttacking  *UnitStoppedAttacking  `json:"unitStoppedAttacking"`
 	LaunchProjectile      *LaunchProjectile      `json:"launchParticle"`
@@ -177,6 +200,7 @@ type MessageToClient struct {
 	ShopUnitRemoved       *ShopUnitRemoved       `json:"shopUnitRemoved"`
 	ShopRefilled          *ShopRefilled          `json:"shopRefilled"`
 	CountdownStarted      *CountdownStarted      `json:"countdownStarted"`
+	RoundCreated          *RoundCreated          `json:"roundCreated"`
 
 	MatchPhaseChanged *MatchPhaseChanged `json:"matchPhaseChanged"`
 }

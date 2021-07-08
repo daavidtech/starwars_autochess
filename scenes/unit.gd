@@ -1,163 +1,80 @@
+  
 extends KinematicBody
 
-export var max_health = 100.0
-export var health = 100.0
-export var speed = 3
-export var attack_range = 4
-export var attack_rate = 0.3
+export var attack_rate: int
+export var move_speed: float = 4
 
-signal death(unit)
-signal health_changed(new_value)
+var moving: bool
+var move_dest: Vector3
+var direct: Vector3
 
-var move_destination = null
-var move_direction = null
+var unit_id: String
 
-var game_coordinator = null
+var _unit_type: String
 
-var current_target = null
+export var unit_type: String setget set_unit_type, get_unit_type
 
-var auto_attack = false
-
-var team = null
-
-var since_last_hit = 0
-
-func set_path_coordinator(c):
-	game_coordinator = c
-
-func _physics_process(delta):
-	since_last_hit += delta
+func set_unit_type(t: String):
+	_unit_type = t
 	
-	if auto_attack == true and current_target == null and game_coordinator.count_units() > 0:
-		var units = game_coordinator.get_units()
+	var path = "res://assets/" + _unit_type + "/" + _unit_type + ".glb"
+	var model = ResourceLoader.load(path).instance()
+	add_child(model)
 	
-		for unit in units:
-			if unit != self and unit.team != team:
-				set_current_target(unit)
-				return
-	
-	if current_target:
-		var my_position = get_position()
-		var target_position = current_target.get_position()
-		
-		if (my_position.x > target_position.x - attack_range and my_position.x < target_position.x + attack_range
-			and my_position.y > target_position.y - attack_range and my_position.y < target_position.y + attack_range):
-			stop()
-			
-			if since_last_hit > attack_rate:
-				hit_target()
-				since_last_hit = 0
-			
-			if current_target.is_death():
-#				print("it is death")
-				
-				current_target = null
-				
-				attack_closest_unit()
-		else:
-			move(target_position.x, target_position.y)
-	
-	if move_direction != null:
-		handle_move(delta)
-
-func handle_move(delta):
-	var step_size = delta * speed
-
-	var stop_now = false
-
-	if step_size > move_direction.length():
-		print("unit reached destination")
-		
-		step_size = move_direction.length()
-		stop_now = true
-	
-	if move_destination.x > translation.x and translation.x + step_size > move_destination.x:
-		move_direction.x = 0
-		
-	if move_destination.z > translation.z and translation.z + step_size > move_destination.z:
-		move_direction.z = 0
-		
-	if move_destination.x < translation.x and translation.x - step_size < move_destination.x:
-		move_direction.x = 0
-	
-	if move_destination.z < translation.z and translation.z - step_size < move_destination.z:
-		move_direction.z = 0
-	
-	var collision = move_and_collide(move_direction.normalized() * step_size)
-#
-#	if collision:
-		#print("collision", collision.collider)
-
-	#translation += move_direction.normalized() * step_size
-
-	if move_direction.x == 0 and move_direction.z == 0:
-		move_direction = null
-		move_destination = null
+func get_unit_type() -> String:
+	return _unit_type
 
 func stop():
-	move_destination = null
-	move_direction = null
+	moving = false
+	move_dest = Vector3()
+	direct = Vector3()
 
-func move(x, y):
-#	print("moving to point")
+func start_moving_to(dest: Vector3):
+	print("start_move ", dest, translation)
+	
+	moving = true
+	
+	move_dest = dest
+	
+	direct = move_dest - translation
+	
+	print("driect ", direct)
 
-	move_destination = Vector3(y, transform.origin.y, x)
+func move_to_position(dest: Vector3):
+	moving = false
+	
+	move_dest = Vector3()
+	direct = Vector3()
+	
+	translation = dest
 
-	move_direction = move_destination - translation
-	
-func set_position(x, y):
-	translation.x = y
-	translation.z = x
-	
-func get_position():
-	return {
-		"x": translation.z,
-		"y": translation.x
-	}
-	
-func set_current_target(t):
-	current_target = t
-	
-func find_closest_enemy():
-	var direct_state = get_world().direct_space_state
-	
-	var query = PhysicsShapeQueryParameters.new()
-	
-	var s = SphereShape.new()
-	s.radius = 100
-	
-	query.set_shape(s)
+func _process(delta):
+	if moving:
+		var step_size = delta * move_speed
 
-	var collisions = direct_state.intersect_ray(query)
-
-	for collision in collisions:
-		if collision.collider.has_group("enemy"):
-			return collision.collider
-
-
-func attack_closest_unit():
-	print("attack_closest_unit")
+		if step_size > direct.length():
+			print("unit reached destination")
+			
+			step_size = direct.length()
+			
+			var step = direct.normalized() * move_speed
+			
+			moving = false
+			move_dest = Vector3()
+			direct = Vector3()
 	
-	auto_attack = true
+		if move_dest.x > translation.x and translation.x + step_size > move_dest.x:
+			direct.x = 0
+			
+		if move_dest.z > translation.z and translation.z + step_size > move_dest.z:
+			direct.z = 0
+			
+		if move_dest.x < translation.x and translation.x - step_size < move_dest.x:
+			direct.x = 0
+		
+		if move_dest.z < translation.z and translation.z - step_size < move_dest.z:
+			direct.z = 0
+			
+		#print("move_direction ", direct)
 
-func take_damage(amount: int):
-	health -= amount
-	
-	var ratio: float = health / max_health
-	
-	var health_percent = ratio * 100
-	
-	print("health_percent ", health_percent)
-	
-	emit_signal("health_changed", health_percent)
-	
-	if health <= 0:
-		print("It is deadth")
-		emit_signal("death", self)
-
-func is_death():
-	return health <= 0
-
-func hit_target():
-	if current_target:
-		current_target.take_damage(30)
+		translation += direct.normalized() * step_size

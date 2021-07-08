@@ -7,13 +7,13 @@ import (
 )
 
 type Player struct {
-	id          string
-	credits     int
-	health      int
-	accepted    bool
-	xp          int
-	battleUnits map[string]*BattleUnit
-	shop        *Shop
+	id       string
+	credits  int
+	health   int
+	accepted bool
+	xp       int
+	units    map[string]*Unit
+	shop     *Shop
 }
 
 func NewPlayer() *Player {
@@ -22,8 +22,8 @@ func NewPlayer() *Player {
 	shop.SetSize(5)
 
 	return &Player{
-		battleUnits: make(map[string]*BattleUnit),
-		shop:        shop,
+		units: make(map[string]*Unit),
+		shop:  shop,
 	}
 }
 
@@ -41,7 +41,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 		newUnitID := uuid.New().String()
 
-		player.battleUnits[newUnitID] = &BattleUnit{
+		player.units[newUnitID] = &Unit{
 			unitId:   newUnitID,
 			unitType: shopUnit.UnitType,
 			//tier:       shopUnit.Tier,
@@ -80,7 +80,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 		removeOneRanks = 2
 	}
 
-	for unitID, unit := range player.battleUnits {
+	for unitID, unit := range player.units {
 		if unit.unitType != shopUnit.UnitType {
 			continue
 		}
@@ -132,7 +132,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 		log.Println("Removing unit " + unitID)
 
-		delete(player.battleUnits, unitID)
+		delete(player.units, unitID)
 
 		events = append(events, MatchEvent{
 			BarrackUnitRemoved: &BarrackUnitRemoved{
@@ -148,7 +148,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 func (player *Player) countUnitType(unitType string, rank int) int {
 	count := 0
 
-	for _, battleUnit := range player.battleUnits {
+	for _, battleUnit := range player.units {
 		if battleUnit.unitType != unitType || battleUnit.rank != rank {
 			continue
 		}
@@ -159,22 +159,22 @@ func (player *Player) countUnitType(unitType string, rank int) int {
 	return count
 }
 
-func (player *Player) getBattleUnits() []*BattleUnit {
-	battleUnits := []*BattleUnit{}
+func (player *Player) getBattleUnits() []*Unit {
+	battleUnits := []*Unit{}
 
-	for _, unit := range player.battleUnits {
+	for _, unit := range player.units {
 		battleUnits = append(battleUnits, unit)
 	}
 
 	return battleUnits
 }
 
-func (player *Player) GetUnit(unitID string) *BattleUnit {
-	return player.battleUnits[unitID]
+func (player *Player) GetUnit(unitID string) *Unit {
+	return player.units[unitID]
 }
 
 func (player *Player) RemoveUnit(unitID string) {
-	delete(player.battleUnits, unitID)
+	delete(player.units, unitID)
 }
 
 func (player *Player) AddXP(amount int) {
@@ -194,5 +194,5 @@ func (player *Player) UseCredits(amount int) {
 }
 
 func (player *Player) IsBarrackFull() bool {
-	return len(player.battleUnits) > 8
+	return len(player.units) > 8
 }

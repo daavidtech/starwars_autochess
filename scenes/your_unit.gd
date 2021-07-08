@@ -15,22 +15,6 @@ signal drag_finished(unit)
 func _ready():
 	place_holder.visible = false	
 
-var unit_id: String
-
-var _unit_type: String
-
-export var unit_type: String setget set_unit_type, get_unit_type
-
-func set_unit_type(t: String):
-	_unit_type = t
-	
-	var path = "res://assets/" + _unit_type + "/" + _unit_type + ".glb"
-	var model = ResourceLoader.load(path).instance()
-	add_child(model)
-	
-func get_unit_type() -> String:
-	return _unit_type
-
 export var hp: int setget set_hp, get_hp
 
 func set_hp(value: int):

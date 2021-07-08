@@ -1,6 +1,7 @@
 extends Spatial
 
 var YourUnit = preload("res://scenes/your_unit.tscn")
+var EnemyUnit = preload("res://scenes/enemy_unit.tscn")
 
 var ServerConnection = preload("res://scenes/server_connection.gd")
 
@@ -25,14 +26,7 @@ var game_phase
 
 var countdown_time: int
 
-enum LocationType {
-	Barrack,
-	BattleField,
-	Placing
-}
-
 var units = {}
-var placement_units = {}
 
 var width = 100
 var heigth = 100
@@ -40,55 +34,6 @@ var heigth = 100
 var game_state
 
 var conn
-
-func load_thing(type: String):
-#	var path = "res://assets/exported/"
-#
-#	path += type + "/" + type + ".gltf"
-	
-	var path = "res://scenes/your_unit.tscn"
-	
-	print("Loading resource from ", path)
-	
-	var does_exists = ResourceLoader.has(path)
-	
-	print("does_exists " + String(does_exists))
-	
-	var Droid = ResourceLoader.load(path)
-	
-	var i = Droid.instance()
-	
-	i.translation.y = placement_area.translation.y
-	
-	add_child(i)
-	
-	i.move_speed = 5;
-	i.start_move(conv_server_coords(50, 50))
-	
-
-func move_to_point(u, x: int, y: int):
-	print("move_to ", x, " y ", y)
-	
-	var size = placement_area.shape.extents
-	
-	var start_x = -size.x
-	var start_y = -size.z
-	
-	print("start_x ", start_x)
-	print("start_y ", start_y)
-	
-	var x_ratio = size.z / game_state.width
-	var y_ratio = size.x / game_state.height
-	
-	var translation_z = start_x + x_ratio * x
-	var translation_x = start_y + y_ratio * y
-	
-	print("translation_x ", translation_x)
-	print("translation_z ", translation_z)
-	
-	u.translation.x = translation_x
-	u.translation.z = translation_z
-	u.translation.y = placement_area.translation.y
 	
 func _ready():
 	conn = ServerConnection.new()
@@ -169,7 +114,68 @@ func _handle_msg(msg):
 		handle_shop_unit_removed(msg["shopUnitRemoved"])
 	if msg.countdownStarted != null:
 		handle_countdown_started(msg.countdownStarted)
+	if msg.roundCreated != null:
+		handle_round_created(msg["roundCreated"])
+	
+func clear_units():
+	for child in placement_area.get_children():
+		placement_area.remove_child(child)
 		
+	units.clear()
+	unit_barrack.clear()
+	
+func set_unit(loc: String, new_unit):
+	var unit
+	
+	if units.has(new_unit.unitId):
+		unit = units[new_unit.unitId]
+	else:
+		if new_unit.team == 1:
+			unit = YourUnit.instance()
+			unit.connect("drag_started", self, "_on_drag_started")
+			unit.connect("drag_finished", self, "_on_drag_finished")
+	
+		if new_unit.team == 2:
+			unit = EnemyUnit.instance()
+	
+		units[new_unit.unitId] = unit
+	
+	if new_unit.team == 1:
+		if unit.location != loc:
+			unit.location = loc
+			
+			if loc == "barrack":
+				unit_barrack.add_unit(unit)
+		
+			if loc == "battlefield":
+				placement_area.add_child(unit)
+				unit.translation = conv_server_coords(new_unit.x, new_unit.y)
+			
+			if loc == "placing":
+				dragging_area.add_child(unit)
+				
+	else:
+		placement_area.add_child(unit)
+		unit.translation = conv_server_coords(new_unit.x, new_unit.y)
+
+	unit.unit_id = new_unit.unitId
+	unit.unit_type = new_unit.unitType
+	unit.hp = new_unit.hp
+	
+	if new_unit.team == 1:
+		unit.mana = new_unit.mana
+	
+	unit.attack_rate = new_unit.attackRate
+	unit.attack_rate = new_unit.attackRate
+	unit.rank = new_unit.rank
+	
+func handle_round_created(round_created):
+	clear_units()
+	
+	for unit in round_created.units:
+		set_unit("battlefield", unit)
+	
+
 func handle_countdown_started(countdown_started):
 	countdown_label.visible = true
 	
@@ -194,7 +200,7 @@ func handle_unit_started_moving(unit_started_moving):
 	if units.has(unit_started_moving.unitId):
 		var unit = units[unit_started_moving.unitId]
 		
-		unit.start_moving(conv_server_coords(unit_started_moving.x, unit_started_moving.y))
+		unit.start_moving_to(conv_server_coords(unit_started_moving.x, unit_started_moving.y))
 	
 func handle_unit_arrived_to_position(unit_arrived):
 	if units.has(unit_arrived.unitId):

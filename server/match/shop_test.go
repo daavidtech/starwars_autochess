@@ -60,7 +60,7 @@ func TestPicksOneUnit(t *testing.T) {
 		t.Errorf("Shop units is invalid")
 	}
 
-	unit := shop.Pick(0)
+	unit := shop.Pick(1)
 
 	if unit.UnitType != "unit_clone" {
 		t.Errorf("Pick gives wrong unit")

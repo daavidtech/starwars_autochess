@@ -124,11 +124,11 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 	ch := eventBroker.Subscribe(matchID)
 
 	for event := range ch {
-		log.Printf("Received event %v", event)
-
 		// if event.NewBarrackUnit != nil {
 
 		// }
+
+		var err error
 
 		if event.ShopRefilled != nil {
 			shopRefilled := ShopRefilled{
@@ -225,23 +225,101 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 		}
 
 		if event.UnitPlaced != nil {
+			log.Println("Sending unit placed to client")
+
 			unitPlaced := UnitPlaced{
 				UnitID: event.UnitPlaced.UnitID,
 				X:      event.UnitPlaced.X,
 				Y:      event.UnitPlaced.Y,
 			}
 
-			ws.WriteJSON(MessageToClient{
+			err = ws.WriteJSON(MessageToClient{
 				UnitPlaced: &unitPlaced,
 			})
 		}
 
 		if event.PhaseChanged != nil {
-			ws.WriteJSON(MessageToClient{
+			log.Println("Sending phase changed to client")
+
+			err = ws.WriteJSON(MessageToClient{
 				MatchPhaseChanged: &MatchPhaseChanged{
 					MatchPhase: event.PhaseChanged.MatchPhase,
 				},
 			})
+		}
+
+		if event.UnitStartedMovingTo != nil {
+			log.Printf("Sending unit %v started moving to %v %v",
+				event.UnitStartedMovingTo.UnitID,
+				event.UnitStartedMovingTo.X,
+				event.UnitStartedMovingTo.Y)
+
+			err = ws.WriteJSON(MessageToClient{
+				UnitStartedMovingTo: &UnitStartedMovingTo{
+					UnitID: event.UnitStartedMovingTo.UnitID,
+					X:      event.UnitStartedMovingTo.X,
+					Y:      event.UnitStartedMovingTo.Y,
+				},
+			})
+		}
+
+		if event.UnitArrivedTo != nil {
+			log.Printf("Sending unit %v arrived to", event.UnitArrivedTo.UnitID)
+
+			err = ws.WriteJSON(MessageToClient{
+				UnitArrivedTo: &UnitArrivedTo{
+					UnitID: event.UnitArrivedTo.UnitID,
+					X:      event.UnitArrivedTo.X,
+					Y:      event.UnitArrivedTo.Y,
+				},
+			})
+		}
+
+		if event.UnitDied != nil {
+			log.Printf("Sending unit %v died to client", event.UnitDied.UnitID)
+
+			err = ws.WriteJSON(MessageToClient{
+				UnitDied: &UnitDied{
+					UnitID: event.UnitDied.UnitID,
+				},
+			})
+		}
+
+		if event.RoundCreated != nil {
+			units := []BattleUnit{}
+
+			for _, unit := range event.RoundCreated.Units {
+				units = append(units, BattleUnit{
+					Team:          unit.Team,
+					UnitID:        unit.UnitID,
+					UnitType:      unit.UnitType,
+					Rank:          unit.Rank,
+					MaxHP:         unit.MaxHP,
+					HP:            unit.HP,
+					MaxMana:       unit.MaxMana,
+					Mana:          unit.Mana,
+					AttackRate:    unit.AttackRate,
+					AttackRange:   unit.AttackRange,
+					AttackDamage:  unit.AttackDamage,
+					InstantAttack: unit.InstantAttack,
+					MoveSpeed:     unit.MoveSpeed,
+					Dead:          unit.Dead,
+					X:             int(unit.X),
+					Y:             int(unit.Y),
+				})
+			}
+
+			err = ws.WriteJSON(MessageToClient{
+				RoundCreated: &RoundCreated{
+					Units: units,
+				},
+			})
+		}
+
+		if err != nil {
+			log.Printf("Sending ws message error %v", err)
+
+			return
 		}
 	}
 

@@ -18,12 +18,12 @@ func TestAddsNewShopUnitWhenNoOthers(t *testing.T) {
 
 func TestUpgradeUnit(t *testing.T) {
 	player := Player{
-		battleUnits: map[string]*BattleUnit{
-			"1": &BattleUnit{
+		units: map[string]*Unit{
+			"1": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
-			"2": &BattleUnit{
+			"2": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
@@ -49,13 +49,13 @@ func TestUpgradeUnit(t *testing.T) {
 
 func TestCannotUpgradeUnitTooBigRank(t *testing.T) {
 	player := Player{
-		battleUnits: map[string]*BattleUnit{
-			"1": &BattleUnit{
+		units: map[string]*Unit{
+			"1": &Unit{
 				unitId:   "1",
 				unitType: "unit_droid",
 				rank:     2,
 			},
-			"2": &BattleUnit{
+			"2": &Unit{
 				unitId:   "2",
 				unitType: "unit_droid",
 				rank:     1,
@@ -88,20 +88,20 @@ func TestCannotUpgradeUnitTooBigRank(t *testing.T) {
 
 func Test_updates_unit_rank_to_3(t *testing.T) {
 	player := Player{
-		battleUnits: map[string]*BattleUnit{
-			"1": &BattleUnit{
+		units: map[string]*Unit{
+			"1": &Unit{
 				unitType: "unit_droid",
 				rank:     2,
 			},
-			"2": &BattleUnit{
+			"2": &Unit{
 				unitType: "unit_droid",
 				rank:     2,
 			},
-			"3": &BattleUnit{
+			"3": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
-			"4": &BattleUnit{
+			"4": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
@@ -137,12 +137,12 @@ func Test_updates_unit_rank_to_3(t *testing.T) {
 
 func Test_diffrent_unit_types_are_ignored(t *testing.T) {
 	player := Player{
-		battleUnits: map[string]*BattleUnit{
-			"1": &BattleUnit{
+		units: map[string]*Unit{
+			"1": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
-			"2": &BattleUnit{
+			"2": &Unit{
 				unitType: "unit_clone",
 				rank:     1,
 			},
@@ -166,24 +166,24 @@ func Test_diffrent_unit_types_are_ignored(t *testing.T) {
 
 func Test_cannot_upgrade_to_rank3_when_different_unit_type(t *testing.T) {
 	player := Player{
-		battleUnits: map[string]*BattleUnit{
-			"1": &BattleUnit{
+		units: map[string]*Unit{
+			"1": &Unit{
 				unitType: "unit_droid",
 				rank:     2,
 			},
-			"2": &BattleUnit{
+			"2": &Unit{
 				unitType: "unit_clone",
 				rank:     2,
 			},
-			"4": &BattleUnit{
+			"4": &Unit{
 				unitType: "unit_clone",
 				rank:     1,
 			},
-			"5": &BattleUnit{
+			"5": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
-			"6": &BattleUnit{
+			"6": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
@@ -240,16 +240,16 @@ func Test_cannot_upgrade_to_rank3_when_different_unit_type(t *testing.T) {
 
 func Test_upgrades_to_rank2_unit_when_there_is_rank3_unit(t *testing.T) {
 	player := Player{
-		battleUnits: map[string]*BattleUnit{
-			"1": &BattleUnit{
+		units: map[string]*Unit{
+			"1": &Unit{
 				unitType: "unit_droid",
 				rank:     3,
 			},
-			"2": &BattleUnit{
+			"2": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},
-			"3": &BattleUnit{
+			"3": &Unit{
 				unitType: "unit_droid",
 				rank:     1,
 			},

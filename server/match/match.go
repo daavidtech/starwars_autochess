@@ -89,11 +89,11 @@ func (match *Match) PlaceUnit(playerID string, unitID string, x int, y int) {
 
 	player := match.players[playerID]
 
-	unit := player.battleUnits[unitID]
+	unit := player.units[unitID]
 
-	unit.placement = &Placement{
-		x: x,
-		y: y,
+	unit.placement = &Point{
+		x: float32(x),
+		y: float32(y),
 	}
 
 	match.eventBroker.publishEvent(MatchEvent{
@@ -179,7 +179,7 @@ func (match *Match) moveToPlacementPhase() {
 
 	match.eventBroker.publishEvent(MatchEvent{
 		CountdownStarted: &CountdownStarted{
-			StartValue: 10,
+			StartValue: 5,
 			Interval:   1.0,
 		},
 	})
@@ -196,10 +196,62 @@ func (match *Match) moveToBattlePhase() {
 			MatchPhase: BattlePhase,
 		},
 	})
+
+	rounds := []*Round{}
+
+	playerPool := copyPlayers(match.players)
+
+	for len(playerPool) > 0 {
+		player1 := popPlayer(playerPool)
+
+		player2 := popPlayer(playerPool)
+
+		if player2 == nil {
+			player2 = picRandomPlayer(match.players)
+		}
+
+		battleUnits := []*BattleUnit{}
+
+		for _, unit := range player1.units {
+			if unit.placement != nil {
+				battleUnits = append(battleUnits, createBattleUnit(unit, 1))
+			}
+		}
+
+		for _, unit := range player2.units {
+			if unit.placement != nil {
+				battleUnits = append(battleUnits, createBattleUnit(unit, 2))
+			}
+		}
+
+		round := CreateRound(match.ctx, match.eventBroker, battleUnits)
+
+		roundCreated := RoundCreated{
+			Units: []BattleUnit{},
+		}
+
+		for _, battleUnit := range battleUnits {
+			roundCreated.Units = append(roundCreated.Units, *battleUnit)
+		}
+
+		rounds = append(rounds, round)
+
+		match.eventBroker.publishEvent(MatchEvent{
+			RoundCreated: &roundCreated,
+		})
+	}
+
+	for _, round := range rounds {
+		log.Printf("Starting round %v", round.id)
+
+		round.run()
+
+		log.Printf("%v round finished", round.id)
+	}
 }
 
 func (match *Match) Run() {
-	<-time.NewTimer(500 * time.Millisecond).C
+	<-time.NewTimer(10 * time.Millisecond).C
 
 	match.eventBroker.publishEvent(MatchEvent{
 		PhaseChanged: &PhaseChanged{
@@ -207,7 +259,7 @@ func (match *Match) Run() {
 		},
 	})
 
-	<-time.NewTimer(2 * time.Second).C
+	<-time.NewTimer(100 * time.Millisecond).C
 
 	match.eventBroker.publishEvent(MatchEvent{
 		PhaseChanged: &PhaseChanged{
@@ -215,15 +267,15 @@ func (match *Match) Run() {
 		},
 	})
 
-	match.eventBroker.publishEvent(MatchEvent{
-		CountdownStarted: &CountdownStarted{
-			StartValue: 2,
-			Interval:   1.0,
-		},
-	})
+	// match.eventBroker.publishEvent(MatchEvent{
+	// 	CountdownStarted: &CountdownStarted{
+	// 		StartValue: 2,
+	// 		Interval:   1.0,
+	// 	},
+	// })
 
 	select {
-	case <-time.NewTimer(2 * time.Second).C:
+	case <-time.NewTimer(100 * time.Millisecond).C:
 	case <-match.ctx.Done():
 		return
 	}
@@ -235,16 +287,16 @@ func (match *Match) Run() {
 
 		match.eventBroker.publishEvent(MatchEvent{
 			CountdownStarted: &CountdownStarted{
-				StartValue: 10,
+				StartValue: 5,
 				Interval:   1.0,
 			},
 		})
 
-		<-time.NewTimer(10 * time.Second).C
+		<-time.NewTimer(5 * time.Second).C
 
 		match.moveToPlacementPhase()
 
-		<-time.NewTimer(10 * time.Second).C
+		<-time.NewTimer(5 * time.Second).C
 
 		match.moveToBattlePhase()
 	}
