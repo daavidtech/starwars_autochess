@@ -353,6 +353,8 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 		}
 
 		if err != nil {
+			eventBroker.Unsubscribe(ch)
+
 			log.Printf("Sending ws message error %v", err)
 
 			return

@@ -62,7 +62,7 @@ func (eventBus *MatchEventBroker) publishEvent(matchEvents ...MatchEvent) {
 	}
 }
 
-func (eventBus *MatchEventBroker) Subscribe(matchID string) <-chan MatchEvent {
+func (eventBus *MatchEventBroker) Subscribe(matchID string) chan MatchEvent {
 	log.Println("MatchEventBroker Subscribe")
 
 	ch := make(chan MatchEvent, 20)
