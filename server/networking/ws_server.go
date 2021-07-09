@@ -304,8 +304,10 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 					InstantAttack: unit.InstantAttack,
 					MoveSpeed:     unit.MoveSpeed,
 					Dead:          unit.Dead,
-					X:             int(unit.X),
-					Y:             int(unit.Y),
+					Placement: Point{
+						X: unit.X,
+						Y: unit.Y,
+					},
 				})
 			}
 
@@ -314,6 +316,40 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 					Units: units,
 				},
 			})
+		}
+
+		if event.RoundFinished != nil {
+			if event.RoundFinished.PlayerID == playerID {
+				roundFinished := RoundFinished{
+					PlayerID: playerID,
+				}
+
+				for _, unit := range event.RoundFinished.Units {
+					eventUnit := Unit{
+						Team:       1,
+						UnitID:     unit.UnitID,
+						UnitType:   unit.UnitType,
+						Tier:       unit.Tier,
+						Rank:       unit.Rank,
+						HP:         unit.HP,
+						Mana:       unit.Mana,
+						AttackRate: unit.AttackRate,
+					}
+
+					if unit.Placement != nil {
+						eventUnit.Placement = &Point{
+							X: unit.Placement.X,
+							Y: unit.Placement.Y,
+						}
+					}
+
+					roundFinished.Units = append(roundFinished.Units, eventUnit)
+				}
+
+				err = ws.WriteJSON(MessageToClient{
+					RoundFinished: &roundFinished,
+				})
+			}
 		}
 
 		if err != nil {

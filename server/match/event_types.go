@@ -69,6 +69,11 @@ type RoundCreated struct {
 	Units []BattleUnit
 }
 
+type RoundFinished struct {
+	PlayerID string
+	Units    []Unit
+}
+
 type MatchEvent struct {
 	UnitBought          *UnitBought
 	BarrackUnitAdded    *BarrackUnitAdded
@@ -83,4 +88,5 @@ type MatchEvent struct {
 	UnitArrivedTo       *UnitArrivedTo
 	UnitDied            *UnitDied
 	RoundCreated        *RoundCreated
+	RoundFinished       *RoundFinished
 }

@@ -91,9 +91,9 @@ func (match *Match) PlaceUnit(playerID string, unitID string, x int, y int) {
 
 	unit := player.units[unitID]
 
-	unit.placement = &Point{
-		x: float32(x),
-		y: float32(y),
+	unit.Placement = &Point{
+		X: float32(x),
+		Y: float32(y),
 	}
 
 	match.eventBroker.publishEvent(MatchEvent{
@@ -213,18 +213,21 @@ func (match *Match) moveToBattlePhase() {
 		battleUnits := []*BattleUnit{}
 
 		for _, unit := range player1.units {
-			if unit.placement != nil {
+			if unit.Placement != nil {
 				battleUnits = append(battleUnits, createBattleUnit(unit, 1))
 			}
 		}
 
 		for _, unit := range player2.units {
-			if unit.placement != nil {
+			if unit.Placement != nil {
 				battleUnits = append(battleUnits, createBattleUnit(unit, 2))
 			}
 		}
 
 		round := CreateRound(match.ctx, match.eventBroker, battleUnits)
+
+		round.player1ID = player1.id
+		round.player2ID = player2.id
 
 		roundCreated := RoundCreated{
 			Units: []BattleUnit{},
@@ -247,6 +250,36 @@ func (match *Match) moveToBattlePhase() {
 		round.run()
 
 		log.Printf("%v round finished", round.id)
+
+		player := match.players[round.player1ID]
+
+		roundFinished := RoundFinished{
+			PlayerID: round.player1ID,
+		}
+
+		for _, unit := range player.units {
+			roundFinished.Units = append(roundFinished.Units, *unit)
+		}
+
+		match.eventBroker.publishEvent(MatchEvent{
+			RoundFinished: &roundFinished,
+		})
+
+		if round.player2ID != round.player1ID {
+			player2 := match.players[round.player2ID]
+
+			roundFinished = RoundFinished{
+				PlayerID: round.player2ID,
+			}
+
+			for _, unit := range player2.units {
+				roundFinished.Units = append(roundFinished.Units, *unit)
+			}
+
+			match.eventBroker.publishEvent(MatchEvent{
+				RoundFinished: &roundFinished,
+			})
+		}
 	}
 }
 

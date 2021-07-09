@@ -20,12 +20,12 @@ func TestUpgradeUnit(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 			"2": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 		},
 	}
@@ -42,7 +42,7 @@ func TestUpgradeUnit(t *testing.T) {
 
 	unit := units[0]
 
-	if unit.rank != 2 {
+	if unit.Rank != 2 {
 		t.Errorf("Unit did not get upgraded correctly")
 	}
 }
@@ -51,14 +51,14 @@ func TestCannotUpgradeUnitTooBigRank(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				unitId:   "1",
-				unitType: "unit_droid",
-				rank:     2,
+				UnitID:   "1",
+				UnitType: "unit_droid",
+				Rank:     2,
 			},
 			"2": &Unit{
-				unitId:   "2",
-				unitType: "unit_droid",
-				rank:     1,
+				UnitID:   "2",
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 		},
 	}
@@ -75,13 +75,13 @@ func TestCannotUpgradeUnitTooBigRank(t *testing.T) {
 
 	unit1 := player.GetUnit("1")
 
-	if unit1.rank != 2 {
-		t.Errorf("Unit 1 has invalid rank %v", unit1.rank)
+	if unit1.Rank != 2 {
+		t.Errorf("Unit 1 has invalid rank %v", unit1.Rank)
 	}
 
 	unit2 := player.GetUnit("2")
 
-	if unit2.rank != 1 {
+	if unit2.Rank != 1 {
 		t.Error("Unit 2 has invalid rank")
 	}
 }
@@ -90,20 +90,20 @@ func Test_updates_unit_rank_to_3(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				unitType: "unit_droid",
-				rank:     2,
+				UnitType: "unit_droid",
+				Rank:     2,
 			},
 			"2": &Unit{
-				unitType: "unit_droid",
-				rank:     2,
+				UnitType: "unit_droid",
+				Rank:     2,
 			},
 			"3": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 			"4": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 		},
 	}
@@ -125,7 +125,7 @@ func Test_updates_unit_rank_to_3(t *testing.T) {
 	rank3Unit := false
 
 	for _, unit := range units {
-		if unit.rank == 3 {
+		if unit.Rank == 3 {
 			rank3Unit = true
 		}
 	}
@@ -139,12 +139,12 @@ func Test_diffrent_unit_types_are_ignored(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 			"2": &Unit{
-				unitType: "unit_clone",
-				rank:     1,
+				UnitType: "unit_clone",
+				Rank:     1,
 			},
 		},
 	}
@@ -168,24 +168,24 @@ func Test_cannot_upgrade_to_rank3_when_different_unit_type(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				unitType: "unit_droid",
-				rank:     2,
+				UnitType: "unit_droid",
+				Rank:     2,
 			},
 			"2": &Unit{
-				unitType: "unit_clone",
-				rank:     2,
+				UnitType: "unit_clone",
+				Rank:     2,
 			},
 			"4": &Unit{
-				unitType: "unit_clone",
-				rank:     1,
+				UnitType: "unit_clone",
+				Rank:     1,
 			},
 			"5": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 			"6": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 		},
 	}
@@ -228,7 +228,7 @@ func Test_cannot_upgrade_to_rank3_when_different_unit_type(t *testing.T) {
 	droidRank2Units := 0
 
 	for _, unit := range units {
-		if unit.rank == 2 && unit.unitType == "unit_droid" {
+		if unit.Rank == 2 && unit.UnitType == "unit_droid" {
 			droidRank2Units += 1
 		}
 	}
@@ -242,16 +242,16 @@ func Test_upgrades_to_rank2_unit_when_there_is_rank3_unit(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				unitType: "unit_droid",
-				rank:     3,
+				UnitType: "unit_droid",
+				Rank:     3,
 			},
 			"2": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 			"3": &Unit{
-				unitType: "unit_droid",
-				rank:     1,
+				UnitType: "unit_droid",
+				Rank:     1,
 			},
 		},
 	}
@@ -274,11 +274,11 @@ func Test_upgrades_to_rank2_unit_when_there_is_rank3_unit(t *testing.T) {
 	rank2Unit := 0
 
 	for _, unit := range units {
-		if unit.rank == 2 {
+		if unit.Rank == 2 {
 			rank2Unit += 1
 		}
 
-		if unit.rank == 3 {
+		if unit.Rank == 3 {
 			rank3Unit += 1
 		}
 	}

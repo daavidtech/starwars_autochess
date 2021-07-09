@@ -64,8 +64,8 @@ func Test_next_loc_is_in_x_axis(t *testing.T) {
 		t.Error("Next loc cannot be nil")
 	}
 
-	if loc.x != 100 || loc.y != 10 {
-		t.Errorf("Next loc is invalid %v %v", loc.x, loc.y)
+	if loc.X != 100 || loc.Y != 10 {
+		t.Errorf("Next loc is invalid %v %v", loc.X, loc.Y)
 	}
 }
 
@@ -86,8 +86,8 @@ func Test_next_loc_is_in_y_axis(t *testing.T) {
 		t.Error("Next loc cannot be nil")
 	}
 
-	if loc.x != 10 || loc.y != 100 {
-		t.Errorf("Next loc is invalid %v %v", loc.x, loc.y)
+	if loc.X != 10 || loc.Y != 100 {
+		t.Errorf("Next loc is invalid %v %v", loc.X, loc.Y)
 	}
 }
 
@@ -108,8 +108,8 @@ func Test_next_loc_x_is_smaller(t *testing.T) {
 		t.Error("Next loc cannot be nil")
 	}
 
-	if loc.x != 10 || loc.y != 100 {
-		t.Errorf("Next loc is invalid %v %v", loc.x, loc.y)
+	if loc.X != 10 || loc.Y != 100 {
+		t.Errorf("Next loc is invalid %v %v", loc.X, loc.Y)
 	}
 }
 
@@ -130,8 +130,8 @@ func Test_next_loc_y_is_smaller(t *testing.T) {
 		t.Error("Next loc cannot be nil")
 	}
 
-	if loc.x != 100 || loc.y != 10 {
-		t.Errorf("Next loc is invalid %v %v", loc.x, loc.y)
+	if loc.X != 100 || loc.Y != 10 {
+		t.Errorf("Next loc is invalid %v %v", loc.X, loc.Y)
 	}
 }
 
@@ -141,8 +141,8 @@ func Test_move_towards_in_x_axis(t *testing.T) {
 		Y:         5,
 		MoveSpeed: 10,
 		nextLoc: &Point{
-			x: 40,
-			y: 10,
+			X: 40,
+			Y: 10,
 		},
 	}
 
@@ -159,8 +159,8 @@ func Test_move_towards_in_y_axis(t *testing.T) {
 		Y:         5,
 		MoveSpeed: 10,
 		nextLoc: &Point{
-			x: 10,
-			y: 40,
+			X: 10,
+			Y: 40,
 		},
 	}
 
@@ -177,8 +177,8 @@ func Test_move_towards_in_x_axis_negative_direction(t *testing.T) {
 		Y:         20,
 		MoveSpeed: 10,
 		nextLoc: &Point{
-			x: 10,
-			y: 10,
+			X: 10,
+			Y: 10,
 		},
 	}
 
@@ -195,8 +195,8 @@ func Test_move_towards_in_y_axis_negative_direction(t *testing.T) {
 		Y:         40,
 		MoveSpeed: 10,
 		nextLoc: &Point{
-			x: 10,
-			y: 10,
+			X: 10,
+			Y: 10,
 		},
 	}
 
@@ -213,8 +213,8 @@ func Test_dont_move_past_target_location_on_x_axis(t *testing.T) {
 		Y:         20,
 		MoveSpeed: 15,
 		nextLoc: &Point{
-			x: 30,
-			y: 25,
+			X: 30,
+			Y: 25,
 		},
 	}
 
@@ -231,8 +231,8 @@ func Test_dont_move_past_target_location_on_y_axis(t *testing.T) {
 		Y:         20,
 		MoveSpeed: 15,
 		nextLoc: &Point{
-			x: 25,
-			y: 30,
+			X: 25,
+			Y: 30,
 		},
 	}
 
@@ -249,8 +249,8 @@ func Test_dont_move_past_target_location_on_x_axis_negative(t *testing.T) {
 		Y:         30,
 		MoveSpeed: 15,
 		nextLoc: &Point{
-			x: 20,
-			y: 25,
+			X: 20,
+			Y: 25,
 		},
 	}
 
@@ -267,8 +267,8 @@ func Test_dont_move_past_target_location_on_y_axis_negative(t *testing.T) {
 		Y:         30,
 		MoveSpeed: 15,
 		nextLoc: &Point{
-			x: 25,
-			y: 20,
+			X: 25,
+			Y: 20,
 		},
 	}
 

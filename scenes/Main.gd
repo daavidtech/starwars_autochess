@@ -116,6 +116,8 @@ func _handle_msg(msg):
 		handle_countdown_started(msg.countdownStarted)
 	if msg.roundCreated != null:
 		handle_round_created(msg["roundCreated"])
+	if msg.roundFinished != null:
+		handle_round_finished(msg["roundFinished"])
 	
 func clear_units():
 	for child in placement_area.get_children():
@@ -149,14 +151,15 @@ func set_unit(loc: String, new_unit):
 		
 			if loc == "battlefield":
 				placement_area.add_child(unit)
-				unit.translation = conv_server_coords(new_unit.x, new_unit.y)
 			
 			if loc == "placing":
 				dragging_area.add_child(unit)
 				
 	else:
 		placement_area.add_child(unit)
-		unit.translation = conv_server_coords(new_unit.x, new_unit.y)
+		
+	if new_unit.placement != null:
+		unit.translation = conv_server_coords(new_unit.placement.x, new_unit.placement.y)
 
 	unit.unit_id = new_unit.unitId
 	unit.unit_type = new_unit.unitType
@@ -169,6 +172,15 @@ func set_unit(loc: String, new_unit):
 	unit.attack_rate = new_unit.attackRate
 	unit.rank = new_unit.rank
 	
+func handle_round_finished(round_finished):
+	clear_units()
+	
+	for unit in round_finished.units:
+		if unit.placement == null:
+			set_unit("barrack", unit)
+		else:
+			set_unit("battlefield", unit)
+
 func handle_round_created(round_created):
 	clear_units()
 	

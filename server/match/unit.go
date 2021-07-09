@@ -1,13 +1,13 @@
 package match
 
 type Unit struct {
-	unitId     string
-	unitType   string
-	tier       int
-	rank       int
-	hp         int
-	mana       int
-	attackRate int
+	UnitID     string
+	UnitType   string
+	Tier       int
+	Rank       int
+	HP         int
+	Mana       int
+	AttackRate int
 
-	placement *Point
+	Placement *Point
 }

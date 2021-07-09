@@ -31,7 +31,7 @@ type BattleUnit struct {
 }
 
 func createBattleUnit(unit *Unit, team int) *BattleUnit {
-	y := unit.placement.y
+	y := unit.Placement.Y
 
 	if team == 2 {
 		y = 100 - y
@@ -41,17 +41,17 @@ func createBattleUnit(unit *Unit, team int) *BattleUnit {
 
 	return &BattleUnit{
 		UnitID:      unitID,
-		UnitType:    unit.unitType,
+		UnitType:    unit.UnitType,
 		MaxHP:       100,
 		HP:          100,
-		MaxMana:     unit.mana,
-		Mana:        unit.mana,
-		AttackRate:  unit.attackRate,
+		MaxMana:     unit.Mana,
+		Mana:        unit.Mana,
+		AttackRate:  unit.AttackRate,
 		AttackRange: 20,
 		MoveSpeed:   20,
 		Dead:        false,
 		Team:        team,
-		X:           unit.placement.x,
+		X:           unit.Placement.X,
 		Y:           y,
 	}
 }
@@ -79,13 +79,13 @@ func (unit *BattleUnit) calcNextLoc() *Point {
 
 	if xDist > yDist {
 		return &Point{
-			x: unit.currAttackTarget.X,
-			y: unit.Y,
+			X: unit.currAttackTarget.X,
+			Y: unit.Y,
 		}
 	} else {
 		return &Point{
-			x: unit.X,
-			y: unit.currAttackTarget.Y,
+			X: unit.X,
+			Y: unit.currAttackTarget.Y,
 		}
 	}
 }
@@ -95,10 +95,10 @@ func (unit *BattleUnit) moveTowardsNextLoc(delta float32) {
 		return
 	}
 
-	xDiff := unit.nextLoc.x - unit.X
+	xDiff := unit.nextLoc.X - unit.X
 	xDist := int(math.Abs(float64(xDiff)))
 
-	yDiff := unit.nextLoc.y - unit.Y
+	yDiff := unit.nextLoc.Y - unit.Y
 	yDist := int(math.Abs(float64(yDiff)))
 
 	stepSize := float32(unit.MoveSpeed) * delta

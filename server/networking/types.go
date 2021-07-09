@@ -170,12 +170,33 @@ type BattleUnit struct {
 	InstantAttack bool   `json:"instantAttack"`
 	MoveSpeed     int    `json:"moveSpeed"`
 	Dead          bool   `json:"dead"`
-	X             int    `json:"x"`
-	Y             int    `json:"y"`
+	Placement     Point  `json:"placement"`
 }
 
 type RoundCreated struct {
 	Units []BattleUnit `json:"units"`
+}
+
+type Point struct {
+	X float32 `json:"x"`
+	Y float32 `json:"y"`
+}
+
+type Unit struct {
+	Team       int    `json:"team"`
+	UnitID     string `json:"unitId"`
+	UnitType   string `json:"unitType"`
+	Tier       int    `json:"tier"`
+	Rank       int    `json:"rank"`
+	HP         int    `json:"hp"`
+	Mana       int    `json:"mana"`
+	AttackRate int    `json:"attackRate"`
+	Placement  *Point `json:"placement"`
+}
+
+type RoundFinished struct {
+	PlayerID string `json:"playerId"`
+	Units    []Unit `json:"units"`
 }
 
 type MessageToClient struct {
@@ -201,6 +222,7 @@ type MessageToClient struct {
 	ShopRefilled          *ShopRefilled          `json:"shopRefilled"`
 	CountdownStarted      *CountdownStarted      `json:"countdownStarted"`
 	RoundCreated          *RoundCreated          `json:"roundCreated"`
+	RoundFinished         *RoundFinished         `json:"roundFinished"`
 
 	MatchPhaseChanged *MatchPhaseChanged `json:"matchPhaseChanged"`
 }

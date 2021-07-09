@@ -42,13 +42,13 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 		newUnitID := uuid.New().String()
 
 		player.units[newUnitID] = &Unit{
-			unitId:   newUnitID,
-			unitType: shopUnit.UnitType,
+			UnitID:   newUnitID,
+			UnitType: shopUnit.UnitType,
 			//tier:       shopUnit.Tier,
-			rank:       1,
-			hp:         shopUnit.HP,
-			mana:       shopUnit.Mana,
-			attackRate: shopUnit.AttackRate,
+			Rank:       1,
+			HP:         shopUnit.HP,
+			Mana:       shopUnit.Mana,
+			AttackRate: shopUnit.AttackRate,
 		}
 
 		return []MatchEvent{
@@ -81,24 +81,24 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 	}
 
 	for unitID, unit := range player.units {
-		if unit.unitType != shopUnit.UnitType {
+		if unit.UnitType != shopUnit.UnitType {
 			continue
 		}
 
-		if !upgraded && upgradeRank == unit.rank {
-			unit.rank += 1
-			unit.hp = shopUnit.HP
-			unit.mana = shopUnit.Mana
-			unit.attackRate = shopUnit.AttackRate
+		if !upgraded && upgradeRank == unit.Rank {
+			unit.Rank += 1
+			unit.HP = shopUnit.HP
+			unit.Mana = shopUnit.Mana
+			unit.AttackRate = shopUnit.AttackRate
 
-			log.Printf("Unit %v upgraded to rank %v", unitID, unit.rank)
+			log.Printf("Unit %v upgraded to rank %v", unitID, unit.Rank)
 
 			events = append(events, MatchEvent{
 				BarrackUnitUpgraded: &BarrackUnitUpgraded{
 					UnitID:   unitID,
 					UnitType: shopUnit.UnitType,
 					//Tier:       shopUnit.Tier,
-					Rank:       unit.rank,
+					Rank:       unit.Rank,
 					HP:         shopUnit.HP,
 					Mana:       shopUnit.Mana,
 					AttackRate: shopUnit.AttackRate,
@@ -110,7 +110,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 			continue
 		}
 
-		if unit.rank == 1 {
+		if unit.Rank == 1 {
 			if removeOneRanks == 0 {
 				continue
 			}
@@ -118,7 +118,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 			removeOneRanks -= 1
 		}
 
-		if unit.rank == 2 {
+		if unit.Rank == 2 {
 			if removeTwoRanks == 0 {
 				continue
 			}
@@ -126,7 +126,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 			removeTwoRanks -= 1
 		}
 
-		if unit.rank == 3 {
+		if unit.Rank == 3 {
 			continue
 		}
 
@@ -149,7 +149,7 @@ func (player *Player) countUnitType(unitType string, rank int) int {
 	count := 0
 
 	for _, battleUnit := range player.units {
-		if battleUnit.unitType != unitType || battleUnit.rank != rank {
+		if battleUnit.UnitType != unitType || battleUnit.Rank != rank {
 			continue
 		}
 

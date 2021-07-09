@@ -14,8 +14,10 @@ type RoundResult struct {
 }
 
 type Round struct {
-	id    string
-	units []*BattleUnit
+	id        string
+	player1ID string
+	player2ID string
+	units     []*BattleUnit
 
 	eventBroker *MatchEventBroker
 
@@ -182,13 +184,13 @@ func (round *Round) work(delta float32) RoundWorkResult {
 		if unit.nextLoc == nil || !nextLock.isEqual(unit.nextLoc) {
 			unit.nextLoc = nextLock
 
-			log.Printf("Unit started moving to %v %v", nextLock.x, nextLock.y)
+			log.Printf("Unit started moving to %v %v", nextLock.X, nextLock.Y)
 
 			result.events = append(result.events, MatchEvent{
 				UnitStartedMovingTo: &UnitStartedMovingTo{
 					UnitID: unit.UnitID,
-					X:      int(nextLock.x),
-					Y:      int(nextLock.y),
+					X:      int(nextLock.X),
+					Y:      int(nextLock.Y),
 				},
 			})
 		}
