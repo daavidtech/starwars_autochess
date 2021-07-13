@@ -174,7 +174,8 @@ type BattleUnit struct {
 }
 
 type RoundCreated struct {
-	Units []BattleUnit `json:"units"`
+	PlayerID string       `json:"playerId"`
+	Units    []BattleUnit `json:"units"`
 }
 
 type Point struct {
@@ -195,8 +196,10 @@ type Unit struct {
 }
 
 type RoundFinished struct {
-	PlayerID string `json:"playerId"`
-	Units    []Unit `json:"units"`
+	PlayerID         string `json:"playerId"`
+	NewCreditsAmount int    `json:"newCreditsAmount"`
+	NewPlayerHealth  int    `json:"newPlayerHealth"`
+	Units            []Unit `json:"units"`
 }
 
 type MessageToClient struct {
@@ -251,6 +254,14 @@ type JoinGame struct{}
 
 type SeekMatch struct{}
 
+type Login struct {
+	Username string
+	Password string
+}
+
+type StartMatch struct {
+}
+
 type MessageFromClient struct {
 	BuyUnit          *BuyUnit          `json:"buyUnit"`
 	PlaceUnit        *PlaceUnit        `json:"placeUnit"`
@@ -259,6 +270,8 @@ type MessageFromClient struct {
 	RecycleShopUnits *RecycleShopUnits `json:"recycleShopUnits"`
 	JoinGame         *JoinGame         `json:"joinGame"`
 	SeekMatch        *SeekMatch        `json:"seekMatch"`
+	Login            *Login            `json:"login"`
+	StartMatch       *StartMatch       `json:"startMatch"`
 }
 
 type GameSnapshot struct {

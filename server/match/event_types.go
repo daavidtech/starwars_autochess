@@ -66,12 +66,15 @@ type UnitDied struct {
 }
 
 type RoundCreated struct {
-	Units []BattleUnit
+	PlayerID string
+	Units    []BattleUnit
 }
 
 type RoundFinished struct {
-	PlayerID string
-	Units    []Unit
+	PlayerID         string
+	NewCreditsAmount int
+	NewPlayerHealth  int
+	Units            []Unit
 }
 
 type MatchEvent struct {

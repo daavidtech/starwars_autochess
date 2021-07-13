@@ -2,6 +2,7 @@ package game
 
 type UserRepository interface {
 	Fetch(userID string) *User
+	FetchByUsername(username string) *User
 }
 
 type UserRepositoryMemImpl struct {

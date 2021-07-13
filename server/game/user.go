@@ -1,13 +1,14 @@
 package game
 
 import (
-	"github.com/daavidtech/starwars_autochess/match"
 	"github.com/google/uuid"
 )
 
 type User struct {
 	id              string
-	currentMatch    *match.Match
+	username        string
+	password        string
+	currentMatchID  string
 	currentPlayerID string
 }
 
@@ -17,12 +18,32 @@ func NewUser() *User {
 	}
 }
 
-func (user *User) GetCurrentMatch() *match.Match {
-	return user.currentMatch
+func (user *User) GetID() string {
+	return user.id
 }
 
-func (user *User) SetCurrentMatch(match *match.Match) {
-	user.currentMatch = match
+func (user *User) GetUsername() string {
+	return user.username
+}
+
+func (user *User) SetUsername(username string) {
+	user.username = username
+}
+
+func (user *User) GetPassword() string {
+	return user.password
+}
+
+func (user *User) SetPassword(password string) {
+	user.password = password
+}
+
+func (user *User) GetCurrentMatchID() string {
+	return user.currentMatchID
+}
+
+func (user *User) SetCurrentMatchID(matchID string) {
+	user.currentMatchID = matchID
 }
 
 func (user *User) GetCurrentPlayerID() string {

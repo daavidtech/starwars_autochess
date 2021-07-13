@@ -1,0 +1,44 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://scenes/loging_form.gd" type="Script" id=1]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 439, 339 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Username" type="TextEdit" parent="."]
+margin_left = 319.0
+margin_top = 125.0
+margin_right = 562.0
+margin_bottom = 175.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Password" type="TextEdit" parent="."]
+margin_left = 320.0
+margin_top = 198.0
+margin_right = 563.0
+margin_bottom = 248.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Button" type="Button" parent="."]
+margin_left = 346.0
+margin_top = 287.0
+margin_right = 541.0
+margin_bottom = 350.0
+text = "Login"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="text_changed" from="Username" to="." method="_on_TextEdit_text_changed"]
+[connection signal="text_changed" from="Password" to="." method="_on_TextEdit2_text_changed"]
+[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]

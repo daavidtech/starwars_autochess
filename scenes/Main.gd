@@ -175,6 +175,9 @@ func set_unit(loc: String, new_unit):
 func handle_round_finished(round_finished):
 	clear_units()
 	
+	your_money.text = String(round_finished.newCreditsAmount)
+	your_health.text = String(round_finished.newPlayerHealth)
+	
 	for unit in round_finished.units:
 		if unit.placement == null:
 			set_unit("barrack", unit)
@@ -289,6 +292,13 @@ func handle_game_phase_changed(game_phase_changed):
 				placing_unit.location = "barrack"
 				placing_unit.dragging = false
 				placing_unit = null
+		"EndPhase":
+			lobby.visible = false
+			your_money.visible = false
+			your_health.visible = false
+			your_level.visible = false
+			unit_shop.visible = false
+			unit_barrack.visible = false
 
 func handle_unit_added(unit_added):
 	print("Unit added " + unit_added.unitType)

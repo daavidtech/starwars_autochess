@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/daavidtech/starwars_autochess/game"
+	"github.com/daavidtech/starwars_autochess/match"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
@@ -28,52 +29,68 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 
 	log.Println("New ws connection")
 
-	// ws.WriteJSON(MessageToClient{
-	// 	ShopRefilled: &ShopRefilled{
-	// 		ShopUnits: []ShopUnit{
-	// 			ShopUnit{
-	// 				UnitType: "unit_droid",
-	// 				Level:    3,
-	// 				HP:       200,
-	// 				Mana:     300,
-	// 				Rank:     3,
-	// 				Cost:     100,
-	// 			},
-	// 		},
-	// 	},
-	// })
+	var user *game.User
 
-	user := wsServer.UserRepository.Fetch("1")
+	for {
+		var msg MessageFromClient
 
-	currentMatch := user.GetCurrentMatch()
+		err := ws.ReadJSON(&msg)
 
-	if currentMatch == nil {
-		currentMatch = wsServer.GameCoordinator.FindNewMatch()
-		newPlayer := currentMatch.CreatePlayer()
+		if err != nil {
+			log.Printf("Error while receiving message %v", err)
 
-		user.SetCurrentPlayerID(newPlayer.GetID())
-		user.SetCurrentMatch(currentMatch)
+			return
+		}
+
+		if msg.Login != nil {
+			user = wsServer.UserRepository.FetchByUsername(msg.Login.Username)
+
+			if user == nil {
+				log.Printf("User not found %v", msg.Login.Username)
+				continue
+			}
+
+			if user.GetPassword() != msg.Login.Password {
+				log.Printf("Password is incorrect for user %v", msg.Login.Username)
+
+				continue
+			}
+
+			break
+		}
 	}
 
-	matchID := currentMatch.GetID()
+	matchID := user.GetCurrentMatchID()
+
+	var currentMatch *match.Match
+
+	currentMatch = wsServer.GameCoordinator.FindMatch(matchID)
+
+	if currentMatch == nil {
+		for {
+			var msg MessageFromClient
+
+			err := ws.ReadJSON(&msg)
+
+			if err != nil {
+				log.Printf("Error while receiving message %v", err)
+
+				return
+			}
+
+			if msg.SeekMatch != nil {
+				currentMatch = wsServer.GameCoordinator.FindNewMatch()
+				newPlayer := currentMatch.CreatePlayer()
+
+				user.SetCurrentPlayerID(newPlayer.GetID())
+				user.SetCurrentMatchID(currentMatch.GetID())
+			}
+		}
+	}
+
+	matchID = currentMatch.GetID()
+
 	playerID := user.GetCurrentPlayerID()
-
-	// err = ws.WriteJSON(MessageToClient{
-	// 	CreateUnit: &CreateUnit{
-	// 		ID:       "1",
-	// 		UnitType: "UNIT_DROID",
-	// 		X:        2,
-	// 		Y:        2,
-	// 	},
-	// })
-
-	// if err != nil {
-	// 	log.Println("Failed to send json message", err)
-	// }
-
-	// reqCtx := getReqCtx(ctx)
-
-	// playerControls := game.PlayerControls{}
 
 	go func() {
 		for {
@@ -87,7 +104,11 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				break
 			}
 
-			log.Printf("received msg %v", msg)
+			if msg.StartMatch != nil {
+				currentMatch.Start()
+
+				continue
+			}
 
 			if msg.BuyUnit != nil {
 				log.Printf("BuyUnit %v", msg.BuyUnit)
@@ -286,42 +307,48 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 		}
 
 		if event.RoundCreated != nil {
-			units := []BattleUnit{}
+			if event.RoundCreated.PlayerID == playerID {
+				roundCreated := RoundCreated{
+					PlayerID: playerID,
+					Units:    []BattleUnit{},
+				}
 
-			for _, unit := range event.RoundCreated.Units {
-				units = append(units, BattleUnit{
-					Team:          unit.Team,
-					UnitID:        unit.UnitID,
-					UnitType:      unit.UnitType,
-					Rank:          unit.Rank,
-					MaxHP:         unit.MaxHP,
-					HP:            unit.HP,
-					MaxMana:       unit.MaxMana,
-					Mana:          unit.Mana,
-					AttackRate:    unit.AttackRate,
-					AttackRange:   unit.AttackRange,
-					AttackDamage:  unit.AttackDamage,
-					InstantAttack: unit.InstantAttack,
-					MoveSpeed:     unit.MoveSpeed,
-					Dead:          unit.Dead,
-					Placement: Point{
-						X: unit.X,
-						Y: unit.Y,
-					},
+				for _, unit := range event.RoundCreated.Units {
+					roundCreated.Units = append(roundCreated.Units, BattleUnit{
+						Team:          unit.Team,
+						UnitID:        unit.UnitID,
+						UnitType:      unit.UnitType,
+						Rank:          unit.Rank,
+						MaxHP:         unit.MaxHP,
+						HP:            unit.HP,
+						MaxMana:       unit.MaxMana,
+						Mana:          unit.Mana,
+						AttackRate:    unit.AttackRate,
+						AttackRange:   unit.AttackRange,
+						AttackDamage:  unit.AttackDamage,
+						InstantAttack: unit.InstantAttack,
+						MoveSpeed:     unit.MoveSpeed,
+						Dead:          unit.Dead,
+						Placement: Point{
+							X: unit.X,
+							Y: unit.Y,
+						},
+					})
+				}
+
+				err = ws.WriteJSON(MessageToClient{
+					RoundCreated: &roundCreated,
 				})
 			}
-
-			err = ws.WriteJSON(MessageToClient{
-				RoundCreated: &RoundCreated{
-					Units: units,
-				},
-			})
 		}
 
 		if event.RoundFinished != nil {
 			if event.RoundFinished.PlayerID == playerID {
 				roundFinished := RoundFinished{
-					PlayerID: playerID,
+					PlayerID:         playerID,
+					NewCreditsAmount: event.RoundFinished.NewCreditsAmount,
+					NewPlayerHealth:  event.RoundFinished.NewPlayerHealth,
+					Units:            []Unit{},
 				}
 
 				for _, unit := range event.RoundFinished.Units {
@@ -360,6 +387,4 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 			return
 		}
 	}
-
-	log.Println("Event broker subscription stopped")
 }

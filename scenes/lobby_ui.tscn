@@ -75,3 +75,13 @@ size_flags_vertical = 3
 margin_right = 1025.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
+
+[node name="Button" type="Button" parent="."]
+margin_left = 180.76
+margin_top = 390.06
+margin_right = 426.76
+margin_bottom = 466.06
+text = "start"
+__meta__ = {
+"_edit_use_anchors_": false
+}

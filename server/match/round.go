@@ -235,6 +235,6 @@ func (round *Round) run() RoundResult {
 	// log.Printf("Team %v won", roundResult.whoWon)
 
 	return RoundResult{
-		whoWon: 1,
+		whoWon: result.whoWon,
 	}
 }

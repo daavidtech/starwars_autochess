@@ -17,6 +17,7 @@ const (
 	ShoppingPhase  MatchPhase = "ShoppingPhase"
 	PlacementPhase MatchPhase = "PlacementPhase"
 	BattlePhase    MatchPhase = "BattlePhase"
+	EndPhase       MatchPhase = "EndPhase"
 )
 
 type Match struct {
@@ -48,6 +49,10 @@ func NewMatch(ctx context.Context) *Match {
 		players:     make(map[string]*Player),
 		phase:       InitPhase,
 	}
+}
+
+func (match *Match) GetMatchPhase() MatchPhase {
+	return match.phase
 }
 
 func (match *Match) GetEventBroker() *MatchEventBroker {
@@ -185,7 +190,7 @@ func (match *Match) moveToPlacementPhase() {
 	})
 }
 
-func (match *Match) moveToBattlePhase() {
+func (match *Match) moveToBattlePhase() bool {
 	match.mu.Lock()
 	defer match.mu.Unlock()
 
@@ -199,7 +204,7 @@ func (match *Match) moveToBattlePhase() {
 
 	rounds := []*Round{}
 
-	playerPool := copyPlayers(match.players)
+	playerPool := copyPlayersWithoutDead(match.players)
 
 	for len(playerPool) > 0 {
 		player1 := popPlayer(playerPool)
@@ -247,14 +252,26 @@ func (match *Match) moveToBattlePhase() {
 	for _, round := range rounds {
 		log.Printf("Starting round %v", round.id)
 
-		round.run()
+		result := round.run()
 
 		log.Printf("%v round finished", round.id)
 
 		player := match.players[round.player1ID]
 
+		player.payDay()
+
+		if result.whoWon == 2 {
+			player.health -= 10
+
+			if player.health <= 0 {
+				player.dead = true
+			}
+		}
+
 		roundFinished := RoundFinished{
-			PlayerID: round.player1ID,
+			PlayerID:         round.player1ID,
+			NewCreditsAmount: player.credits,
+			NewPlayerHealth:  player.health,
 		}
 
 		for _, unit := range player.units {
@@ -268,8 +285,20 @@ func (match *Match) moveToBattlePhase() {
 		if round.player2ID != round.player1ID {
 			player2 := match.players[round.player2ID]
 
+			player2.payDay()
+
+			if result.whoWon == 1 {
+				player2.health -= 10
+
+				if player2.health <= 0 {
+					player2.dead = true
+				}
+			}
+
 			roundFinished = RoundFinished{
-				PlayerID: round.player2ID,
+				PlayerID:         round.player2ID,
+				NewCreditsAmount: player2.credits,
+				NewPlayerHealth:  player2.health,
 			}
 
 			for _, unit := range player2.units {
@@ -281,41 +310,63 @@ func (match *Match) moveToBattlePhase() {
 			})
 		}
 	}
+
+	if match.CountAlivePlayers() < 1 {
+		log.Println("Match ended")
+
+		match.eventBroker.publishEvent(MatchEvent{
+			PhaseChanged: &PhaseChanged{
+				MatchPhase: EndPhase,
+			},
+		})
+
+		return false
+	}
+
+	return true
 }
 
-func (match *Match) Run() {
-	<-time.NewTimer(10 * time.Millisecond).C
+func (match *Match) CountAlivePlayers() int {
+	count := 0
 
-	match.eventBroker.publishEvent(MatchEvent{
-		PhaseChanged: &PhaseChanged{
-			MatchPhase: InitPhase,
-		},
-	})
+	for _, player := range match.players {
+		if player.dead {
+			continue
+		}
 
-	<-time.NewTimer(100 * time.Millisecond).C
+		count += 1
+	}
 
-	match.eventBroker.publishEvent(MatchEvent{
-		PhaseChanged: &PhaseChanged{
-			MatchPhase: LobbyPhase,
-		},
-	})
+	return count
+}
 
-	// match.eventBroker.publishEvent(MatchEvent{
-	// 	CountdownStarted: &CountdownStarted{
-	// 		StartValue: 2,
-	// 		Interval:   1.0,
-	// 	},
-	// })
+func (match *Match) Start() {
+	match.mu.Lock()
+	defer match.mu.Unlock()
 
-	select {
-	case <-time.NewTimer(100 * time.Millisecond).C:
-	case <-match.ctx.Done():
+	if match.phase != LobbyPhase {
+		log.Println("Cannot start match if not in lobby phase")
+
 		return
 	}
 
+	if len(match.players) < 1 {
+		log.Println("Too few players to start the game")
+
+		return
+	}
+
+	match.phase = ShoppingPhase
+
+	go match.Run()
+}
+
+func (match *Match) Run() {
 	log.Printf("Refilling shop")
 
-	for {
+	gameContinue := true
+
+	for gameContinue {
 		match.moveToShoppingPhase()
 
 		match.eventBroker.publishEvent(MatchEvent{
@@ -331,6 +382,6 @@ func (match *Match) Run() {
 
 		<-time.NewTimer(5 * time.Second).C
 
-		match.moveToBattlePhase()
+		gameContinue = match.moveToBattlePhase()
 	}
 }

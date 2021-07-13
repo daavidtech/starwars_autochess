@@ -35,8 +35,6 @@ func (gameCoordinator *GameCoordinator) FindNewMatch() *match.Match {
 	newMatch.UnitPropertyStore = gameCoordinator.UnitPropertyStore
 	newMatch.TierProbabilities = gameCoordinator.TierProbabilities
 
-	go newMatch.Run()
-
 	gameCoordinator.matches[newMatch.GetID()] = newMatch
 
 	return newMatch

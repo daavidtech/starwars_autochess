@@ -11,6 +11,7 @@ type Player struct {
 	credits  int
 	health   int
 	accepted bool
+	dead     bool
 	xp       int
 	units    map[string]*Unit
 	shop     *Shop
@@ -22,8 +23,10 @@ func NewPlayer() *Player {
 	shop.SetSize(5)
 
 	return &Player{
-		units: make(map[string]*Unit),
-		shop:  shop,
+		units:  make(map[string]*Unit),
+		shop:   shop,
+		health: 100,
+		dead:   false,
 	}
 }
 
@@ -195,4 +198,8 @@ func (player *Player) UseCredits(amount int) {
 
 func (player *Player) IsBarrackFull() bool {
 	return len(player.units) > 8
+}
+
+func (player *Player) payDay() {
+	player.credits += 100
 }
