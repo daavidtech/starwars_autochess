@@ -195,11 +195,34 @@ type Unit struct {
 	Placement  *Point `json:"placement"`
 }
 
+type Player struct {
+	PlayerID string `json:"playerId"`
+	Name     string `json:"name"`
+}
+
 type RoundFinished struct {
 	PlayerID         string `json:"playerId"`
 	NewCreditsAmount int    `json:"newCreditsAmount"`
 	NewPlayerHealth  int    `json:"newPlayerHealth"`
 	Units            []Unit `json:"units"`
+}
+
+type CurrentMatch struct {
+	MatchID string           `json:"matchId"`
+	Phase   match.MatchPhase `json:"phase"`
+	Players []Player         `json:"players"`
+}
+
+type PlayerJoined struct {
+	Player Player `json:"player"`
+}
+
+type PlayerLeft struct {
+	Player Player `json:"player"`
+}
+
+type LoginSuccess struct {
+	Uusername string `json:""`
 }
 
 type MessageToClient struct {
@@ -226,6 +249,10 @@ type MessageToClient struct {
 	CountdownStarted      *CountdownStarted      `json:"countdownStarted"`
 	RoundCreated          *RoundCreated          `json:"roundCreated"`
 	RoundFinished         *RoundFinished         `json:"roundFinished"`
+	CurrentMatch          *CurrentMatch          `json:"currentMatch"`
+	LoginSuccess          *LoginSuccess          `json:"loginSuccess"`
+	PlayerJoined          *PlayerJoined          `json:"playerJoined"`
+	PlayerLeft            *PlayerLeft            `json:"playerLeft"`
 
 	MatchPhaseChanged *MatchPhaseChanged `json:"matchPhaseChanged"`
 }
@@ -252,7 +279,7 @@ type RecycleShopUnits struct{}
 
 type JoinGame struct{}
 
-type SeekMatch struct{}
+type FindMatch struct{}
 
 type Login struct {
 	Username string
@@ -269,7 +296,7 @@ type MessageFromClient struct {
 	BuyLevelUp       *BuyLevelUp       `json:"buyLevelUp"`
 	RecycleShopUnits *RecycleShopUnits `json:"recycleShopUnits"`
 	JoinGame         *JoinGame         `json:"joinGame"`
-	SeekMatch        *SeekMatch        `json:"seekMatch"`
+	FindMatch        *FindMatch        `json:"findMatch"`
 	Login            *Login            `json:"login"`
 	StartMatch       *StartMatch       `json:"startMatch"`
 }

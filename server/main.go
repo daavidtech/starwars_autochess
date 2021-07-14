@@ -41,6 +41,20 @@ func main() {
 
 	userRepo := game.NewUserRepository()
 
+	newUser := game.NewUser()
+
+	newUser.SetUsername("dragonslayer69")
+	newUser.SetPassword("asdf")
+
+	userRepo.Save(newUser)
+
+	newUser = game.NewUser()
+
+	newUser.SetUsername("hotmom")
+	newUser.SetPassword("asdf")
+
+	userRepo.Save(newUser)
+
 	wsServer := networking.WsServer{
 		UserRepository:  userRepo,
 		GameCoordinator: gameCoordinator,

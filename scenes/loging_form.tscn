@@ -11,7 +11,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Username" type="TextEdit" parent="."]
+[node name="username_textbox" type="TextEdit" parent="."]
 margin_left = 319.0
 margin_top = 125.0
 margin_right = 562.0
@@ -20,16 +20,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Password" type="TextEdit" parent="."]
-margin_left = 320.0
-margin_top = 198.0
-margin_right = 563.0
-margin_bottom = 248.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Button" type="Button" parent="."]
+[node name="login_button" type="Button" parent="."]
 margin_left = 346.0
 margin_top = 287.0
 margin_right = 541.0
@@ -39,6 +30,15 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="text_changed" from="Username" to="." method="_on_TextEdit_text_changed"]
-[connection signal="text_changed" from="Password" to="." method="_on_TextEdit2_text_changed"]
-[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+[node name="password_line_edit" type="LineEdit" parent="."]
+margin_left = 320.0
+margin_top = 191.0
+margin_right = 562.0
+margin_bottom = 241.0
+secret = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="text_changed" from="username_textbox" to="." method="_on_TextEdit_text_changed"]
+[connection signal="pressed" from="login_button" to="." method="_on_Button_pressed"]

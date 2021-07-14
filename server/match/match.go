@@ -12,7 +12,6 @@ import (
 type MatchPhase string
 
 const (
-	InitPhase      MatchPhase = "InitPhase"
 	LobbyPhase     MatchPhase = "LobbyPhase"
 	ShoppingPhase  MatchPhase = "ShoppingPhase"
 	PlacementPhase MatchPhase = "PlacementPhase"
@@ -47,8 +46,18 @@ func NewMatch(ctx context.Context) *Match {
 		id:          uuid.New().String(),
 		eventBroker: eventBroker,
 		players:     make(map[string]*Player),
-		phase:       InitPhase,
+		phase:       LobbyPhase,
 	}
+}
+
+func (match *Match) GetPlayers() []*Player {
+	players := []*Player{}
+
+	for _, player := range match.players {
+		players = append(players, player)
+	}
+
+	return players
 }
 
 func (match *Match) GetMatchPhase() MatchPhase {
@@ -122,13 +131,22 @@ func (match *Match) CreateSnapshop() MatchSnapshot {
 	return MatchSnapshot{}
 }
 
-func (match *Match) CreatePlayer() *Player {
+func (match *Match) CreatePlayer(name string, lobbyAdmin bool) *Player {
 	newPlayer := NewPlayer()
+
+	newPlayer.name = name
+	newPlayer.lobbyAdmin = lobbyAdmin
 
 	newPlayer.shop.UnitPropertyStore = match.UnitPropertyStore
 	newPlayer.shop.TierProbabilities = match.TierProbabilities
 
 	match.players[newPlayer.GetID()] = newPlayer
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PlayerJoined: &PlayerJoined{
+			Player: *newPlayer,
+		},
+	})
 
 	return newPlayer
 }
@@ -340,7 +358,21 @@ func (match *Match) CountAlivePlayers() int {
 	return count
 }
 
-func (match *Match) Start() {
+func (match *Match) StartLobby() {
+	match.mu.Lock()
+	defer match.mu.Unlock()
+
+	match.phase = LobbyPhase
+
+	match.eventBroker.publishEvent(MatchEvent{
+		PhaseChanged: &PhaseChanged{
+			MatchPhase: LobbyPhase,
+		},
+	})
+
+}
+
+func (match *Match) Start(playerID string) {
 	match.mu.Lock()
 	defer match.mu.Unlock()
 
@@ -352,6 +384,14 @@ func (match *Match) Start() {
 
 	if len(match.players) < 1 {
 		log.Println("Too few players to start the game")
+
+		return
+	}
+
+	player := match.players[playerID]
+
+	if !player.lobbyAdmin {
+		log.Println("Player is not lobby admin cannot start match")
 
 		return
 	}

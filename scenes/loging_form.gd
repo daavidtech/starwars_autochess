@@ -2,20 +2,17 @@ extends Control
 
 var ServerConn = preload("res://scenes/server_connection.gd")
 
-onready var username_text_box = $Username
-onready var password_text_box = $Password
+onready var username = $username_textbox
+onready var password = $password_line_edit
 
 var conn
 
-func _ready():
-	conn = ServerConn.new()
-
 func _on_Button_pressed():
-	print("Login " + username_text_box.text + " " + password_text_box.text)
+	print("Login " + username.text + " " + password.text)
 	
 	conn.send_msg({
 		"login": {
-			"username": username_text_box.text,
-			"password": password_text_box.text
+			"username": username.text,
+			"password": password.text
 		}
 	})

@@ -19,6 +19,8 @@ onready var countdown_label = $CountDownLabel
 onready var countdown_timer = $CountdownTimer
 onready var game_phase_label = $GamePhaseLabel
 onready var connected_label = $ConnectedLabel
+onready var main_menu = $main_menu
+onready var login_form = $login_form
 
 var placing_unit = null
 
@@ -50,6 +52,11 @@ func _ready():
 	your_level.visible = false
 	unit_shop.visible = false
 	unit_barrack.visible = false
+	main_menu.visible = false
+
+	lobby.conn = conn
+	main_menu.conn = conn
+	login_form.conn = conn	
 	
 #	game_state = GameState.new()
 #	add_child(game_state)
@@ -118,6 +125,14 @@ func _handle_msg(msg):
 		handle_round_created(msg["roundCreated"])
 	if msg.roundFinished != null:
 		handle_round_finished(msg["roundFinished"])
+	if msg.loginSuccess != null:
+		handle_login_success(msg["loginSuccess"])
+	if msg.currentMatch != null:
+		handle_current_match(msg["currentMatch"])
+	if msg.playerJoined != null:
+		handle_player_joined(msg["playerJoined"])
+	if msg.playerLeft != null:
+		handle_player_left(msg["playerLeft"])
 	
 func clear_units():
 	for child in placement_area.get_children():
@@ -171,6 +186,24 @@ func set_unit(loc: String, new_unit):
 	unit.attack_rate = new_unit.attackRate
 	unit.attack_rate = new_unit.attackRate
 	unit.rank = new_unit.rank
+	
+func handle_player_joined(player_joined):
+	lobby.add_player(player_joined.player.playerId, player_joined.player.name)
+	
+func handle_player_left(player_left):
+	lobby.remove_player(player_left.player.playerId)
+	
+func handle_current_match(current_match):
+	main_menu.visible = false
+	
+	handle_game_phase_changed(current_match.phase)
+	
+	for player in current_match.players:
+		lobby.add_player(player.playerId, player.name)
+	
+func handle_login_success(login_success):
+	login_form.visible = false
+	main_menu.visible = true
 	
 func handle_round_finished(round_finished):
 	clear_units()
@@ -244,11 +277,11 @@ func handle_player_level_changed(player_level_changed):
 func handle_player_health_changed(player_health_changed):
 	your_health.text = String(player_health_changed.newHp)
 
-func handle_game_phase_changed(game_phase_changed):
-	game_phase_label.text = game_phase_changed
-	game_phase = game_phase_changed
+func handle_game_phase_changed(match_phase):
+	game_phase_label.text = match_phase
+	game_phase = match_phase
 	
-	match game_phase_changed:
+	match match_phase:
 		"InitPhase":			
 			lobby.visible = false
 			your_money.visible = false

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://scenes/lobby_player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://fonts/new_dynamicfont.tres" type="DynamicFont" id=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -10,8 +10,7 @@ var LobbyPlayer = preload(\"res://scenes/lobby_player.tscn\")
 onready var ScrollContainer = $ScrollContainer
 onready var vertical_container = $ScrollContainer/vertical_container
 
-func _ready():
-	pass
+var conn
 
 func set_players(players):
 	for child in vertical_container.get_children():
@@ -33,6 +32,12 @@ func remove_player(player_id: String):
 		if lobby_player.plyer_id == player_id:
 			vertical_container.remove_child(lobby_player)
 			break
+
+
+func _on_start_match_button_pressed():
+	conn.send_msg({
+		\"startMatch\": {}
+	})
 "
 
 [node name="Control" type="Control"]
@@ -47,8 +52,10 @@ __meta__ = {
 }
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_right = 778.0
-margin_bottom = 475.0
+margin_left = 200.0
+margin_top = 60.0
+margin_right = 804.0
+margin_bottom = 564.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.443137, 0.443137, 0.443137, 1 )
@@ -57,8 +64,10 @@ __meta__ = {
 }
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
-margin_right = 1025.0
-margin_bottom = 597.0
+margin_left = 202.0
+margin_top = 64.0
+margin_right = 802.0
+margin_bottom = 475.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 __meta__ = {
@@ -66,22 +75,20 @@ __meta__ = {
 }
 
 [node name="vertical_container" type="VBoxContainer" parent="ScrollContainer"]
-margin_right = 1025.0
-margin_bottom = 597.0
+margin_right = 600.0
+margin_bottom = 411.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" parent="ScrollContainer/vertical_container" instance=ExtResource( 1 )]
-margin_right = 1025.0
-margin_bottom = 14.0
-size_flags_horizontal = 3
-
-[node name="Button" type="Button" parent="."]
-margin_left = 180.76
-margin_top = 390.06
-margin_right = 426.76
-margin_bottom = 466.06
+[node name="start_match_button" type="Button" parent="."]
+margin_left = 368.488
+margin_top = 483.294
+margin_right = 614.488
+margin_bottom = 559.294
+custom_fonts/font = ExtResource( 2 )
 text = "start"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[connection signal="pressed" from="start_match_button" to="." method="_on_start_match_button_pressed"]

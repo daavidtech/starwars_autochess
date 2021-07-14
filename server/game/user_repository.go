@@ -3,6 +3,7 @@ package game
 type UserRepository interface {
 	Fetch(userID string) *User
 	FetchByUsername(username string) *User
+	Save(user *User)
 }
 
 type UserRepositoryMemImpl struct {
@@ -16,5 +17,19 @@ func NewUserRepository() *UserRepositoryMemImpl {
 }
 
 func (userRepo *UserRepositoryMemImpl) Fetch(userID string) *User {
-	return NewUser()
+	return userRepo.users[userID]
+}
+
+func (userRepo *UserRepositoryMemImpl) FetchByUsername(username string) *User {
+	for _, user := range userRepo.users {
+		if user.GetUsername() == username {
+			return user
+		}
+	}
+
+	return nil
+}
+
+func (userRepo *UserRepositoryMemImpl) Save(user *User) {
+	userRepo.users[user.GetID()] = user
 }

@@ -7,14 +7,16 @@ import (
 )
 
 type Player struct {
-	id       string
-	credits  int
-	health   int
-	accepted bool
-	dead     bool
-	xp       int
-	units    map[string]*Unit
-	shop     *Shop
+	id         string
+	name       string
+	credits    int
+	health     int
+	accepted   bool
+	dead       bool
+	xp         int
+	lobbyAdmin bool
+	units      map[string]*Unit
+	shop       *Shop
 }
 
 func NewPlayer() *Player {
@@ -23,6 +25,7 @@ func NewPlayer() *Player {
 	shop.SetSize(5)
 
 	return &Player{
+		id:     uuid.NewString(),
 		units:  make(map[string]*Unit),
 		shop:   shop,
 		health: 100,
@@ -32,6 +35,14 @@ func NewPlayer() *Player {
 
 func (player *Player) GetID() string {
 	return player.id
+}
+
+func (player *Player) GetName() string {
+	return player.name
+}
+
+func (player *Player) SetName(name string) {
+	player.name = name
 }
 
 func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {

@@ -43,6 +43,8 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 		}
 
 		if msg.Login != nil {
+			log.Printf("Login attempt %v", msg.Login.Username)
+
 			user = wsServer.UserRepository.FetchByUsername(msg.Login.Username)
 
 			if user == nil {
@@ -54,6 +56,18 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				log.Printf("Password is incorrect for user %v", msg.Login.Username)
 
 				continue
+			}
+
+			log.Printf("Login successfull %v", msg.Login.Username)
+
+			err = ws.WriteJSON(MessageToClient{
+				LoginSuccess: &LoginSuccess{
+					Uusername: msg.Login.Username,
+				},
+			})
+
+			if err != nil {
+				log.Println("Failed sending loging success to client")
 			}
 
 			break
@@ -78,313 +92,369 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				return
 			}
 
-			if msg.SeekMatch != nil {
+			if msg.FindMatch != nil {
+				log.Println("Find new match")
+
 				currentMatch = wsServer.GameCoordinator.FindNewMatch()
-				newPlayer := currentMatch.CreatePlayer()
+
+				matchID = currentMatch.GetID()
+
+				lobbyAdmin := false
+
+				if currentMatch.CountPlayers() == 0 {
+					lobbyAdmin = true
+				}
+
+				newPlayer := currentMatch.CreatePlayer(user.GetUsername(), lobbyAdmin)
 
 				user.SetCurrentPlayerID(newPlayer.GetID())
 				user.SetCurrentMatchID(currentMatch.GetID())
+
+				break
 			}
 		}
 	}
 
-	matchID = currentMatch.GetID()
+	log.Printf("Current match %v", matchID)
+
+	players := []Player{}
+
+	for _, p := range currentMatch.GetPlayers() {
+		players = append(players, Player{
+			PlayerID: p.GetID(),
+			Name:     p.GetName(),
+		})
+	}
+
+	ws.WriteJSON(MessageToClient{
+		CurrentMatch: &CurrentMatch{
+			MatchID: matchID,
+			Phase:   currentMatch.GetMatchPhase(),
+			Players: players,
+		},
+	})
 
 	playerID := user.GetCurrentPlayerID()
 
 	go func() {
-		for {
-			var msg MessageFromClient
+		eventBroker := currentMatch.GetEventBroker()
 
-			err := ws.ReadJSON(&msg)
+		ch := eventBroker.Subscribe(matchID)
+
+		for event := range ch {
+			// if event.NewBarrackUnit != nil {
+
+			// }
+
+			var err error
+
+			if event.ShopRefilled != nil {
+				shopRefilled := ShopRefilled{
+					ShopUnits: []ShopUnit{},
+				}
+
+				for _, shopUnit := range event.ShopRefilled.ShopUnits {
+					shopRefilled.ShopUnits = append(shopRefilled.ShopUnits, ShopUnit{
+						ID:       shopUnit.ID,
+						UnitType: shopUnit.UnitType,
+						Level:    shopUnit.Level,
+						HP:       shopUnit.HP,
+						Mana:     shopUnit.Mana,
+						Rank:     shopUnit.Rank,
+						Cost:     shopUnit.Cost,
+					})
+				}
+
+				msg := MessageToClient{
+					ShopRefilled: &shopRefilled,
+				}
+
+				log.Println("Sending shopRefilled to client")
+
+				ws.WriteJSON(msg)
+			}
+
+			if event.CountdownStarted != nil {
+				ws.WriteJSON(MessageToClient{
+					CountdownStarted: &CountdownStarted{
+						StartValue: event.CountdownStarted.StartValue,
+						Interval:   event.CountdownStarted.Interval,
+					},
+				})
+			}
+
+			if event.ShopUnitRemoved != nil {
+				log.Println("Sending shop unit removed")
+
+				ws.WriteJSON(MessageToClient{
+					ShopUnitRemoved: &ShopUnitRemoved{
+						ShopUnitID: event.ShopUnitRemoved.ShopUnitID,
+					},
+				})
+			}
+
+			if event.BarrackUnitAdded != nil {
+				unitAdded := UnitAdded{
+					UnitID:     event.BarrackUnitAdded.UnitID,
+					UnitType:   event.BarrackUnitAdded.UnitType,
+					Rank:       event.BarrackUnitAdded.Rank,
+					HP:         event.BarrackUnitAdded.HP,
+					Mana:       event.BarrackUnitAdded.Mana,
+					AttackRate: event.BarrackUnitAdded.AttackRate,
+				}
+
+				msg := MessageToClient{
+					UnitAdded: &unitAdded,
+				}
+
+				log.Println("Seding unitAdded to client")
+
+				ws.WriteJSON(msg)
+			}
+
+			if event.BarrackUnitRemoved != nil {
+				unitRemoved := UnitRemoved{
+					UnitID: event.BarrackUnitRemoved.UnitID,
+				}
+
+				msg := MessageToClient{
+					UnitRemoved: &unitRemoved,
+				}
+
+				log.Println("Sending unitRemoved to client")
+
+				ws.WriteJSON(msg)
+			}
+
+			if event.BarrackUnitUpgraded != nil {
+				unitUpgraded := UnitUpgraded{
+					UnitID:     event.BarrackUnitUpgraded.UnitID,
+					Rank:       event.BarrackUnitUpgraded.Rank,
+					HP:         event.BarrackUnitUpgraded.HP,
+					Mana:       event.BarrackUnitUpgraded.Mana,
+					AttackRate: event.BarrackUnitUpgraded.AttackRate,
+				}
+
+				log.Println("Sending unitUpgraded to client")
+
+				ws.WriteJSON(MessageToClient{
+					UnitUpgraded: &unitUpgraded,
+				})
+			}
+
+			if event.UnitPlaced != nil {
+				log.Println("Sending unit placed to client")
+
+				unitPlaced := UnitPlaced{
+					UnitID: event.UnitPlaced.UnitID,
+					X:      event.UnitPlaced.X,
+					Y:      event.UnitPlaced.Y,
+				}
+
+				err = ws.WriteJSON(MessageToClient{
+					UnitPlaced: &unitPlaced,
+				})
+			}
+
+			if event.PhaseChanged != nil {
+				log.Println("Sending phase changed to client")
+
+				err = ws.WriteJSON(MessageToClient{
+					MatchPhaseChanged: &MatchPhaseChanged{
+						MatchPhase: event.PhaseChanged.MatchPhase,
+					},
+				})
+			}
+
+			if event.UnitStartedMovingTo != nil {
+				log.Printf("Sending unit %v started moving to %v %v",
+					event.UnitStartedMovingTo.UnitID,
+					event.UnitStartedMovingTo.X,
+					event.UnitStartedMovingTo.Y)
+
+				err = ws.WriteJSON(MessageToClient{
+					UnitStartedMovingTo: &UnitStartedMovingTo{
+						UnitID: event.UnitStartedMovingTo.UnitID,
+						X:      event.UnitStartedMovingTo.X,
+						Y:      event.UnitStartedMovingTo.Y,
+					},
+				})
+			}
+
+			if event.UnitArrivedTo != nil {
+				log.Printf("Sending unit %v arrived to", event.UnitArrivedTo.UnitID)
+
+				err = ws.WriteJSON(MessageToClient{
+					UnitArrivedTo: &UnitArrivedTo{
+						UnitID: event.UnitArrivedTo.UnitID,
+						X:      event.UnitArrivedTo.X,
+						Y:      event.UnitArrivedTo.Y,
+					},
+				})
+			}
+
+			if event.UnitDied != nil {
+				log.Printf("Sending unit %v died to client", event.UnitDied.UnitID)
+
+				err = ws.WriteJSON(MessageToClient{
+					UnitDied: &UnitDied{
+						UnitID: event.UnitDied.UnitID,
+					},
+				})
+			}
+
+			if event.RoundCreated != nil {
+				if event.RoundCreated.PlayerID == playerID {
+					roundCreated := RoundCreated{
+						PlayerID: playerID,
+						Units:    []BattleUnit{},
+					}
+
+					for _, unit := range event.RoundCreated.Units {
+						roundCreated.Units = append(roundCreated.Units, BattleUnit{
+							Team:          unit.Team,
+							UnitID:        unit.UnitID,
+							UnitType:      unit.UnitType,
+							Rank:          unit.Rank,
+							MaxHP:         unit.MaxHP,
+							HP:            unit.HP,
+							MaxMana:       unit.MaxMana,
+							Mana:          unit.Mana,
+							AttackRate:    unit.AttackRate,
+							AttackRange:   unit.AttackRange,
+							AttackDamage:  unit.AttackDamage,
+							InstantAttack: unit.InstantAttack,
+							MoveSpeed:     unit.MoveSpeed,
+							Dead:          unit.Dead,
+							Placement: Point{
+								X: unit.X,
+								Y: unit.Y,
+							},
+						})
+					}
+
+					err = ws.WriteJSON(MessageToClient{
+						RoundCreated: &roundCreated,
+					})
+				}
+			}
+
+			if event.RoundFinished != nil {
+				if event.RoundFinished.PlayerID == playerID {
+					roundFinished := RoundFinished{
+						PlayerID:         playerID,
+						NewCreditsAmount: event.RoundFinished.NewCreditsAmount,
+						NewPlayerHealth:  event.RoundFinished.NewPlayerHealth,
+						Units:            []Unit{},
+					}
+
+					for _, unit := range event.RoundFinished.Units {
+						eventUnit := Unit{
+							Team:       1,
+							UnitID:     unit.UnitID,
+							UnitType:   unit.UnitType,
+							Tier:       unit.Tier,
+							Rank:       unit.Rank,
+							HP:         unit.HP,
+							Mana:       unit.Mana,
+							AttackRate: unit.AttackRate,
+						}
+
+						if unit.Placement != nil {
+							eventUnit.Placement = &Point{
+								X: unit.Placement.X,
+								Y: unit.Placement.Y,
+							}
+						}
+
+						roundFinished.Units = append(roundFinished.Units, eventUnit)
+					}
+
+					err = ws.WriteJSON(MessageToClient{
+						RoundFinished: &roundFinished,
+					})
+				}
+			}
+
+			if event.PlayerJoined != nil {
+				err = ws.WriteJSON(MessageToClient{
+					PlayerJoined: &PlayerJoined{
+						Player: Player{
+							PlayerID: event.PlayerJoined.Player.GetID(),
+							Name:     event.PlayerJoined.Player.GetName(),
+						},
+					},
+				})
+			}
+
+			if event.PlayerLeft != nil {
+				err = ws.WriteJSON(MessageToClient{
+					PlayerLeft: &PlayerLeft{
+						Player: Player{
+							PlayerID: event.PlayerLeft.Player.GetID(),
+							Name:     event.PlayerLeft.Player.GetName(),
+						},
+					},
+				})
+			}
 
 			if err != nil {
-				log.Printf("error while receiving %v", err)
+				eventBroker.Unsubscribe(ch)
 
-				break
-			}
+				log.Printf("Sending ws message error %v", err)
 
-			if msg.StartMatch != nil {
-				currentMatch.Start()
-
-				continue
-			}
-
-			if msg.BuyUnit != nil {
-				log.Printf("BuyUnit %v", msg.BuyUnit)
-
-				currentMatch.BuyUnit(playerID, msg.BuyUnit.ShopUnitIndex)
-			}
-
-			if msg.PlaceUnit != nil {
-				log.Printf("PlaceUnit %v to %v:%v", msg.PlaceUnit.UnitID, msg.PlaceUnit.X, msg.PlaceUnit.Y)
-
-				currentMatch.PlaceUnit(playerID, msg.PlaceUnit.UnitID, msg.PlaceUnit.X, msg.PlaceUnit.Y)
-			}
-
-			if msg.SellUnit != nil {
-				log.Println("SellUnit")
-
-				currentMatch.SellUnit(playerID, msg.SellUnit.UnitID)
-			}
-
-			if msg.BuyLevelUp != nil {
-				log.Println("BuyLevelUp")
-				currentMatch.BuyLevelUp(playerID)
-			}
-
-			if msg.RecycleShopUnits != nil {
-				log.Println("RecycleShopUnit")
-				currentMatch.RecycleShopUnits(playerID)
+				return
 			}
 		}
 	}()
 
-	eventBroker := currentMatch.GetEventBroker()
+	currentMatch.StartLobby()
 
-	ch := eventBroker.Subscribe(matchID)
+	matchID = currentMatch.GetID()
 
-	for event := range ch {
-		// if event.NewBarrackUnit != nil {
+	for {
+		var msg MessageFromClient
 
-		// }
-
-		var err error
-
-		if event.ShopRefilled != nil {
-			shopRefilled := ShopRefilled{
-				ShopUnits: []ShopUnit{},
-			}
-
-			for _, shopUnit := range event.ShopRefilled.ShopUnits {
-				shopRefilled.ShopUnits = append(shopRefilled.ShopUnits, ShopUnit{
-					ID:       shopUnit.ID,
-					UnitType: shopUnit.UnitType,
-					Level:    shopUnit.Level,
-					HP:       shopUnit.HP,
-					Mana:     shopUnit.Mana,
-					Rank:     shopUnit.Rank,
-					Cost:     shopUnit.Cost,
-				})
-			}
-
-			msg := MessageToClient{
-				ShopRefilled: &shopRefilled,
-			}
-
-			log.Println("Sending shopRefilled to client")
-
-			ws.WriteJSON(msg)
-		}
-
-		if event.CountdownStarted != nil {
-			ws.WriteJSON(MessageToClient{
-				CountdownStarted: &CountdownStarted{
-					StartValue: event.CountdownStarted.StartValue,
-					Interval:   event.CountdownStarted.Interval,
-				},
-			})
-		}
-
-		if event.ShopUnitRemoved != nil {
-			log.Println("Sending shop unit removed")
-
-			ws.WriteJSON(MessageToClient{
-				ShopUnitRemoved: &ShopUnitRemoved{
-					ShopUnitID: event.ShopUnitRemoved.ShopUnitID,
-				},
-			})
-		}
-
-		if event.BarrackUnitAdded != nil {
-			unitAdded := UnitAdded{
-				UnitID:     event.BarrackUnitAdded.UnitID,
-				UnitType:   event.BarrackUnitAdded.UnitType,
-				Rank:       event.BarrackUnitAdded.Rank,
-				HP:         event.BarrackUnitAdded.HP,
-				Mana:       event.BarrackUnitAdded.Mana,
-				AttackRate: event.BarrackUnitAdded.AttackRate,
-			}
-
-			msg := MessageToClient{
-				UnitAdded: &unitAdded,
-			}
-
-			log.Println("Seding unitAdded to client")
-
-			ws.WriteJSON(msg)
-		}
-
-		if event.BarrackUnitRemoved != nil {
-			unitRemoved := UnitRemoved{
-				UnitID: event.BarrackUnitRemoved.UnitID,
-			}
-
-			msg := MessageToClient{
-				UnitRemoved: &unitRemoved,
-			}
-
-			log.Println("Sending unitRemoved to client")
-
-			ws.WriteJSON(msg)
-		}
-
-		if event.BarrackUnitUpgraded != nil {
-			unitUpgraded := UnitUpgraded{
-				UnitID:     event.BarrackUnitUpgraded.UnitID,
-				Rank:       event.BarrackUnitUpgraded.Rank,
-				HP:         event.BarrackUnitUpgraded.HP,
-				Mana:       event.BarrackUnitUpgraded.Mana,
-				AttackRate: event.BarrackUnitUpgraded.AttackRate,
-			}
-
-			log.Println("Sending unitUpgraded to client")
-
-			ws.WriteJSON(MessageToClient{
-				UnitUpgraded: &unitUpgraded,
-			})
-		}
-
-		if event.UnitPlaced != nil {
-			log.Println("Sending unit placed to client")
-
-			unitPlaced := UnitPlaced{
-				UnitID: event.UnitPlaced.UnitID,
-				X:      event.UnitPlaced.X,
-				Y:      event.UnitPlaced.Y,
-			}
-
-			err = ws.WriteJSON(MessageToClient{
-				UnitPlaced: &unitPlaced,
-			})
-		}
-
-		if event.PhaseChanged != nil {
-			log.Println("Sending phase changed to client")
-
-			err = ws.WriteJSON(MessageToClient{
-				MatchPhaseChanged: &MatchPhaseChanged{
-					MatchPhase: event.PhaseChanged.MatchPhase,
-				},
-			})
-		}
-
-		if event.UnitStartedMovingTo != nil {
-			log.Printf("Sending unit %v started moving to %v %v",
-				event.UnitStartedMovingTo.UnitID,
-				event.UnitStartedMovingTo.X,
-				event.UnitStartedMovingTo.Y)
-
-			err = ws.WriteJSON(MessageToClient{
-				UnitStartedMovingTo: &UnitStartedMovingTo{
-					UnitID: event.UnitStartedMovingTo.UnitID,
-					X:      event.UnitStartedMovingTo.X,
-					Y:      event.UnitStartedMovingTo.Y,
-				},
-			})
-		}
-
-		if event.UnitArrivedTo != nil {
-			log.Printf("Sending unit %v arrived to", event.UnitArrivedTo.UnitID)
-
-			err = ws.WriteJSON(MessageToClient{
-				UnitArrivedTo: &UnitArrivedTo{
-					UnitID: event.UnitArrivedTo.UnitID,
-					X:      event.UnitArrivedTo.X,
-					Y:      event.UnitArrivedTo.Y,
-				},
-			})
-		}
-
-		if event.UnitDied != nil {
-			log.Printf("Sending unit %v died to client", event.UnitDied.UnitID)
-
-			err = ws.WriteJSON(MessageToClient{
-				UnitDied: &UnitDied{
-					UnitID: event.UnitDied.UnitID,
-				},
-			})
-		}
-
-		if event.RoundCreated != nil {
-			if event.RoundCreated.PlayerID == playerID {
-				roundCreated := RoundCreated{
-					PlayerID: playerID,
-					Units:    []BattleUnit{},
-				}
-
-				for _, unit := range event.RoundCreated.Units {
-					roundCreated.Units = append(roundCreated.Units, BattleUnit{
-						Team:          unit.Team,
-						UnitID:        unit.UnitID,
-						UnitType:      unit.UnitType,
-						Rank:          unit.Rank,
-						MaxHP:         unit.MaxHP,
-						HP:            unit.HP,
-						MaxMana:       unit.MaxMana,
-						Mana:          unit.Mana,
-						AttackRate:    unit.AttackRate,
-						AttackRange:   unit.AttackRange,
-						AttackDamage:  unit.AttackDamage,
-						InstantAttack: unit.InstantAttack,
-						MoveSpeed:     unit.MoveSpeed,
-						Dead:          unit.Dead,
-						Placement: Point{
-							X: unit.X,
-							Y: unit.Y,
-						},
-					})
-				}
-
-				err = ws.WriteJSON(MessageToClient{
-					RoundCreated: &roundCreated,
-				})
-			}
-		}
-
-		if event.RoundFinished != nil {
-			if event.RoundFinished.PlayerID == playerID {
-				roundFinished := RoundFinished{
-					PlayerID:         playerID,
-					NewCreditsAmount: event.RoundFinished.NewCreditsAmount,
-					NewPlayerHealth:  event.RoundFinished.NewPlayerHealth,
-					Units:            []Unit{},
-				}
-
-				for _, unit := range event.RoundFinished.Units {
-					eventUnit := Unit{
-						Team:       1,
-						UnitID:     unit.UnitID,
-						UnitType:   unit.UnitType,
-						Tier:       unit.Tier,
-						Rank:       unit.Rank,
-						HP:         unit.HP,
-						Mana:       unit.Mana,
-						AttackRate: unit.AttackRate,
-					}
-
-					if unit.Placement != nil {
-						eventUnit.Placement = &Point{
-							X: unit.Placement.X,
-							Y: unit.Placement.Y,
-						}
-					}
-
-					roundFinished.Units = append(roundFinished.Units, eventUnit)
-				}
-
-				err = ws.WriteJSON(MessageToClient{
-					RoundFinished: &roundFinished,
-				})
-			}
-		}
+		err := ws.ReadJSON(&msg)
 
 		if err != nil {
-			eventBroker.Unsubscribe(ch)
+			log.Printf("error while receiving %v", err)
 
-			log.Printf("Sending ws message error %v", err)
+			break
+		}
 
-			return
+		if msg.StartMatch != nil {
+			currentMatch.Start(playerID)
+
+			continue
+		}
+
+		if msg.BuyUnit != nil {
+			log.Printf("BuyUnit %v", msg.BuyUnit)
+
+			currentMatch.BuyUnit(playerID, msg.BuyUnit.ShopUnitIndex)
+		}
+
+		if msg.PlaceUnit != nil {
+			log.Printf("PlaceUnit %v to %v:%v", msg.PlaceUnit.UnitID, msg.PlaceUnit.X, msg.PlaceUnit.Y)
+
+			currentMatch.PlaceUnit(playerID, msg.PlaceUnit.UnitID, msg.PlaceUnit.X, msg.PlaceUnit.Y)
+		}
+
+		if msg.SellUnit != nil {
+			log.Println("SellUnit")
+
+			currentMatch.SellUnit(playerID, msg.SellUnit.UnitID)
+		}
+
+		if msg.BuyLevelUp != nil {
+			log.Println("BuyLevelUp")
+			currentMatch.BuyLevelUp(playerID)
+		}
+
+		if msg.RecycleShopUnits != nil {
+			log.Println("RecycleShopUnit")
+			currentMatch.RecycleShopUnits(playerID)
 		}
 	}
 }

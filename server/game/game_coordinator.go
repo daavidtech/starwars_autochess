@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"log"
 
 	"github.com/daavidtech/starwars_autochess/match"
 )
@@ -27,8 +28,12 @@ func (gameCoordinator *GameCoordinator) FindNewMatch() *match.Match {
 			continue
 		}
 
+		log.Println("Found existing match")
+
 		return match
 	}
+
+	log.Println("No existing match found creating new")
 
 	newMatch := match.NewMatch(gameCoordinator.ctx)
 

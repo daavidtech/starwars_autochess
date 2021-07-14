@@ -77,6 +77,14 @@ type RoundFinished struct {
 	Units            []Unit
 }
 
+type PlayerJoined struct {
+	Player Player
+}
+
+type PlayerLeft struct {
+	Player Player
+}
+
 type MatchEvent struct {
 	UnitBought          *UnitBought
 	BarrackUnitAdded    *BarrackUnitAdded
@@ -92,4 +100,6 @@ type MatchEvent struct {
 	UnitDied            *UnitDied
 	RoundCreated        *RoundCreated
 	RoundFinished       *RoundFinished
+	PlayerJoined        *PlayerJoined
+	PlayerLeft          *PlayerLeft
 }
