@@ -141,6 +141,7 @@ func (match *Match) CreatePlayer(name string, lobbyAdmin bool) *Player {
 
 	newPlayer.shop.UnitPropertyStore = match.UnitPropertyStore
 	newPlayer.shop.TierProbabilities = match.TierProbabilities
+	newPlayer.unitPropStore = match.UnitPropertyStore
 
 	match.players[newPlayer.GetID()] = newPlayer
 

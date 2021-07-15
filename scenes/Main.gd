@@ -147,17 +147,17 @@ func set_unit(loc: String, new_unit):
 	if units.has(new_unit.unitId):
 		unit = units[new_unit.unitId]
 	else:
-		if new_unit.team == 1:
+		if !new_unit.has("team") || new_unit.team == 1:
 			unit = YourUnit.instance()
 			unit.connect("drag_started", self, "_on_drag_started")
 			unit.connect("drag_finished", self, "_on_drag_finished")
 	
-		if new_unit.team == 2:
+		elif new_unit.team == 2:
 			unit = EnemyUnit.instance()
 	
 		units[new_unit.unitId] = unit
 	
-	if new_unit.team == 1:
+	if !new_unit.has("team") ||new_unit.team == 1:		
 		if unit.location != loc:
 			unit.location = loc
 			
@@ -169,23 +169,25 @@ func set_unit(loc: String, new_unit):
 			
 			if loc == "placing":
 				dragging_area.add_child(unit)
-				
+		
+		unit.mana = new_unit.mana
+
 	else:
 		placement_area.add_child(unit)
 		
-	if new_unit.placement != null:
+	if new_unit.has("placement") && new_unit.placement != null:
 		unit.translation = conv_server_coords(new_unit.placement.x, new_unit.placement.y)
 
 	unit.unit_id = new_unit.unitId
 	unit.unit_type = new_unit.unitType
 	unit.hp = new_unit.hp
 	
-	if new_unit.team == 1:
-		unit.mana = new_unit.mana
-	
 	unit.attack_rate = new_unit.attackRate
 	unit.attack_rate = new_unit.attackRate
 	unit.rank = new_unit.rank
+	
+	if new_unit.has("move_speed") && new_unit["move_speed"] != null:
+		unit.move_speed = conv_move_speed(new_unit.moveSpeed)
 	
 func handle_player_joined(player_joined):
 	lobby.add_player(player_joined.player.playerId, player_joined.player.name)
@@ -335,22 +337,8 @@ func handle_game_phase_changed(match_phase):
 
 func handle_unit_added(unit_added):
 	print("Unit added " + unit_added.unitType)
-		
-	var new_unit = YourUnit.instance()
-	unit_barrack.add_unit(new_unit)
 	
-	new_unit.unit_id = unit_added.unitId
-	new_unit.unit_type = unit_added.unitType
-	new_unit.hp = unit_added.hp
-	new_unit.mana = unit_added.mana
-	new_unit.attack_rate = unit_added.attackRate
-	new_unit.rank = unit_added.rank
-	new_unit.location = "barrack"
-	
-	units[unit_added.unitId] = new_unit
-	
-	new_unit.connect("drag_started", self, "_on_drag_started")
-	new_unit.connect("drag_finished", self, "_on_drag_finished")
+	set_unit("barrack", unit_added)
 	
 func handle_unit_removed(unit_removed):
 	var unit = units[unit_removed.unitId]
@@ -369,11 +357,8 @@ func handle_unit_removed(unit_removed):
 func handle_unit_upgraded(unit_upgraded):
 	var unit = units[unit_upgraded.unitId]
 	
-	unit.hp = unit_upgraded.hp
-	unit.mana = unit_upgraded.mana
-	unit.attack_rate = unit_upgraded.attackRate
-	unit.rank = unit_upgraded.rank
-	
+	set_unit(unit.location, unit_upgraded)
+
 func handle_unit_placed(unit_placed):
 	var unit = units[unit_placed.unitId]
 	
@@ -426,6 +411,11 @@ func trans_to_server_coord(z, x):
 		"x": round(abs(size.z + z) * z_ratio),
 		"y": round(abs(size.x + x) * x_ratio)
 	}
+
+func conv_move_speed(move_speed: int):
+	var size = placement_area.shape.extents
+	
+	return size.x / 100 * move_speed
 
 func _unhandled_input(event):
 	if placing_unit != null and event is InputEventMouseMotion:

@@ -149,6 +149,8 @@ func (round *Round) work(delta float32) RoundWorkResult {
 				continue
 			}
 
+			log.Printf("Unit is attacking %v", unit.UnitID)
+
 			unit.lastAttacked = now
 			target.HP -= 10
 

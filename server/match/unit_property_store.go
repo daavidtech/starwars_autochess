@@ -19,6 +19,10 @@ func (unitStore *UnitPropertyStore) CountUnits() int {
 }
 
 func (unitRegister *UnitPropertyStore) SaveUnit(unit UnitProperties) {
+	if unit.HP == 0 {
+		panic("Unit cannot have zero hp")
+	}
+
 	unitRegister.units[unit.UnitType] = unit
 
 	count := unitRegister.unitTierCounts[unit.Tier]
@@ -52,6 +56,16 @@ func (u *UnitPropertyStore) ChooseRandomUnitFromTier(tier int) UnitProperties {
 		}
 
 		return u
+	}
+
+	return UnitProperties{}
+}
+
+func (unitPropStore *UnitPropertyStore) GetUnitProperties(unitType string, rank int) UnitProperties {
+	for _, unitProp := range unitPropStore.units {
+		if unitProp.UnitType == unitType && unitProp.Rank == rank {
+			return unitProp
+		}
 	}
 
 	return UnitProperties{}

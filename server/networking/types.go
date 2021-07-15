@@ -34,14 +34,18 @@ type MatchPhaseChanged struct {
 	MatchPhase match.MatchPhase `json:"matchPhase"`
 }
 
-type UnitAdded struct {
-	PlayerID   string `json:"playerId"`
-	UnitID     string `json:"unitId"`
+type UnitProperties struct {
 	UnitType   string `json:"unitType"`
 	Rank       int    `json:"rank"`
 	HP         int    `json:"hp"`
 	Mana       int    `json:"mana"`
 	AttackRate int    `json:"attackRate"`
+}
+
+type UnitAdded struct {
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	UnitProperties
 }
 
 type UnitRemoved struct {
@@ -50,12 +54,9 @@ type UnitRemoved struct {
 }
 
 type UnitUpgraded struct {
-	PlayerID   string `json:"playerId"`
-	UnitID     string `json:"unitId"`
-	Rank       int    `json:"rank"`
-	HP         int    `json:"hp"`
-	Mana       int    `json:"mana"`
-	AttackRate int    `json:"attackRate"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	UnitProperties
 }
 
 type UnitSold struct {

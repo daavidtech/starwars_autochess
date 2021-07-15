@@ -4,13 +4,9 @@ type UnitBought struct {
 }
 
 type BarrackUnitAdded struct {
-	PlayerID   string
-	UnitID     string
-	UnitType   string
-	Rank       int
-	HP         int
-	Mana       int
-	AttackRate int
+	PlayerID string
+
+	Unit
 }
 
 type BarrackUnitRemoved struct {
@@ -19,14 +15,9 @@ type BarrackUnitRemoved struct {
 }
 
 type BarrackUnitUpgraded struct {
-	PlayerID   string
-	UnitID     string
-	UnitType   string
-	Tier       int
-	Rank       int
-	HP         int
-	Mana       int
-	AttackRate int
+	PlayerID string
+
+	Unit
 }
 
 type ShopRefilled struct {

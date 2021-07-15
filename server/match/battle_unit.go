@@ -41,20 +41,23 @@ func createBattleUnit(unit *Unit, team int, playerID string) *BattleUnit {
 	unitID := uuid.New().String()
 
 	return &BattleUnit{
-		UnitID:      unitID,
-		UnitType:    unit.UnitType,
-		PlayerID:    playerID,
-		MaxHP:       100,
-		HP:          100,
-		MaxMana:     unit.Mana,
-		Mana:        unit.Mana,
-		AttackRate:  unit.AttackRate,
-		AttackRange: 20,
-		MoveSpeed:   20,
-		Dead:        false,
-		Team:        team,
-		X:           unit.Placement.X,
-		Y:           y,
+		UnitID:        unitID,
+		UnitType:      unit.UnitType,
+		PlayerID:      playerID,
+		MaxHP:         unit.HP,
+		HP:            unit.HP,
+		MaxMana:       unit.Mana,
+		Mana:          unit.Mana,
+		AttackRate:    unit.AttackRate,
+		AttackRange:   unit.AttackRange,
+		AttackDamage:  unit.AttackDamage,
+		InstantAttack: unit.InstantAttack,
+		Rank:          unit.Rank,
+		MoveSpeed:     unit.MoveSpeed,
+		Dead:          false,
+		Team:          team,
+		X:             unit.Placement.X,
+		Y:             y,
 	}
 }
 

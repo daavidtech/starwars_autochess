@@ -6,7 +6,9 @@ func TestAddsNewShopUnitWhenNoOthers(t *testing.T) {
 	player := NewPlayer()
 
 	player.AddShopUnit(ShopUnit{
-		UnitType: "unit_droid",
+		UnitProperties: UnitProperties{
+			UnitType: "unit_droid",
+		},
 	})
 
 	battleUnits := player.getBattleUnits()
@@ -17,21 +19,36 @@ func TestAddsNewShopUnitWhenNoOthers(t *testing.T) {
 }
 
 func TestUpgradeUnit(t *testing.T) {
+	unitPropStore := NewUnitPropertyStore()
+
+	unitPropStore.SaveUnit(UnitProperties{
+		UnitType: "unit_droid",
+		Rank:     2,
+		HP:       100,
+	})
+
 	player := Player{
 		units: map[string]*Unit{
-			"1": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"1": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
-			"2": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"2": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
 		},
+		unitPropStore: &unitPropStore,
 	}
 
 	player.AddShopUnit(ShopUnit{
-		UnitType: "unit_droid",
+		UnitProperties: UnitProperties{
+			UnitType: "unit_droid",
+		},
 	})
 
 	units := player.getBattleUnits()
@@ -51,20 +68,26 @@ func TestCannotUpgradeUnitTooBigRank(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				UnitID:   "1",
-				UnitType: "unit_droid",
-				Rank:     2,
+				UnitID: "1",
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     2,
+				},
 			},
 			"2": &Unit{
-				UnitID:   "2",
-				UnitType: "unit_droid",
-				Rank:     1,
+				UnitID: "2",
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
 		},
 	}
 
 	player.AddShopUnit(ShopUnit{
-		UnitType: "unit_droid",
+		UnitProperties: UnitProperties{
+			UnitType: "unit_droid",
+		},
 	})
 
 	units := player.getBattleUnits()
@@ -87,29 +110,47 @@ func TestCannotUpgradeUnitTooBigRank(t *testing.T) {
 }
 
 func Test_updates_unit_rank_to_3(t *testing.T) {
+	unitPropertyStore := NewUnitPropertyStore()
+
+	unitPropertyStore.SaveUnit(UnitProperties{
+		UnitType: "unit_droid",
+		HP:       100,
+	})
+
 	player := Player{
 		units: map[string]*Unit{
-			"1": &Unit{
-				UnitType: "unit_droid",
-				Rank:     2,
+			"1": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     2,
+				},
 			},
-			"2": &Unit{
-				UnitType: "unit_droid",
-				Rank:     2,
+			"2": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     2,
+				},
 			},
-			"3": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"3": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
-			"4": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"4": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
 		},
+		unitPropStore: &unitPropertyStore,
 	}
 
 	events := player.AddShopUnit(ShopUnit{
-		UnitType: "unit_droid",
+		UnitProperties: UnitProperties{
+			UnitType: "unit_droid",
+		},
 	})
 
 	if len(events) != 4 {
@@ -139,18 +180,24 @@ func Test_diffrent_unit_types_are_ignored(t *testing.T) {
 	player := Player{
 		units: map[string]*Unit{
 			"1": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
 			"2": &Unit{
-				UnitType: "unit_clone",
-				Rank:     1,
+				UnitProperties: UnitProperties{
+					UnitType: "unit_clone",
+					Rank:     1,
+				},
 			},
 		},
 	}
 
 	events := player.AddShopUnit(ShopUnit{
-		UnitType: "unit_droid",
+		UnitProperties: UnitProperties{
+			UnitType: "unit_droid",
+		},
 	})
 
 	if len(events) != 1 {
@@ -165,33 +212,53 @@ func Test_diffrent_unit_types_are_ignored(t *testing.T) {
 }
 
 func Test_cannot_upgrade_to_rank3_when_different_unit_type(t *testing.T) {
+	unitPropStore := NewUnitPropertyStore()
+
+	unitPropStore.SaveUnit(UnitProperties{
+		UnitType: "unit_droid",
+		HP:       100,
+	})
+
 	player := Player{
 		units: map[string]*Unit{
-			"1": &Unit{
-				UnitType: "unit_droid",
-				Rank:     2,
+			"1": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     2,
+				},
 			},
-			"2": &Unit{
-				UnitType: "unit_clone",
-				Rank:     2,
+			"2": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_clone",
+					Rank:     2,
+				},
 			},
-			"4": &Unit{
-				UnitType: "unit_clone",
-				Rank:     1,
+			"4": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_clone",
+					Rank:     1,
+				},
 			},
-			"5": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"5": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
-			"6": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"6": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
 		},
+		unitPropStore: &unitPropStore,
 	}
 
 	events := player.AddShopUnit(ShopUnit{
-		UnitType: "unit_droid",
+		UnitProperties: UnitProperties{
+			UnitType: "unit_droid",
+		},
 	})
 
 	if len(events) != 2 {
@@ -239,25 +306,41 @@ func Test_cannot_upgrade_to_rank3_when_different_unit_type(t *testing.T) {
 }
 
 func Test_upgrades_to_rank2_unit_when_there_is_rank3_unit(t *testing.T) {
+	unitPropStore := NewUnitPropertyStore()
+
+	unitPropStore.SaveUnit(UnitProperties{
+		UnitType: "unit_droid",
+		HP:       100,
+	})
+
 	player := Player{
 		units: map[string]*Unit{
-			"1": &Unit{
-				UnitType: "unit_droid",
-				Rank:     3,
+			"1": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     3,
+				},
 			},
-			"2": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"2": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
-			"3": &Unit{
-				UnitType: "unit_droid",
-				Rank:     1,
+			"3": {
+				UnitProperties: UnitProperties{
+					UnitType: "unit_droid",
+					Rank:     1,
+				},
 			},
 		},
+		unitPropStore: &unitPropStore,
 	}
 
 	events := player.AddShopUnit(ShopUnit{
-		UnitType: "unit_droid",
+		UnitProperties: UnitProperties{
+			UnitType: "unit_droid",
+		},
 	})
 
 	if len(events) != 2 {

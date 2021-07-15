@@ -196,12 +196,14 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 			if event.BarrackUnitAdded != nil && event.BarrackUnitAdded.PlayerID == playerID {
 				if event.BarrackUnitAdded.PlayerID == playerID {
 					unitAdded := UnitAdded{
-						UnitID:     event.BarrackUnitAdded.UnitID,
-						UnitType:   event.BarrackUnitAdded.UnitType,
-						Rank:       event.BarrackUnitAdded.Rank,
-						HP:         event.BarrackUnitAdded.HP,
-						Mana:       event.BarrackUnitAdded.Mana,
-						AttackRate: event.BarrackUnitAdded.AttackRate,
+						UnitID: event.BarrackUnitAdded.UnitID,
+						UnitProperties: UnitProperties{
+							UnitType:   event.BarrackUnitAdded.UnitType,
+							Rank:       event.BarrackUnitAdded.Rank,
+							HP:         event.BarrackUnitAdded.HP,
+							Mana:       event.BarrackUnitAdded.Mana,
+							AttackRate: event.BarrackUnitAdded.AttackRate,
+						},
 					}
 
 					msg := MessageToClient{
@@ -233,11 +235,14 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 			if event.BarrackUnitUpgraded != nil && event.BarrackUnitUpgraded.PlayerID == playerID {
 				if event.BarrackUnitUpgraded.PlayerID == playerID {
 					unitUpgraded := UnitUpgraded{
-						UnitID:     event.BarrackUnitUpgraded.UnitID,
-						Rank:       event.BarrackUnitUpgraded.Rank,
-						HP:         event.BarrackUnitUpgraded.HP,
-						Mana:       event.BarrackUnitUpgraded.Mana,
-						AttackRate: event.BarrackUnitUpgraded.AttackRate,
+						UnitID: event.BarrackUnitUpgraded.UnitID,
+						UnitProperties: UnitProperties{
+							Rank:       event.BarrackUnitUpgraded.Rank,
+							HP:         event.BarrackUnitUpgraded.HP,
+							Mana:       event.BarrackUnitUpgraded.Mana,
+							AttackRate: event.BarrackUnitUpgraded.AttackRate,
+							UnitType:   event.BarrackUnitUpgraded.UnitType,
+						},
 					}
 
 					log.Println("Sending unitUpgraded to client")

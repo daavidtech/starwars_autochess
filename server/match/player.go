@@ -7,16 +7,18 @@ import (
 )
 
 type Player struct {
-	id         string
-	name       string
-	credits    int
-	health     int
-	accepted   bool
-	dead       bool
-	xp         int
-	lobbyAdmin bool
-	units      map[string]*Unit
-	shop       *Shop
+	id            string
+	name          string
+	credits       int
+	health        int
+	accepted      bool
+	connected     bool
+	dead          bool
+	xp            int
+	lobbyAdmin    bool
+	units         map[string]*Unit
+	shop          *Shop
+	unitPropStore *UnitPropertyStore
 }
 
 func NewPlayer() *Player {
@@ -25,11 +27,13 @@ func NewPlayer() *Player {
 	shop.SetSize(5)
 
 	return &Player{
-		id:     uuid.NewString(),
-		units:  make(map[string]*Unit),
-		shop:   shop,
-		health: 100,
-		dead:   false,
+		id:        uuid.NewString(),
+		units:     make(map[string]*Unit),
+		shop:      shop,
+		health:    100,
+		dead:      false,
+		accepted:  false,
+		connected: false,
 	}
 }
 
@@ -55,26 +59,18 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 		newUnitID := uuid.New().String()
 
-		player.units[newUnitID] = &Unit{
-			UnitID:   newUnitID,
-			UnitType: shopUnit.UnitType,
-			//tier:       shopUnit.Tier,
-			Rank:       1,
-			HP:         shopUnit.HP,
-			Mana:       shopUnit.Mana,
-			AttackRate: shopUnit.AttackRate,
+		unit := Unit{
+			UnitID:         newUnitID,
+			UnitProperties: shopUnit.UnitProperties,
 		}
 
+		player.units[newUnitID] = &unit
+
 		return []MatchEvent{
-			MatchEvent{
+			{
 				BarrackUnitAdded: &BarrackUnitAdded{
-					PlayerID:   player.id,
-					UnitID:     newUnitID,
-					UnitType:   shopUnit.UnitType,
-					Rank:       1,
-					HP:         shopUnit.HP,
-					Mana:       shopUnit.Mana,
-					AttackRate: shopUnit.AttackRate,
+					PlayerID: player.id,
+					Unit:     unit,
 				},
 			},
 		}
@@ -102,22 +98,19 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 		if !upgraded && upgradeRank == unit.Rank {
 			unit.Rank += 1
-			unit.HP = shopUnit.HP
-			unit.Mana = shopUnit.Mana
-			unit.AttackRate = shopUnit.AttackRate
+
+			props := player.unitPropStore.GetUnitProperties(unit.UnitType, unit.Rank)
+
+			unit.HP = props.HP
+			unit.Mana = props.Mana
+			unit.AttackRate = props.AttackRate
 
 			log.Printf("Unit %v upgraded to rank %v", unitID, unit.Rank)
 
 			events = append(events, MatchEvent{
 				BarrackUnitUpgraded: &BarrackUnitUpgraded{
 					PlayerID: player.id,
-					UnitID:   unitID,
-					UnitType: shopUnit.UnitType,
-					//Tier:       shopUnit.Tier,
-					Rank:       unit.Rank,
-					HP:         shopUnit.HP,
-					Mana:       shopUnit.Mana,
-					AttackRate: shopUnit.AttackRate,
+					Unit:     *unit,
 				},
 			})
 

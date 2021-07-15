@@ -5,14 +5,8 @@ import (
 )
 
 type ShopUnit struct {
-	ID         int
-	UnitType   string
-	Level      int
-	HP         int
-	Mana       int
-	Rank       int
-	Cost       int
-	AttackRate int
+	ID int
+	UnitProperties
 }
 
 type Shop struct {
@@ -60,11 +54,11 @@ func (shop *Shop) Fill(level int) ShopRefilled {
 
 		tier := chooseRandomTier(probabilities)
 
-		unit := shop.UnitPropertyStore.ChooseRandomUnitFromTier(tier)
+		unitProps := shop.UnitPropertyStore.ChooseRandomUnitFromTier(tier)
 
 		shopUnit := ShopUnit{
-			ID:       id,
-			UnitType: unit.UnitType,
+			ID:             id,
+			UnitProperties: unitProps,
 		}
 
 		shop.units[id] = shopUnit
