@@ -68,6 +68,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 		return []MatchEvent{
 			MatchEvent{
 				BarrackUnitAdded: &BarrackUnitAdded{
+					PlayerID:   player.id,
 					UnitID:     newUnitID,
 					UnitType:   shopUnit.UnitType,
 					Rank:       1,
@@ -109,6 +110,7 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 			events = append(events, MatchEvent{
 				BarrackUnitUpgraded: &BarrackUnitUpgraded{
+					PlayerID: player.id,
 					UnitID:   unitID,
 					UnitType: shopUnit.UnitType,
 					//Tier:       shopUnit.Tier,
@@ -150,7 +152,8 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 
 		events = append(events, MatchEvent{
 			BarrackUnitRemoved: &BarrackUnitRemoved{
-				UnitID: unitID,
+				PlayerID: player.id,
+				UnitID:   unitID,
 			},
 		})
 

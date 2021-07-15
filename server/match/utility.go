@@ -37,3 +37,7 @@ func picRandomPlayer(players map[string]*Player) *Player {
 
 	return nil
 }
+
+func invertY(y float32) float32 {
+	return 100 - y
+}

@@ -148,7 +148,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 
 			var err error
 
-			if event.ShopRefilled != nil {
+			if event.ShopRefilled != nil && event.ShopRefilled.PlayerID == playerID {
 				shopRefilled := ShopRefilled{
 					ShopUnits: []ShopUnit{},
 				}
@@ -183,7 +183,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				})
 			}
 
-			if event.ShopUnitRemoved != nil {
+			if event.ShopUnitRemoved != nil && event.ShopUnitRemoved.PlayerID == playerID {
 				log.Println("Sending shop unit removed")
 
 				ws.WriteJSON(MessageToClient{
@@ -193,56 +193,63 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				})
 			}
 
-			if event.BarrackUnitAdded != nil {
-				unitAdded := UnitAdded{
-					UnitID:     event.BarrackUnitAdded.UnitID,
-					UnitType:   event.BarrackUnitAdded.UnitType,
-					Rank:       event.BarrackUnitAdded.Rank,
-					HP:         event.BarrackUnitAdded.HP,
-					Mana:       event.BarrackUnitAdded.Mana,
-					AttackRate: event.BarrackUnitAdded.AttackRate,
+			if event.BarrackUnitAdded != nil && event.BarrackUnitAdded.PlayerID == playerID {
+				if event.BarrackUnitAdded.PlayerID == playerID {
+					unitAdded := UnitAdded{
+						UnitID:     event.BarrackUnitAdded.UnitID,
+						UnitType:   event.BarrackUnitAdded.UnitType,
+						Rank:       event.BarrackUnitAdded.Rank,
+						HP:         event.BarrackUnitAdded.HP,
+						Mana:       event.BarrackUnitAdded.Mana,
+						AttackRate: event.BarrackUnitAdded.AttackRate,
+					}
+
+					msg := MessageToClient{
+						UnitAdded: &unitAdded,
+					}
+
+					log.Println("Seding unitAdded to client")
+
+					ws.WriteJSON(msg)
 				}
-
-				msg := MessageToClient{
-					UnitAdded: &unitAdded,
-				}
-
-				log.Println("Seding unitAdded to client")
-
-				ws.WriteJSON(msg)
 			}
 
-			if event.BarrackUnitRemoved != nil {
-				unitRemoved := UnitRemoved{
-					UnitID: event.BarrackUnitRemoved.UnitID,
+			if event.BarrackUnitRemoved != nil && event.BarrackUnitRemoved.PlayerID == playerID {
+				if event.BarrackUnitRemoved.PlayerID == playerID {
+					unitRemoved := UnitRemoved{
+						UnitID: event.BarrackUnitRemoved.UnitID,
+					}
+
+					msg := MessageToClient{
+						UnitRemoved: &unitRemoved,
+					}
+
+					log.Println("Sending unitRemoved to client")
+
+					ws.WriteJSON(msg)
 				}
-
-				msg := MessageToClient{
-					UnitRemoved: &unitRemoved,
-				}
-
-				log.Println("Sending unitRemoved to client")
-
-				ws.WriteJSON(msg)
 			}
 
-			if event.BarrackUnitUpgraded != nil {
-				unitUpgraded := UnitUpgraded{
-					UnitID:     event.BarrackUnitUpgraded.UnitID,
-					Rank:       event.BarrackUnitUpgraded.Rank,
-					HP:         event.BarrackUnitUpgraded.HP,
-					Mana:       event.BarrackUnitUpgraded.Mana,
-					AttackRate: event.BarrackUnitUpgraded.AttackRate,
+			if event.BarrackUnitUpgraded != nil && event.BarrackUnitUpgraded.PlayerID == playerID {
+				if event.BarrackUnitUpgraded.PlayerID == playerID {
+					unitUpgraded := UnitUpgraded{
+						UnitID:     event.BarrackUnitUpgraded.UnitID,
+						Rank:       event.BarrackUnitUpgraded.Rank,
+						HP:         event.BarrackUnitUpgraded.HP,
+						Mana:       event.BarrackUnitUpgraded.Mana,
+						AttackRate: event.BarrackUnitUpgraded.AttackRate,
+					}
+
+					log.Println("Sending unitUpgraded to client")
+
+					ws.WriteJSON(MessageToClient{
+						UnitUpgraded: &unitUpgraded,
+					})
 				}
-
-				log.Println("Sending unitUpgraded to client")
-
-				ws.WriteJSON(MessageToClient{
-					UnitUpgraded: &unitUpgraded,
-				})
 			}
 
-			if event.UnitPlaced != nil {
+			if event.UnitPlaced != nil && event.UnitPlaced.PlayerID == playerID {
+
 				log.Println("Sending unit placed to client")
 
 				unitPlaced := UnitPlaced{
@@ -254,6 +261,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				err = ws.WriteJSON(MessageToClient{
 					UnitPlaced: &unitPlaced,
 				})
+
 			}
 
 			if event.PhaseChanged != nil {
@@ -266,7 +274,7 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				})
 			}
 
-			if event.UnitStartedMovingTo != nil {
+			if event.UnitStartedMovingTo != nil && event.UnitStartedMovingTo.PlayerID == playerID {
 				log.Printf("Sending unit %v started moving to %v %v",
 					event.UnitStartedMovingTo.UnitID,
 					event.UnitStartedMovingTo.X,
@@ -279,9 +287,10 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 						Y:      event.UnitStartedMovingTo.Y,
 					},
 				})
+
 			}
 
-			if event.UnitArrivedTo != nil {
+			if event.UnitArrivedTo != nil && event.UnitArrivedTo.PlayerID == playerID {
 				log.Printf("Sending unit %v arrived to", event.UnitArrivedTo.UnitID)
 
 				err = ws.WriteJSON(MessageToClient{
@@ -291,9 +300,11 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 						Y:      event.UnitArrivedTo.Y,
 					},
 				})
+
 			}
 
-			if event.UnitDied != nil {
+			if event.UnitDied != nil && event.UnitDied.PlayerID == playerID {
+
 				log.Printf("Sending unit %v died to client", event.UnitDied.UnitID)
 
 				err = ws.WriteJSON(MessageToClient{
@@ -301,79 +312,80 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 						UnitID: event.UnitDied.UnitID,
 					},
 				})
+
 			}
 
-			if event.RoundCreated != nil {
-				if event.RoundCreated.PlayerID == playerID {
-					roundCreated := RoundCreated{
-						PlayerID: playerID,
-						Units:    []BattleUnit{},
-					}
+			if event.RoundCreated != nil && event.RoundCreated.PlayerID == playerID {
 
-					for _, unit := range event.RoundCreated.Units {
-						roundCreated.Units = append(roundCreated.Units, BattleUnit{
-							Team:          unit.Team,
-							UnitID:        unit.UnitID,
-							UnitType:      unit.UnitType,
-							Rank:          unit.Rank,
-							MaxHP:         unit.MaxHP,
-							HP:            unit.HP,
-							MaxMana:       unit.MaxMana,
-							Mana:          unit.Mana,
-							AttackRate:    unit.AttackRate,
-							AttackRange:   unit.AttackRange,
-							AttackDamage:  unit.AttackDamage,
-							InstantAttack: unit.InstantAttack,
-							MoveSpeed:     unit.MoveSpeed,
-							Dead:          unit.Dead,
-							Placement: Point{
-								X: unit.X,
-								Y: unit.Y,
-							},
-						})
-					}
+				roundCreated := RoundCreated{
+					PlayerID: playerID,
+					Units:    []BattleUnit{},
+				}
 
-					err = ws.WriteJSON(MessageToClient{
-						RoundCreated: &roundCreated,
+				for _, unit := range event.RoundCreated.Units {
+					roundCreated.Units = append(roundCreated.Units, BattleUnit{
+						Team:          unit.Team,
+						UnitID:        unit.UnitID,
+						UnitType:      unit.UnitType,
+						Rank:          unit.Rank,
+						MaxHP:         unit.MaxHP,
+						HP:            unit.HP,
+						MaxMana:       unit.MaxMana,
+						Mana:          unit.Mana,
+						AttackRate:    unit.AttackRate,
+						AttackRange:   unit.AttackRange,
+						AttackDamage:  unit.AttackDamage,
+						InstantAttack: unit.InstantAttack,
+						MoveSpeed:     unit.MoveSpeed,
+						Dead:          unit.Dead,
+						Placement: Point{
+							X: unit.X,
+							Y: unit.Y,
+						},
 					})
 				}
+
+				err = ws.WriteJSON(MessageToClient{
+					RoundCreated: &roundCreated,
+				})
+
 			}
 
-			if event.RoundFinished != nil {
-				if event.RoundFinished.PlayerID == playerID {
-					roundFinished := RoundFinished{
-						PlayerID:         playerID,
-						NewCreditsAmount: event.RoundFinished.NewCreditsAmount,
-						NewPlayerHealth:  event.RoundFinished.NewPlayerHealth,
-						Units:            []Unit{},
-					}
+			if event.RoundFinished != nil && event.RoundFinished.PlayerID == playerID {
 
-					for _, unit := range event.RoundFinished.Units {
-						eventUnit := Unit{
-							Team:       1,
-							UnitID:     unit.UnitID,
-							UnitType:   unit.UnitType,
-							Tier:       unit.Tier,
-							Rank:       unit.Rank,
-							HP:         unit.HP,
-							Mana:       unit.Mana,
-							AttackRate: unit.AttackRate,
-						}
-
-						if unit.Placement != nil {
-							eventUnit.Placement = &Point{
-								X: unit.Placement.X,
-								Y: unit.Placement.Y,
-							}
-						}
-
-						roundFinished.Units = append(roundFinished.Units, eventUnit)
-					}
-
-					err = ws.WriteJSON(MessageToClient{
-						RoundFinished: &roundFinished,
-					})
+				roundFinished := RoundFinished{
+					PlayerID:         playerID,
+					NewCreditsAmount: event.RoundFinished.NewCreditsAmount,
+					NewPlayerHealth:  event.RoundFinished.NewPlayerHealth,
+					Units:            []Unit{},
 				}
+
+				for _, unit := range event.RoundFinished.Units {
+					eventUnit := Unit{
+						Team:       1,
+						UnitID:     unit.UnitID,
+						UnitType:   unit.UnitType,
+						Tier:       unit.Tier,
+						Rank:       unit.Rank,
+						HP:         unit.HP,
+						Mana:       unit.Mana,
+						AttackRate: unit.AttackRate,
+					}
+
+					if unit.Placement != nil {
+						eventUnit.Placement = &Point{
+							X: unit.Placement.X,
+							Y: unit.Placement.Y,
+						}
+					}
+
+					roundFinished.Units = append(roundFinished.Units, eventUnit)
+				}
+
+				err = ws.WriteJSON(MessageToClient{
+					RoundFinished: &roundFinished,
+				})
+
 			}
 
 			if event.PlayerJoined != nil {

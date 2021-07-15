@@ -35,6 +35,7 @@ type MatchPhaseChanged struct {
 }
 
 type UnitAdded struct {
+	PlayerID   string `json:"playerId"`
 	UnitID     string `json:"unitId"`
 	UnitType   string `json:"unitType"`
 	Rank       int    `json:"rank"`
@@ -44,10 +45,12 @@ type UnitAdded struct {
 }
 
 type UnitRemoved struct {
-	UnitID string `json:"unitId"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
 }
 
 type UnitUpgraded struct {
+	PlayerID   string `json:"playerId"`
 	UnitID     string `json:"unitId"`
 	Rank       int    `json:"rank"`
 	HP         int    `json:"hp"`
@@ -64,25 +67,29 @@ type StartTimerTimeChanged struct {
 }
 
 type UnitDied struct {
-	UnitID string `json:"unitId"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
 }
 
 type UnitPlaced struct {
-	UnitID string `json:"unitId"`
-	X      int    `json:"x"`
-	Y      int    `json:"y"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	X        int    `json:"x"`
+	Y        int    `json:"y"`
 }
 
 type UnitStartedMovingTo struct {
-	UnitID string `json:"unitId"`
-	X      int    `json:"x"`
-	Y      int    `json:"y"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	X        int    `json:"x"`
+	Y        int    `json:"y"`
 }
 
 type UnitArrivedTo struct {
-	UnitID string `json:"unitId"`
-	X      int    `json:"x"`
-	Y      int    `json:"y"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	X        int    `json:"x"`
+	Y        int    `json:"y"`
 }
 
 type UnitStartedAttacking struct {
@@ -103,16 +110,19 @@ type LaunchProjectile struct {
 }
 
 type UnitTookDamage struct {
-	UnitID string `json:"unitId"`
-	Amount int    `json:"amount"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	Amount   int    `json:"amount"`
 }
 
 type UnitUsedMana struct {
-	UnitID string `json:"unitId"`
-	Amount int    `json:"amount"`
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	Amount   int    `json:"amount"`
 }
 
 type UnitUsedAbility struct {
+	PlayerID  string `json:"playerId"`
 	UnitID    string `json:"unitId"`
 	AbilityID string `json:"abilityId"`
 }
@@ -143,10 +153,12 @@ type ShopUnit struct {
 }
 
 type ShopUnitRemoved struct {
-	ShopUnitID int `json:"shopUnitId"`
+	PlayerID   string `json:"playerId"`
+	ShopUnitID int    `json:"shopUnitId"`
 }
 
 type ShopRefilled struct {
+	PlayerID  string     `json:"playerId"`
 	ShopUnits []ShopUnit `json:"shop_units"`
 }
 

@@ -4,6 +4,7 @@ type UnitBought struct {
 }
 
 type BarrackUnitAdded struct {
+	PlayerID   string
 	UnitID     string
 	UnitType   string
 	Rank       int
@@ -13,10 +14,12 @@ type BarrackUnitAdded struct {
 }
 
 type BarrackUnitRemoved struct {
-	UnitID string
+	PlayerID string
+	UnitID   string
 }
 
 type BarrackUnitUpgraded struct {
+	PlayerID   string
 	UnitID     string
 	UnitType   string
 	Tier       int
@@ -27,6 +30,7 @@ type BarrackUnitUpgraded struct {
 }
 
 type ShopRefilled struct {
+	PlayerID  string
 	ShopUnits []ShopUnit
 }
 
@@ -35,6 +39,7 @@ type PhaseChanged struct {
 }
 
 type ShopUnitRemoved struct {
+	PlayerID   string
 	ShopUnitID int
 }
 
@@ -44,25 +49,29 @@ type CountdownStarted struct {
 }
 
 type UnitPlaced struct {
-	UnitID string
-	X      int
-	Y      int
+	PlayerID string
+	UnitID   string
+	X        int
+	Y        int
 }
 
 type UnitStartedMovingTo struct {
-	UnitID string
-	X      int
-	Y      int
+	PlayerID string
+	UnitID   string
+	X        int
+	Y        int
 }
 
 type UnitArrivedTo struct {
-	UnitID string
-	X      int
-	Y      int
+	PlayerID string
+	UnitID   string
+	X        int
+	Y        int
 }
 
 type UnitDied struct {
-	UnitID string
+	PlayerID string
+	UnitID   string
 }
 
 type RoundCreated struct {

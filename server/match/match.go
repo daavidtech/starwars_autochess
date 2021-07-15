@@ -86,6 +86,7 @@ func (match *Match) BuyUnit(playerID string, id int) {
 
 	events = append(events, MatchEvent{
 		ShopUnitRemoved: &ShopUnitRemoved{
+			PlayerID:   playerID,
 			ShopUnitID: id,
 		},
 	})
@@ -112,9 +113,10 @@ func (match *Match) PlaceUnit(playerID string, unitID string, x int, y int) {
 
 	match.eventBroker.publishEvent(MatchEvent{
 		UnitPlaced: &UnitPlaced{
-			UnitID: unitID,
-			X:      x,
-			Y:      y,
+			PlayerID: playerID,
+			UnitID:   unitID,
+			X:        x,
+			Y:        y,
 		},
 	})
 }
@@ -182,6 +184,8 @@ func (match *Match) moveToShoppingPhase() {
 	for _, player := range match.players {
 		shopRefilled := player.shop.Fill(player.GetLevel())
 
+		shopRefilled.PlayerID = player.GetID()
+
 		match.eventBroker.publishEvent(MatchEvent{
 			ShopRefilled: &shopRefilled,
 		})
@@ -237,13 +241,13 @@ func (match *Match) moveToBattlePhase() bool {
 
 		for _, unit := range player1.units {
 			if unit.Placement != nil {
-				battleUnits = append(battleUnits, createBattleUnit(unit, 1))
+				battleUnits = append(battleUnits, createBattleUnit(unit, 1, player1.id))
 			}
 		}
 
 		for _, unit := range player2.units {
 			if unit.Placement != nil {
-				battleUnits = append(battleUnits, createBattleUnit(unit, 2))
+				battleUnits = append(battleUnits, createBattleUnit(unit, 2, player2.id))
 			}
 		}
 
@@ -253,7 +257,8 @@ func (match *Match) moveToBattlePhase() bool {
 		round.player2ID = player2.id
 
 		roundCreated := RoundCreated{
-			Units: []BattleUnit{},
+			PlayerID: round.player1ID,
+			Units:    []BattleUnit{},
 		}
 
 		for _, battleUnit := range battleUnits {
@@ -265,6 +270,25 @@ func (match *Match) moveToBattlePhase() bool {
 		match.eventBroker.publishEvent(MatchEvent{
 			RoundCreated: &roundCreated,
 		})
+
+		if round.player1ID != round.player2ID {
+			roundCreated2 := RoundCreated{
+				PlayerID: round.player2ID,
+				Units:    []BattleUnit{},
+			}
+
+			for _, battleUnit := range battleUnits {
+				b := *battleUnit
+
+				b.Y = float32(invertY(b.Y))
+
+				roundCreated2.Units = append(roundCreated2.Units, b)
+			}
+
+			match.eventBroker.publishEvent(MatchEvent{
+				RoundCreated: &roundCreated2,
+			})
+		}
 	}
 
 	for _, round := range rounds {
@@ -313,18 +337,18 @@ func (match *Match) moveToBattlePhase() bool {
 				}
 			}
 
-			roundFinished = RoundFinished{
+			roundFinished2 := RoundFinished{
 				PlayerID:         round.player2ID,
 				NewCreditsAmount: player2.credits,
 				NewPlayerHealth:  player2.health,
 			}
 
 			for _, unit := range player2.units {
-				roundFinished.Units = append(roundFinished.Units, *unit)
+				roundFinished2.Units = append(roundFinished2.Units, *unit)
 			}
 
 			match.eventBroker.publishEvent(MatchEvent{
-				RoundFinished: &roundFinished,
+				RoundFinished: &roundFinished2,
 			})
 		}
 	}

@@ -99,10 +99,6 @@ func (round *Round) work(delta float32) RoundWorkResult {
 			team2AllDead = false
 		}
 
-		// if unit.Team == 2 {
-		// 	continue
-		// }
-
 		if unit.currAttackTarget == nil {
 			closestUnit := round.findClosestEnemy(unit)
 
@@ -124,15 +120,27 @@ func (round *Round) work(delta float32) RoundWorkResult {
 			if unit.nextLoc != nil {
 				log.Printf("1. Unit arrived to %v %v", unit.X, unit.Y)
 
-				result.events = append(result.events,
-					MatchEvent{
-						UnitArrivedTo: &UnitArrivedTo{
-							UnitID: unit.UnitID,
-							X:      int(unit.X),
-							Y:      int(unit.Y),
-						},
+				result.events = append(result.events, MatchEvent{
+					UnitArrivedTo: &UnitArrivedTo{
+						PlayerID: round.player1ID,
+						UnitID:   unit.UnitID,
+						X:        int(unit.X),
+						Y:        int(unit.Y),
 					},
-				)
+				})
+
+				if round.player1ID != round.player2ID {
+					invertedY := int(invertY(unit.Y))
+
+					result.events = append(result.events, MatchEvent{
+						UnitArrivedTo: &UnitArrivedTo{
+							PlayerID: round.player2ID,
+							UnitID:   unit.UnitID,
+							X:        int(unit.X),
+							Y:        invertedY,
+						},
+					})
+				}
 
 				unit.nextLoc = nil
 			}
@@ -155,9 +163,19 @@ func (round *Round) work(delta float32) RoundWorkResult {
 
 				result.events = append(result.events, MatchEvent{
 					UnitDied: &UnitDied{
-						UnitID: target.UnitID,
+						PlayerID: round.player1ID,
+						UnitID:   target.UnitID,
 					},
 				})
+
+				if round.player1ID != round.player2ID {
+					result.events = append(result.events, MatchEvent{
+						UnitDied: &UnitDied{
+							PlayerID: round.player2ID,
+							UnitID:   target.UnitID,
+						},
+					})
+				}
 			}
 
 			continue
@@ -170,11 +188,23 @@ func (round *Round) work(delta float32) RoundWorkResult {
 
 			result.events = append(result.events, MatchEvent{
 				UnitArrivedTo: &UnitArrivedTo{
-					UnitID: unit.UnitID,
-					X:      int(unit.X),
-					Y:      int(unit.Y),
+					PlayerID: round.player1ID,
+					UnitID:   unit.UnitID,
+					X:        int(unit.X),
+					Y:        int(unit.Y),
 				},
 			})
+
+			if round.player1ID != round.player2ID {
+				result.events = append(result.events, MatchEvent{
+					UnitArrivedTo: &UnitArrivedTo{
+						PlayerID: round.player2ID,
+						UnitID:   unit.UnitID,
+						X:        int(unit.X),
+						Y:        int(invertY(unit.Y)),
+					},
+				})
+			}
 
 			unit.nextLoc = nil
 
@@ -188,11 +218,23 @@ func (round *Round) work(delta float32) RoundWorkResult {
 
 			result.events = append(result.events, MatchEvent{
 				UnitStartedMovingTo: &UnitStartedMovingTo{
-					UnitID: unit.UnitID,
-					X:      int(nextLock.X),
-					Y:      int(nextLock.Y),
+					PlayerID: round.player1ID,
+					UnitID:   unit.UnitID,
+					X:        int(nextLock.X),
+					Y:        int(nextLock.Y),
 				},
 			})
+
+			if round.player1ID != round.player2ID {
+				result.events = append(result.events, MatchEvent{
+					UnitStartedMovingTo: &UnitStartedMovingTo{
+						PlayerID: round.player2ID,
+						UnitID:   unit.UnitID,
+						X:        int(nextLock.X),
+						Y:        int(invertY(nextLock.Y)),
+					},
+				})
+			}
 		}
 
 		unit.moveTowardsNextLoc(delta)

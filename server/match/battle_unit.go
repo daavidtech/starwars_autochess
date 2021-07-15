@@ -11,6 +11,7 @@ type BattleUnit struct {
 	Team          int
 	UnitID        string
 	UnitType      string
+	PlayerID      string
 	Rank          int
 	MaxHP         int
 	HP            int
@@ -30,7 +31,7 @@ type BattleUnit struct {
 	currAttackTarget *BattleUnit
 }
 
-func createBattleUnit(unit *Unit, team int) *BattleUnit {
+func createBattleUnit(unit *Unit, team int, playerID string) *BattleUnit {
 	y := unit.Placement.Y
 
 	if team == 2 {
@@ -42,6 +43,7 @@ func createBattleUnit(unit *Unit, team int) *BattleUnit {
 	return &BattleUnit{
 		UnitID:      unitID,
 		UnitType:    unit.UnitType,
+		PlayerID:    playerID,
 		MaxHP:       100,
 		HP:          100,
 		MaxMana:     unit.Mana,
