@@ -3,14 +3,13 @@ package match
 import "math/rand"
 
 type UnitPropertyStore struct {
-	units          map[string]UnitProperties
+	units          []UnitProperties
 	unitTierCounts map[int]int
 }
 
 func NewUnitPropertyStore() UnitPropertyStore {
 	return UnitPropertyStore{
-		units:          make(map[string]UnitProperties),
-		unitTierCounts: make(map[int]int),
+		units: []UnitProperties{},
 	}
 }
 
@@ -18,30 +17,35 @@ func (unitStore *UnitPropertyStore) CountUnits() int {
 	return len(unitStore.units)
 }
 
-func (unitRegister *UnitPropertyStore) SaveUnit(unit UnitProperties) {
-	if unit.HP == 0 {
+func (unitPropStore *UnitPropertyStore) SaveUnit(newUnit UnitProperties) {
+	if newUnit.HP == 0 {
 		panic("Unit cannot have zero hp")
 	}
 
-	unitRegister.units[unit.UnitType] = unit
+	if newUnit.Rank < 1 && newUnit.Rank > 3 {
+		panic("Invalid rank")
+	}
 
-	count := unitRegister.unitTierCounts[unit.Tier]
+	units := []UnitProperties{}
 
-	count += 1
+	for _, unit := range unitPropStore.units {
+		if unit.UnitType == newUnit.UnitType && unit.Rank == newUnit.Rank {
+			continue
+		}
 
-	unitRegister.unitTierCounts[unit.Tier] = count
+		units = append(units, unit)
+	}
 
+	units = append(units, newUnit)
+
+	unitPropStore.units = units
 }
 
-func (unitRegister *UnitPropertyStore) GetUnit(unitType string) UnitProperties {
-	return unitRegister.units[unitType]
-}
-
-func (u *UnitPropertyStore) ChooseRandomUnitFromTier(tier int) UnitProperties {
-	count := u.unitTierCounts[tier]
+func (u *UnitPropertyStore) PickRandom(tier int) (UnitProperties, bool) {
+	count := u.CountTierUnits(tier)
 
 	if count == 0 {
-		return UnitProperties{}
+		return UnitProperties{}, false
 	}
 
 	random := rand.Intn(count)
@@ -49,24 +53,42 @@ func (u *UnitPropertyStore) ChooseRandomUnitFromTier(tier int) UnitProperties {
 	i := 0
 
 	for _, u := range u.units {
+		if u.Rank != 1 {
+			continue
+		}
+
 		if i != random {
 			i += 1
 
 			continue
 		}
 
-		return u
+		return u, true
 	}
 
-	return UnitProperties{}
+	return UnitProperties{}, false
 }
 
-func (unitPropStore *UnitPropertyStore) GetUnitProperties(unitType string, rank int) UnitProperties {
+func (unitPropStore *UnitPropertyStore) CountTierUnits(tier int) int {
+	count := 0
+
+	for _, unit := range unitPropStore.units {
+		if unit.Tier != tier || unit.Rank != 1 {
+			continue
+		}
+
+		count += 1
+	}
+
+	return count
+}
+
+func (unitPropStore *UnitPropertyStore) FindProps(unitType string, rank int) (UnitProperties, bool) {
 	for _, unitProp := range unitPropStore.units {
 		if unitProp.UnitType == unitType && unitProp.Rank == rank {
-			return unitProp
+			return unitProp, true
 		}
 	}
 
-	return UnitProperties{}
+	return UnitProperties{}, false
 }

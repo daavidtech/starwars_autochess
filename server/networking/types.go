@@ -238,34 +238,48 @@ type LoginSuccess struct {
 	Uusername string `json:""`
 }
 
+type BattleUnitHealthChanged struct {
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	NewHP    int    `json:"newHp"`
+}
+
+type BattleUnitManaChanged struct {
+	PlayerID string `json:"playerId"`
+	UnitID   string `json:"unitId"`
+	NewMana  int    `json:"newMana"`
+}
+
 type MessageToClient struct {
-	UnitAdded             *UnitAdded             `json:"unitAdded"`
-	UnitRemoved           *UnitRemoved           `json:"unitRemoved"`
-	UnitSold              *UnitSold              `json:"unitSold"`
-	UnitUpgraded          *UnitUpgraded          `json:"unitUpgraded"`
-	StartTimerTimeChanged *StartTimerTimeChanged `json:"startTimerTimeChanged"`
-	UnitDied              *UnitDied              `json:"unitDied"`
-	UnitPlaced            *UnitPlaced            `json:"unitPlaced"`
-	UnitTookDamage        *UnitTookDamage        `json:"unitTookDamage"`
-	UnitUsedMana          *UnitUsedMana          `json:"unitUsedMana"`
-	UnitUsedAbility       *UnitUsedAbility       `json:"unitUsedAbility"`
-	UnitStartedMovingTo   *UnitStartedMovingTo   `json:"unitStartedMovingTo"`
-	UnitArrivedTo         *UnitArrivedTo         `json:"unitArrivedToPosition"`
-	UnitStartedAttacking  *UnitStartedAttacking  `json:"unitStartedAttacking"`
-	UnitStoppedAttacking  *UnitStoppedAttacking  `json:"unitStoppedAttacking"`
-	LaunchProjectile      *LaunchProjectile      `json:"launchParticle"`
-	PlayerMoneyChanged    *PlayerMoneyChanged    `json:"playerMoneyChanged"`
-	PlayerLevelChanged    *PlayerLevelChanged    `json:"playerLevelChanged"`
-	PlayerHealthChanged   *PlayerHealthChanged   `json:"playerHealthChanged"`
-	ShopUnitRemoved       *ShopUnitRemoved       `json:"shopUnitRemoved"`
-	ShopRefilled          *ShopRefilled          `json:"shopRefilled"`
-	CountdownStarted      *CountdownStarted      `json:"countdownStarted"`
-	RoundCreated          *RoundCreated          `json:"roundCreated"`
-	RoundFinished         *RoundFinished         `json:"roundFinished"`
-	CurrentMatch          *CurrentMatch          `json:"currentMatch"`
-	LoginSuccess          *LoginSuccess          `json:"loginSuccess"`
-	PlayerJoined          *PlayerJoined          `json:"playerJoined"`
-	PlayerLeft            *PlayerLeft            `json:"playerLeft"`
+	UnitAdded               *UnitAdded               `json:"unitAdded"`
+	UnitRemoved             *UnitRemoved             `json:"unitRemoved"`
+	UnitSold                *UnitSold                `json:"unitSold"`
+	UnitUpgraded            *UnitUpgraded            `json:"unitUpgraded"`
+	StartTimerTimeChanged   *StartTimerTimeChanged   `json:"startTimerTimeChanged"`
+	UnitDied                *UnitDied                `json:"unitDied"`
+	UnitPlaced              *UnitPlaced              `json:"unitPlaced"`
+	UnitTookDamage          *UnitTookDamage          `json:"unitTookDamage"`
+	UnitUsedMana            *UnitUsedMana            `json:"unitUsedMana"`
+	UnitUsedAbility         *UnitUsedAbility         `json:"unitUsedAbility"`
+	UnitStartedMovingTo     *UnitStartedMovingTo     `json:"unitStartedMovingTo"`
+	UnitArrivedTo           *UnitArrivedTo           `json:"unitArrivedToPosition"`
+	UnitStartedAttacking    *UnitStartedAttacking    `json:"unitStartedAttacking"`
+	UnitStoppedAttacking    *UnitStoppedAttacking    `json:"unitStoppedAttacking"`
+	LaunchProjectile        *LaunchProjectile        `json:"launchParticle"`
+	PlayerMoneyChanged      *PlayerMoneyChanged      `json:"playerMoneyChanged"`
+	PlayerLevelChanged      *PlayerLevelChanged      `json:"playerLevelChanged"`
+	PlayerHealthChanged     *PlayerHealthChanged     `json:"playerHealthChanged"`
+	ShopUnitRemoved         *ShopUnitRemoved         `json:"shopUnitRemoved"`
+	ShopRefilled            *ShopRefilled            `json:"shopRefilled"`
+	CountdownStarted        *CountdownStarted        `json:"countdownStarted"`
+	RoundCreated            *RoundCreated            `json:"roundCreated"`
+	RoundFinished           *RoundFinished           `json:"roundFinished"`
+	CurrentMatch            *CurrentMatch            `json:"currentMatch"`
+	LoginSuccess            *LoginSuccess            `json:"loginSuccess"`
+	PlayerJoined            *PlayerJoined            `json:"playerJoined"`
+	PlayerLeft              *PlayerLeft              `json:"playerLeft"`
+	BattleUnitHealthChanged *BattleUnitHealthChanged `json:"battleUnitHealthChanged"`
+	BattleUnitManaChanged   *BattleUnitManaChanged   `json:"battleUnitManaChanged"`
 
 	MatchPhaseChanged *MatchPhaseChanged `json:"matchPhaseChanged"`
 }

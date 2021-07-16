@@ -54,7 +54,7 @@ func (shop *Shop) Fill(level int) ShopRefilled {
 
 		tier := chooseRandomTier(probabilities)
 
-		unitProps := shop.UnitPropertyStore.ChooseRandomUnitFromTier(tier)
+		unitProps, _ := shop.UnitPropertyStore.PickRandom(tier)
 
 		shopUnit := ShopUnit{
 			ID:             id,

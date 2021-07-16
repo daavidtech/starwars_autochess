@@ -152,7 +152,25 @@ func (round *Round) work(delta float32) RoundWorkResult {
 			log.Printf("Unit is attacking %v", unit.UnitID)
 
 			unit.lastAttacked = now
-			target.HP -= 10
+			target.HP -= unit.AttackDamage
+
+			result.events = append(result.events, MatchEvent{
+				BattleUnitHealthChanged: &BattleUnitHealthChanged{
+					PlayerID:  round.player1ID,
+					UnitID:    target.UnitID,
+					NewHealth: target.HP,
+				},
+			})
+
+			if round.player1ID != round.player2ID {
+				result.events = append(result.events, MatchEvent{
+					BattleUnitHealthChanged: &BattleUnitHealthChanged{
+						PlayerID:  round.player2ID,
+						UnitID:    target.UnitID,
+						NewHealth: target.HP,
+					},
+				})
+			}
 
 			if target.HP < 1 {
 				target.Dead = true

@@ -99,11 +99,9 @@ func (player *Player) AddShopUnit(shopUnit ShopUnit) []MatchEvent {
 		if !upgraded && upgradeRank == unit.Rank {
 			unit.Rank += 1
 
-			props := player.unitPropStore.GetUnitProperties(unit.UnitType, unit.Rank)
+			props, _ := player.unitPropStore.FindProps(unit.UnitType, unit.Rank)
 
-			unit.HP = props.HP
-			unit.Mana = props.Mana
-			unit.AttackRate = props.AttackRate
+			unit.UnitProperties = props
 
 			log.Printf("Unit %v upgraded to rank %v", unitID, unit.Rank)
 

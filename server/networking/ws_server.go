@@ -415,6 +415,26 @@ func (wsServer *WsServer) HandleSocket(ctx *gin.Context) {
 				})
 			}
 
+			if event.BattleUnitHealthChanged != nil && event.BattleUnitHealthChanged.PlayerID == playerID {
+				err = ws.WriteJSON(MessageToClient{
+					BattleUnitHealthChanged: &BattleUnitHealthChanged{
+						PlayerID: playerID,
+						UnitID:   event.BattleUnitHealthChanged.UnitID,
+						NewHP:    event.BattleUnitHealthChanged.NewHealth,
+					},
+				})
+			}
+
+			if event.BattleUnitManaChanged != nil && event.BattleUnitManaChanged.PlayerID == playerID {
+				err = ws.WriteJSON(MessageToClient{
+					BattleUnitManaChanged: &BattleUnitManaChanged{
+						PlayerID: playerID,
+						UnitID:   event.BattleUnitManaChanged.UnitID,
+						NewMana:  event.BattleUnitManaChanged.NewMana,
+					},
+				})
+			}
+
 			if err != nil {
 				eventBroker.Unsubscribe(ch)
 

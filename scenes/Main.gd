@@ -133,6 +133,10 @@ func _handle_msg(msg):
 		handle_player_joined(msg["playerJoined"])
 	if msg.playerLeft != null:
 		handle_player_left(msg["playerLeft"])
+	if msg.battleUnitHealthChanged != null:
+		handle_unit_health_changed(msg["battleUnitHealthChanged"])
+	if msg.battleUnitManaChanged != null:
+		handle_unit_mana_changed(msg["battleUnitManaChanged"])
 	
 func clear_units():
 	for child in placement_area.get_children():
@@ -175,7 +179,7 @@ func set_unit(loc: String, new_unit):
 	else:
 		placement_area.add_child(unit)
 		
-	if new_unit.has("placement") && new_unit.placement != null:
+	if new_unit.has("placement") and new_unit.placement != null:
 		unit.translation = conv_server_coords(new_unit.placement.x, new_unit.placement.y)
 
 	unit.unit_id = new_unit.unitId
@@ -186,8 +190,18 @@ func set_unit(loc: String, new_unit):
 	unit.attack_rate = new_unit.attackRate
 	unit.rank = new_unit.rank
 	
-	if new_unit.has("move_speed") && new_unit["move_speed"] != null:
+	if new_unit.has("move_speed") and new_unit["move_speed"] != null:
 		unit.move_speed = conv_move_speed(new_unit.moveSpeed)
+
+func handle_unit_health_changed(health_changed):
+	var unit = units[health_changed.unitId]
+	
+	unit.hp = health_changed.newHp
+
+func handle_unit_mana_changed(mana_changed):
+	var unit = units[mana_changed.unitId]
+	
+	unit.mana = mana_changed.newMana
 	
 func handle_player_joined(player_joined):
 	lobby.add_player(player_joined.player.playerId, player_joined.player.name)

@@ -85,21 +85,35 @@ type PlayerLeft struct {
 	Player Player
 }
 
+type BattleUnitHealthChanged struct {
+	PlayerID  string
+	UnitID    string
+	NewHealth int
+}
+
+type BattleUnitManaChanged struct {
+	PlayerID string
+	UnitID   string
+	NewMana  int
+}
+
 type MatchEvent struct {
-	UnitBought          *UnitBought
-	BarrackUnitAdded    *BarrackUnitAdded
-	BarrackUnitRemoved  *BarrackUnitRemoved
-	BarrackUnitUpgraded *BarrackUnitUpgraded
-	ShopRefilled        *ShopRefilled
-	PhaseChanged        *PhaseChanged
-	ShopUnitRemoved     *ShopUnitRemoved
-	CountdownStarted    *CountdownStarted
-	UnitPlaced          *UnitPlaced
-	UnitStartedMovingTo *UnitStartedMovingTo
-	UnitArrivedTo       *UnitArrivedTo
-	UnitDied            *UnitDied
-	RoundCreated        *RoundCreated
-	RoundFinished       *RoundFinished
-	PlayerJoined        *PlayerJoined
-	PlayerLeft          *PlayerLeft
+	UnitBought              *UnitBought
+	BarrackUnitAdded        *BarrackUnitAdded
+	BarrackUnitRemoved      *BarrackUnitRemoved
+	BarrackUnitUpgraded     *BarrackUnitUpgraded
+	ShopRefilled            *ShopRefilled
+	PhaseChanged            *PhaseChanged
+	ShopUnitRemoved         *ShopUnitRemoved
+	CountdownStarted        *CountdownStarted
+	UnitPlaced              *UnitPlaced
+	UnitStartedMovingTo     *UnitStartedMovingTo
+	UnitArrivedTo           *UnitArrivedTo
+	UnitDied                *UnitDied
+	RoundCreated            *RoundCreated
+	RoundFinished           *RoundFinished
+	PlayerJoined            *PlayerJoined
+	PlayerLeft              *PlayerLeft
+	BattleUnitHealthChanged *BattleUnitHealthChanged
+	BattleUnitManaChanged   *BattleUnitManaChanged
 }

@@ -22,9 +22,21 @@ func main() {
 		Tier:         1,
 		Cost:         20,
 		HP:           100,
-		AttackRange:  10,
+		AttackRange:  20,
 		AttackRate:   1000,
 		AttackDamage: 10,
+		MoveSpeed:    20,
+	})
+
+	unitPropertyStore.SaveUnit(match.UnitProperties{
+		UnitType:     "unit_droid",
+		Rank:         2,
+		Tier:         1,
+		Cost:         20,
+		HP:           200,
+		AttackRange:  20,
+		AttackRate:   700,
+		AttackDamage: 30,
 		MoveSpeed:    20,
 	})
 
@@ -34,9 +46,21 @@ func main() {
 		Tier:         1,
 		Cost:         65,
 		HP:           100,
-		AttackRange:  10,
-		AttackRate:   100,
+		AttackRange:  20,
+		AttackRate:   1000,
 		AttackDamage: 10,
+		MoveSpeed:    20,
+	})
+
+	unitPropertyStore.SaveUnit(match.UnitProperties{
+		UnitType:     "unit_clone",
+		Rank:         2,
+		Tier:         1,
+		Cost:         20,
+		HP:           200,
+		AttackRange:  20,
+		AttackRate:   700,
+		AttackDamage: 30,
 		MoveSpeed:    20,
 	})
 
