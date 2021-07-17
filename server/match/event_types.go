@@ -1,8 +1,5 @@
 package match
 
-type UnitBought struct {
-}
-
 type BarrackUnitAdded struct {
 	PlayerID string
 
@@ -98,7 +95,6 @@ type BattleUnitManaChanged struct {
 }
 
 type MatchEvent struct {
-	UnitBought              *UnitBought
 	BarrackUnitAdded        *BarrackUnitAdded
 	BarrackUnitRemoved      *BarrackUnitRemoved
 	BarrackUnitUpgraded     *BarrackUnitUpgraded
