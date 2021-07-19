@@ -2,8 +2,20 @@ package networking
 
 import "github.com/daavidtech/starwars_autochess/match"
 
-type MatchPhaseChanged struct {
-	MatchPhase match.MatchPhase `json:"matchPhase"`
+type GamePhase string
+
+const (
+	LoginPhase     GamePhase = "LoginPhase"
+	MainMenuPhase  GamePhase = "MainMenuPhase"
+	LobbyPhase     GamePhase = "LobbyPhase"
+	ShoppingPhase  GamePhase = "ShoppingPhase"
+	PlacementPhase GamePhase = "PlacementPhase"
+	BattlePhase    GamePhase = "BattlePhase"
+	EndPhase       GamePhase = "EndPhase"
+)
+
+type GamePhaseChanged struct {
+	GamePhase GamePhase `json:"gamePhase"`
 }
 
 type UnitProperties struct {
@@ -160,6 +172,7 @@ type BattleUnit struct {
 
 type RoundCreated struct {
 	PlayerID string       `json:"playerId"`
+	PlayerHP int          `json:"playerHp"`
 	Units    []BattleUnit `json:"units"`
 }
 
@@ -223,6 +236,7 @@ type BattleUnitManaChanged struct {
 }
 
 type MessageToClient struct {
+	GamePhaseChanged        *GamePhaseChanged        `json:"gamePhaseChanged"`
 	UnitAdded               *UnitAdded               `json:"unitAdded"`
 	UnitRemoved             *UnitRemoved             `json:"unitRemoved"`
 	UnitSold                *UnitSold                `json:"unitSold"`
@@ -252,8 +266,6 @@ type MessageToClient struct {
 	PlayerLeft              *PlayerLeft              `json:"playerLeft"`
 	BattleUnitHealthChanged *BattleUnitHealthChanged `json:"battleUnitHealthChanged"`
 	BattleUnitManaChanged   *BattleUnitManaChanged   `json:"battleUnitManaChanged"`
-
-	MatchPhaseChanged *MatchPhaseChanged `json:"matchPhaseChanged"`
 }
 
 type BuyUnit struct {

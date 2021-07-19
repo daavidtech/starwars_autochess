@@ -33,6 +33,9 @@ func remove_player(player_id: String):
 			vertical_container.remove_child(lobby_player)
 			break
 
+func clear():
+	for child in vertical_container.get_children():
+		vertical_container.remove_child(child)
 
 func _on_start_match_button_pressed():
 	conn.send_msg({

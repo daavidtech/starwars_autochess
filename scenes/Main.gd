@@ -77,8 +77,8 @@ func _on_disconnected():
 	connected_label.text = "Disconnected"
 
 func _handle_msg(msg):	
-	if msg.matchPhaseChanged != null:
-		handle_game_phase_changed(msg.matchPhaseChanged.matchPhase)
+	if msg.gamePhaseChanged != null:
+		handle_game_phase_changed(msg.gamePhaseChanged.gamePhase)
 	if msg.unitAdded != null:
 		handle_unit_added(msg.unitAdded)
 	if msg.unitRemoved != null:
@@ -298,6 +298,32 @@ func handle_game_phase_changed(match_phase):
 	game_phase = match_phase
 	
 	match match_phase:
+		"LoginPhase":
+			countdown_label.visible = false
+			lobby.visible = false
+			your_money.visible = false
+			your_health.visible = false
+			your_level.visible = false
+			unit_shop.visible = false
+			unit_barrack.visible = false
+			main_menu.visible = false
+			login_form.visible = true
+			
+			clear_units()
+		"MainMenuPhase":
+			countdown_label.visible = false
+			lobby.visible = false
+			your_money.visible = false
+			your_health.visible = false
+			your_level.visible = false
+			unit_shop.visible = false
+			unit_barrack.visible = false
+			main_menu.visible = true
+			login_form.visible = false
+			
+			lobby.clear()
+			
+			clear_units()
 		"InitPhase":			
 			lobby.visible = false
 			your_money.visible = false
@@ -312,6 +338,8 @@ func handle_game_phase_changed(match_phase):
 			your_level.visible = false
 			unit_shop.visible = false
 			unit_barrack.visible = false
+			
+			clear_units()
 		"ShoppingPhase":
 			lobby.visible = false
 			your_money.visible = true
@@ -348,6 +376,8 @@ func handle_game_phase_changed(match_phase):
 			your_level.visible = false
 			unit_shop.visible = false
 			unit_barrack.visible = false
+			
+			clear_units()
 
 func handle_unit_added(unit_added):
 	print("Unit added " + unit_added.unitType)

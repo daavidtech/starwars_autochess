@@ -9,16 +9,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type MatchPhase string
-
-const (
-	LobbyPhase     MatchPhase = "LobbyPhase"
-	ShoppingPhase  MatchPhase = "ShoppingPhase"
-	PlacementPhase MatchPhase = "PlacementPhase"
-	BattlePhase    MatchPhase = "BattlePhase"
-	EndPhase       MatchPhase = "EndPhase"
-)
-
 type Match struct {
 	ctx context.Context
 
@@ -356,6 +346,8 @@ func (match *Match) moveToBattlePhase() bool {
 
 	if match.CountAlivePlayers() < 1 {
 		log.Println("Match ended")
+
+		match.phase = EndPhase
 
 		match.eventBroker.publishEvent(MatchEvent{
 			PhaseChanged: &PhaseChanged{

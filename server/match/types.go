@@ -1,5 +1,15 @@
 package match
 
+type MatchPhase string
+
+const (
+	LobbyPhase     MatchPhase = "LobbyPhase"
+	ShoppingPhase  MatchPhase = "ShoppingPhase"
+	PlacementPhase MatchPhase = "PlacementPhase"
+	BattlePhase    MatchPhase = "BattlePhase"
+	EndPhase       MatchPhase = "EndPhase"
+)
+
 type MatchSnapshot struct {
 }
 

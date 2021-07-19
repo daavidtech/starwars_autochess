@@ -39,8 +39,9 @@ type CountdownStarted struct {
 type UnitPlaced struct {
 	PlayerID string
 	UnitID   string
-	X        int
-	Y        int
+
+	X int
+	Y int
 }
 
 type UnitStartedMovingTo struct {

@@ -23,14 +23,19 @@ func NewGameCoordinator(ctx context.Context) *GameCoordinator {
 }
 
 func (gameCoordinator *GameCoordinator) FindNewMatch() *match.Match {
-	for _, match := range gameCoordinator.matches {
-		if match.IsFull() {
+	for matchID, m := range gameCoordinator.matches {
+		if m.IsFull() {
+			continue
+		}
+
+		if m.GetMatchPhase() == match.EndPhase {
+			delete(gameCoordinator.matches, matchID)
 			continue
 		}
 
 		log.Println("Found existing match")
 
-		return match
+		return m
 	}
 
 	log.Println("No existing match found creating new")
